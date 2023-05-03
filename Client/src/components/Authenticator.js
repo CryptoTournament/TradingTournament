@@ -32,9 +32,14 @@ export async function logout() {
 
 export async function signUp(auth, email, password) {
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    addNewUserToDb();
-    navigate("/");
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+    console.log(user);
+    addNewUserToDb(user);
     return { status: true };
   } catch (e) {
     return { status: false, message: e.message };

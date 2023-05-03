@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { login } from "../components/Authenticator";
 import { CgProfile } from "react-icons/cg";
 import useUser from "../hooks/useUser";
@@ -88,77 +88,21 @@ function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <div className="flex">
-            <div className="">
-              <button
-                className=" bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mx-24 rounded focus:outline-none focus:shadow-outline"
-                type="button"
-                onClick={handleSubmit} // call handleSubmit on button click
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.353 5.789 3.498 7.644l2.502-2.353z"
-                      ></path>
-                    </svg>
-                    Loading...
-                  </div>
-                ) : (
-                  "Sign In"
-                )}
-              </button>
-            </div>
-            <div className="">
-              <button
-                className=" bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mx-24 rounded focus:outline-none focus:shadow-outline"
-                type="button"
-                onClick={handleSubmit} // call handleSubmit on button click
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.353 5.789 3.498 7.644l2.502-2.353z"
-                      ></path>
-                    </svg>
-                    Loading...
-                  </div>
-                ) : (
-                  "Sign Up"
-                )}
-              </button>
-            </div>
+          <div className="flex flex-col items-center justify-center">
+            <button
+              className=" bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mx-24 rounded focus:outline-none focus:shadow-outline"
+              type="button"
+              onClick={handleSubmit}
+            >
+              Sign In
+            </button>
+
+            <Link
+              className="  text-blue-800  pt-4 px-4 mx-24 rounded focus:outline-none focus:shadow-outline"
+              to="/register"
+            >
+              Don't have an account? sign up here!
+            </Link>
           </div>
           <div className=" mt-2"></div>
         </form>

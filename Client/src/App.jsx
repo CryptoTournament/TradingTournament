@@ -20,7 +20,7 @@ function App() {
         <div className="relative p-20 z-10 min-h-screen bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 overflow-x-hidden">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/registration" element={<SignUpPage />} />
+            <Route path="/register" element={<SignUpPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

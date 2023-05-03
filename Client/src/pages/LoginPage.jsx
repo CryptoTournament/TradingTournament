@@ -17,7 +17,7 @@ function LoginPage() {
     let logStatus = await login(email, password);
 
     if (logStatus) {
-      navigate("/excel");
+      navigate("/");
     } else {
       setError("Invalid email or password");
       console.log("error in login");

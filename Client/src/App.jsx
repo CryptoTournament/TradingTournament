@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import LoginPage from "./pages/LoginPage";
@@ -9,8 +8,6 @@ import SignUpPage from "./pages/SignUpPage";
 import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <BrowserRouter>
       <div className=" App bg-gray-100">

@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { login } from "../components/Authenticator";
 import { CgProfile } from "react-icons/cg";
 import useUser from "../hooks/useUser";
+import GoogleLogin from "../authProviders/GoogleLogin";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -96,7 +97,12 @@ function LoginPage() {
             >
               Sign In
             </button>
-
+            <div className="flex items-center justify-center mt-6">
+              <div className="bg-slate-200 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <h2 className="text-center mb-4">Or with a provider</h2>
+                <GoogleLogin />
+              </div>
+            </div>
             <Link
               className="  text-blue-800  pt-4 px-4 mx-24 rounded focus:outline-none focus:shadow-outline"
               to="/register"

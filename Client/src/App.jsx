@@ -10,11 +10,11 @@ import "./App.css";
 function App() {
   return (
     <BrowserRouter>
-      <div className=" App bg-gray-100">
+      <div className="">
         <div className=" relative z-20">
           <NavBar />
         </div>
-        <div className="relative p-20 z-10 min-h-screen bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 overflow-x-hidden">
+        <div className="relative pt-20 px-4 z-10 min-h-screen bg-gradient-to-r bg-bg-main-custom overflow-x-hidden">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/register" element={<SignUpPage />} />

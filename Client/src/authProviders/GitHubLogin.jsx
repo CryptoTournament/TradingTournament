@@ -1,11 +1,11 @@
 import React from "react";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithPopup, GithubAuthProvider } from "firebase/auth";
 import { addNewUserToDb } from "../api/users";
 import { auth } from "../components/FireBaseAuth";
-import { FcGoogle } from "react-icons/fc";
+import { AiFillGithub } from "react-icons/ai";
 
-const GoogleLogin = () => {
-  const provider = new GoogleAuthProvider();
+const GithubLogin = () => {
+  const provider = new GithubAuthProvider();
 
   const signIn = async () => {
     try {
@@ -17,20 +17,20 @@ const GoogleLogin = () => {
 
         await addNewUserToDb(user);
       }
-      console.log("successfully logged in with google account");
+      console.log("successfully logged in with github account");
 
       // Handle successful login
     } catch (error) {
-      console.log("error with signing in with google provider", error);
+      console.log("Error with signing in with Github provider:", error);
     }
   };
 
   return (
-    <FcGoogle
+    <AiFillGithub
       onClick={signIn}
-      className="w-12 h-12 cursor-pointer transition duration-200 ease-in-out hover:scale-110 border-2 border-gray-300 hover:border-black rounded-md"
+      className="w-12 h-12 cursor-pointer transition duration-200 ease-in-out hover:scale-110 border-2 border-gray-300 hover:border-black rounded-md text-white"
     />
   );
 };
 
-export default GoogleLogin;
+export default GithubLogin;

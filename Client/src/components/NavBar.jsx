@@ -19,7 +19,7 @@ const NavBar = () => {
   ];
 
   return (
-    <nav className="bg-gray-800 border-b-4 border-black fixed top-0 w-full">
+    <nav className="bg-bg-navbar-custom border-b-4 border-black fixed top-0 w-full">
       <div className="flex justify-between items-center px-4 py-3 md:px-10 md:py-5">
         <div className="flex items-center">
           <Link

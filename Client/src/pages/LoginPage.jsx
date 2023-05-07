@@ -63,7 +63,7 @@ function LoginPage() {
             </h1>
           </div>
           {error && (
-            <p className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative select-none hover:bg-red-200">
+            <p className="bg-red-100 border border-red-400 text-red-700 mb-4 px-4 py-3 rounded relative select-none hover:bg-red-200">
               {error}
             </p>
           )}

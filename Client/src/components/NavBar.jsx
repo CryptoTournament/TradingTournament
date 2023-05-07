@@ -1,22 +1,30 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { logout } from "./Authenticator";
 import useUser from "../hooks/useUser";
 import { MdOutlineDeliveryDining } from "react-icons/md";
-
-const handleLogOut = async (navigate) => {
-  await logout();
-  navigate("/login");
-};
+import DropDown from "./DropDown";
+import NavHeaders from "./NavHeaders";
 
 const NavBar = () => {
   const { user } = useUser();
-  const navigate = useNavigate();
-  const navLinks = [
-    { name: "ערים", path: "/cities" },
-    { name: "אקסל", path: "/excel" },
-    ,
+  const registeredUserNavLinks = [
+    { name: "Inventory", path: "/inventory" },
+    { name: "Shop", path: "/shop" },
   ];
+  const unRegisteredUserNavLinks = [
+    { name: "Leaderboard", path: "/inventory" },
+    { name: "Shop", path: "/shop" },
+  ];
+  const registeredDropDownLinks = [
+    { name: "My Profile", path: "/profile" },
+    { name: "Basic Info", path: "/info" },
+    { name: "Team Info", path: "/team" },
+    { name: "Friends", path: "/friends" },
+    { name: "Statistics", path: "/statistics" },
+    { name: "Achievements", path: "/achievements" },
+    { name: "Settings", path: "/settings" },
+  ];
+  const unRegisteredDropDownLinks = [{ name: "Settings", path: "/settings" }];
 
   return (
     <nav className="bg-bg-navbar-custom border-b-4 border-black fixed top-0 w-full">
@@ -28,43 +36,25 @@ const NavBar = () => {
           >
             <MdOutlineDeliveryDining size={48} />
           </Link>
-          {user ? (
-            <h1 className="text-white font-semibold ml-4">{user.email}</h1>
-          ) : (
-            ""
-          )}
         </div>
-        <div className={`md:flex`}>
-          {user
-            ? navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className="text-gray-200 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium md:flex md:items-center md:px-4 md:py-3 md:text-base"
-                >
-                  {link.name}
-                </Link>
-              ))
-            : ""}
-
+        <div className="flex">
           {user ? (
-            <button
-              className="text-white pb-4 hover:bg-red-600 px-3 py-2 rounded-md text-sm font-medium md:flex md:items-center md:px-4 md:py-3 md:text-base"
-              onClick={() => {
-                handleLogOut(navigate);
-              }}
-            >
-              התנתקות
-            </button>
+            <NavHeaders navBarLinks={registeredUserNavLinks} />
           ) : (
-            <button
-              className="text-white hover:bg-green-600 px-3 py-2 rounded-md text-sm font-medium md:flex md:items-center md:px-4 md:py-3 md:text-base"
-              onClick={() => {
-                navigate("/login");
-              }}
-            >
-              התחברות
-            </button>
+            <NavHeaders navBarLinks={unRegisteredUserNavLinks} />
+          )}
+          {user ? (
+            <DropDown
+              dropDownLinks={registeredDropDownLinks}
+              navBarLinks={registeredUserNavLinks}
+              user={user}
+            />
+          ) : (
+            <DropDown
+              dropDownLinks={unRegisteredDropDownLinks}
+              navBarLinks={unRegisteredUserNavLinks}
+              user={user}
+            />
           )}
         </div>
       </div>

@@ -5,8 +5,8 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import SignUpPage from "./pages/SignUpPage";
-
 import "./App.css";
+import Chart from "./pages/Chart";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -22,9 +22,15 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/registration" element={<SignUpPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/chart" element={<Chart />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
+
+
+
+
+
       </div>
     </BrowserRouter>
   );

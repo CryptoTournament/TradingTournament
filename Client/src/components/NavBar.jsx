@@ -15,6 +15,7 @@ const NavBar = () => {
   const navLinks = [
     { name: "ערים", path: "/cities" },
     { name: "אקסל", path: "/excel" },
+    { name: "Chart", path: "/chart" }
     ,
   ];
 

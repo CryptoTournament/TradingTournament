@@ -21,7 +21,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post("/api/signUp", async (req, res) => {
+app.post("/api/users/signUp", async (req, res) => {
   console.log("got something");
   const { uid } = req.body;
   const status = await db.collection("users").insertOne({
@@ -30,13 +30,20 @@ app.post("/api/signUp", async (req, res) => {
   });
 });
 
-app.get("/BTCUSDT", async (req, res) => {
+app.put("/api/users/:uid", async (req, res) => {
   try {
-    const response = fetchKlineData("BTCUSDT");
-    res.send(response.data);
+    const { uid } = req.params;
+    const updateData = req.body;
+
+    const result = await usersCollection.updateOne(
+      { uid },
+      { $set: updateData },
+      { upsert: true }
+    );
+    res.json({ message: "User data updated", result });
   } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
+    console.error("Error updating user data", error);
+    res.status(500).send("Server error");
   }
 });
 

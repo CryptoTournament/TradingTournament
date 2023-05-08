@@ -3,27 +3,28 @@ import { Link, useNavigate } from "react-router-dom";
 import useUser from "../hooks/useUser";
 import { signUp } from "../components/Authenticator";
 import { auth } from "../components/FireBaseAuth";
+import { ImSpinner8 } from "react-icons/im";
+import { FaSpinner } from "react-icons/fa";
+
 const SignUpPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  //   let idFromFB = "initValue";
+  const [hasClickedCreateAccount, setHasClickedCreateAccount] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const { user } = useUser();
 
-  //   const auth = getAuth();
-  //   onAuthStateChanged(auth, (user) => {
-  //     if (user) {
-  //       idFromFB = user.uid; //get firebase new account's id in order to set it inside mongodb.
-  //     }
-  //   });
-
   const createAccount = async () => {
+    setIsLoading(true); // Add this line
+    setHasClickedCreateAccount(true);
+
     if (password !== confirmPassword) {
       setError("Password and confirm password do not match.");
       console.log("password not match confirmPassword");
+      setIsLoading(false); // Add this line
       return;
     }
     let result = await signUp(auth, email, password);
@@ -32,78 +33,115 @@ const SignUpPage = () => {
       navigate("/");
     } else {
       console.log("User creation failed:", result.message);
-      setError(result.message);
+      setError(result.message.replace("Firebase:", "").trim());
     }
+    setIsLoading(false); // Add this line
   };
+
   const handleSubmit = (event) => {
-    // 👇️ prevent page refresh
     event.preventDefault();
   };
 
   return (
     <>
-      {/* {user ? (
-        navigate("/")
-      ) : ( */}
-      <div className=" flex items-center justify-center	mt-8">
+      <div className="flex items-center justify-center mt-8">
         <form
-          className="bg-slate-200 shadow-md rounded px-8 pt-6 pb-8 mb-4 "
+          className="bg-bg-navbar-custom shadow-2xl rounded md:px-8 px-2 pt-6 pb-8  w-full sm:w-1/2  lg:w-1/3  "
           onSubmit={handleSubmit}
         >
-          <h1 className="text-center font-bold mb-4">Create Account </h1>
-          {error && (
-            <p className="mb-5 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          <h1 className="text-2xl text-gray-50 font-semibold mx-auto text-center mb-3">
+            Create Account
+          </h1>
+
+          <div className="border-2 border-gray-600 rounded-md p-2 mb-2">
+            <div className="mb-3">
+              <label className="block text-gray-50 text-sm  mb-2">
+                Email Address
+              </label>
+              <input
+                className={
+                  (error == "Firebase: Error (auth/invalid-email)." ||
+                    email == "") &&
+                  hasClickedCreateAccount
+                    ? "bg-red-200 shadow appearance-none border rounded w-full py-2 px-3 text-gray-50 leading-tight focus:outline-none focus:shadow-outline"
+                    : "bg-bg-navbar-custom shadow appearance-none border rounded w-full py-2 px-3 text-gray-50 leading-tight focus:outline-none focus:shadow-outline"
+                }
+                placeholder="Your email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="block text-gray-50 text-sm mb-2">
+                Password
+              </label>
+              <input
+                className={
+                  password == "" && hasClickedCreateAccount
+                    ? "bg-red-200 shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-50 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                    : "bg-bg-navbar-custom shadow appearance-none border  rounded w-full py-2 px-3 text-gray-50 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                }
+                type="password"
+                placeholder="your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="block text-gray-50 text-sm mb-2">
+                Confirm Password
+              </label>
+              <input
+                className={
+                  (password != confirmPassword || confirmPassword == "") &&
+                  hasClickedCreateAccount
+                    ? "bg-red-200 shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-50 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                    : "bg-bg-navbar-custom shadow appearance-none border  rounded w-full py-2 px-3 text-gray-50 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                }
+                type="password"
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between m-auto">
+            {isLoading ? (
+              <button
+                onClick={createAccount}
+                className=" bg-blue-400  text-gray-50 font-bold py-2 px-4 mx-auto mb-4 rounded "
+                disabled={true}
+              >
+                <FaSpinner className="animate-spin inline-block h-7 w-7 text-white mr-2" />
+                Loading ..
+              </button>
+            ) : (
+              <button
+                onClick={createAccount}
+                className=" bg-blue-500 hover:bg-blue-700 text-gray-50 font-bold py-2 px-4 mx-auto mb-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Create Account
+              </button>
+            )}
+          </div>
+          {error && hasClickedCreateAccount && (
+            <p className="bg-red-100 border border-red-400 text-red-700 mb-4 px-4 py-3 rounded relative select-none hover:bg-red-200 text-center">
               {error}
             </p>
           )}
-          {/* if error exists, display it */}
 
-          <div className="mb-4">
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              placeholder="Your email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="mb-6">
-            <input
-              className={
-                password == ""
-                  ? "shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-                  : "shadow appearance-none  rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-              }
-              type="password"
-              placeholder="your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <input
-              className={
-                password != confirmPassword || confirmPassword == ""
-                  ? "shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-                  : "shadow appearance-none border  rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-              }
-              type="password"
-              placeholder="Re-enter your password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center justify-between m-auto">
-            <button
-              onClick={createAccount}
-              className=" bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mx-auto mb-4 rounded focus:outline-none focus:shadow-outline"
+          <div className="flex flex-col items-center justify-center md:flex-row md:justify-center md:items-center space-y-4 md:space-x-4 md:space-y-0 mt-4 border-2 border-gray-600 rounded-md py-4 px-6">
+            <h2 className="text-gray-50 ">Already have an account?</h2>
+            <Link
+              className="text-blue-500  rounded focus:outline-none focus:shadow-outline"
+              to="/login"
             >
-              Create Account
-            </button>
-          </div>
-          <div className="text-center">
-            <Link to="/login">Already have an account? log in here</Link>
+              log in here
+            </Link>
           </div>
         </form>
       </div>
-      {/* )} */}
     </>
   );
 };

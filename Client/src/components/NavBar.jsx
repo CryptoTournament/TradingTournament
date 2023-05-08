@@ -10,6 +10,7 @@ const NavBar = () => {
   const registeredUserNavLinks = [
     { name: "Inventory", path: "/inventory" },
     { name: "Shop", path: "/shop" },
+    { name: "Chart", path: "/chart" }
   ];
   const unRegisteredUserNavLinks = [
     { name: "Leaderboard", path: "/inventory" },

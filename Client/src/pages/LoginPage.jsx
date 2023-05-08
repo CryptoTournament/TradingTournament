@@ -1,9 +1,11 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { login } from "../components/Authenticator";
 import { CgProfile } from "react-icons/cg";
 import useUser from "../hooks/useUser";
+import GoogleLogin from "../authProviders/GoogleLogin";
+import GithubLogin from "../authProviders/GitHubLogin";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -49,117 +51,77 @@ function LoginPage() {
   }, [user]);
 
   return (
-    <div className="mt-20">
-      <div className="flex items-center justify-center">
+    <div className="mt-20 ">
+      <div className="flex items-center justify-center w ">
         <form
-          className="bg-slate-200 shadow-md rounded px-8 pt-6 pb-8 mb-4"
+          className="bg-bg-navbar-custom shadow-2xl rounded md:px-8 px-2 pt-6 pb-8  w-full sm:w-1/2  lg:w-1/3  "
           onSubmit={handleSubmit}
         >
           <div className="text-center flex mb-3">
-            <CgProfile className="text-2xl mr-2" />
-            <h1>Login</h1>
+            <h1 className="text-2xl text-gray-50 font-semibold mx-auto">
+              Sign in to TradingTournament
+            </h1>
           </div>
           {error && (
-            <p className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative select-none hover:bg-red-200">
+            <p className="bg-red-100 border border-red-400 text-red-700 mb-4 px-4 py-3 rounded relative select-none hover:bg-red-200">
               {error}
             </p>
           )}
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Email Address
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              type="text"
-              placeholder="Insert Email Address Here"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Password
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-              type="password"
-              placeholder="******************"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="flex">
-            <div className="">
-              <button
-                className=" bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mx-24 rounded focus:outline-none focus:shadow-outline"
-                type="button"
-                onClick={handleSubmit} // call handleSubmit on button click
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.353 5.789 3.498 7.644l2.502-2.353z"
-                      ></path>
-                    </svg>
-                    Loading...
-                  </div>
-                ) : (
-                  "Sign In"
-                )}
-              </button>
+          <div className="border-2 border-gray-600 rounded-md p-2 mb-2">
+            <div className="mb-4">
+              <label className="block text-gray-50 text-sm  mb-2">
+                Email Address
+              </label>
+              <input
+                className="bg-bg-navbar-custom shadow appearance-none border rounded w-full py-2 px-3
+  text-gray-50 leading-tight focus:outline-none focus:shadow-outline
+  focus:border-blue-500
+  "
+                type="text"
+                placeholder="Insert Email Address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
-            <div className="">
-              <button
-                className=" bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mx-24 rounded focus:outline-none focus:shadow-outline"
-                type="button"
-                onClick={handleSubmit} // call handleSubmit on button click
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.353 5.789 3.498 7.644l2.502-2.353z"
-                      ></path>
-                    </svg>
-                    Loading...
-                  </div>
-                ) : (
-                  "Sign Up"
-                )}
-              </button>
+            <div className="mb-2">
+              <label className="block text-gray-50 text-sm mb-2">
+                Password
+              </label>
+              <input
+                className="bg-bg-navbar-custom shadow appearance-none border rounded w-full py-2 px-3
+                 text-gray-50 mb-3 leading-tight focus:outline-none focus:shadow-outline
+                  focus:border-blue-500 "
+                type="password"
+                placeholder="********"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <button
+              className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 w-full rounded focus:outline-none focus:shadow-outline"
+              type="button"
+              onClick={handleSubmit}
+            >
+              Sign In
+            </button>
+          </div>
+          <div className="flex flex-col items-center justify-center">
+            <h2 className="text-center mb-2 text-gray-50">Or... Login with</h2>
+            <div className="flex space-x-8">
+              <GoogleLogin />
+              <GithubLogin />
             </div>
           </div>
+          <div className="flex flex-col items-center justify-center md:flex-row md:justify-center md:items-center space-y-4 md:space-x-4 md:space-y-0 mt-4 border-2 border-gray-600 rounded-md py-4">
+            <h2 className="text-gray-50 ">New To TT?</h2>
+            <Link
+              className="text-blue-500  rounded focus:outline-none focus:shadow-outline"
+              to="/register"
+            >
+              Create an account.
+            </Link>
+          </div>
+
           <div className=" mt-2"></div>
         </form>
       </div>

@@ -21,18 +21,6 @@ const SignUpPage = () => {
   //   });
 
   const createAccount = async () => {
-    // try {
-    //   if (password !== confirmPassword) {
-    //     setError("Password and confirm password do not match.");
-    //     return;
-    //   }
-
-    //   await createUserWithEmailAndPassword(getAuth(), email, password);
-    //   addNewUserToDb();
-    //   navigate("/grades");
-    // } catch (e) {
-    //   setError(e.message);
-    // }
     if (password !== confirmPassword) {
       setError("Password and confirm password do not match.");
       console.log("password not match confirmPassword");

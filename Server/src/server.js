@@ -30,16 +30,33 @@ app.post("/api/users/signUp", async (req, res) => {
   });
 });
 
+app.get("/api/users/:uid", async (req, res) => {
+  try {
+    const { uid } = req.params;
+
+    const user = await db.collection("users").findOne({ uid });
+
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).send("User not found");
+    }
+  } catch (error) {
+    console.error("Error fetching user data", error);
+    res.status(500).send("Server error");
+  }
+});
+
 app.put("/api/users/:uid", async (req, res) => {
+  console.log("got here");
+  console.log(req.body);
   try {
     const { uid } = req.params;
     const updateData = req.body;
 
-    const result = await usersCollection.updateOne(
-      { uid },
-      { $set: updateData },
-      { upsert: true }
-    );
+    const result = await db
+      .collection("users")
+      .updateOne({ uid }, { $set: updateData }, { upsert: true });
     res.json({ message: "User data updated", result });
   } catch (error) {
     console.error("Error updating user data", error);

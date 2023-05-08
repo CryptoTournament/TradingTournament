@@ -6,7 +6,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import SignUpPage from "./pages/SignUpPage";
 import "./App.css";
 import Chart from "./pages/Chart";
-
+import Profile from "./pages/Profile";
 function App() {
   return (
     <BrowserRouter>
@@ -20,6 +20,8 @@ function App() {
             <Route path="/register" element={<SignUpPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/chart" element={<Chart />} />
+            <Route path="/profile" element={<Profile />} />
+
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>

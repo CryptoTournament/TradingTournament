@@ -51,8 +51,8 @@ function LoginPage() {
   }, [user]);
 
   return (
-    <div className="mt-20 ">
-      <div className="flex items-center justify-center w ">
+    <div className="mt-8 ">
+      <div className="flex items-center justify-center ">
         <form
           className="bg-bg-navbar-custom shadow-2xl rounded md:px-8 px-2 pt-6 pb-8  w-full sm:w-1/2  lg:w-1/3  "
           onSubmit={handleSubmit}
@@ -68,7 +68,7 @@ function LoginPage() {
             </p>
           )}
           <div className="border-2 border-gray-600 rounded-md p-2 mb-2">
-            <div className="mb-4">
+            <div className="mb-3">
               <label className="block text-gray-50 text-sm  mb-2">
                 Email Address
               </label>
@@ -83,7 +83,7 @@ function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div className="mb-2">
+            <div className="mb-3">
               <label className="block text-gray-50 text-sm mb-2">
                 Password
               </label>

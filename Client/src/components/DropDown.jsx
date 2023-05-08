@@ -40,7 +40,7 @@ const DropDown = ({ dropDownLinks, navBarLinks, user }) => {
       <div
         ref={menuRef}
         className={` sm:w-auto transition-width duration-1000 ease-in-out ${
-          isOpen ? "w-[70vw]" : "w-10"
+          isOpen ? "w-[69vw]" : "w-10"
         }`}
       >
         <button

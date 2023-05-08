@@ -14,7 +14,7 @@ function App() {
         <div className=" relative z-20">
           <NavBar />
         </div>
-        <div className="relative pt-20 px-4 z-10 min-h-screen bg-gradient-to-r bg-bg-main-custom overflow-x-hidden">
+        <div className="relative pt-20 z-10 h-screen bg-gradient-to-r bg-bg-main-custom overflow-x-hidden">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/register" element={<SignUpPage />} />
@@ -23,11 +23,6 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
-
-
-
-
-
       </div>
     </BrowserRouter>
   );

@@ -9,7 +9,7 @@ const Homepage = () => {
   const { user } = useUser();
 
   return (
-    <div className="w-full pt-10 md:pt-20 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 flex flex-col items-center justify-center overflow-hidden bg-fixed">
+    <div className=" h-full pt-10 md:pt-32    bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 flex flex-col   overflow-hidden bg-fixed">
       <div className="text-center mb-12 md:mb-24">
         <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-gray-800 mb-8">
           Trading Tournament

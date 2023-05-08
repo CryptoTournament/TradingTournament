@@ -5,7 +5,7 @@ export const addNewUserToDb = async (user) => {
   // const headers = token ? { authtoken: token } : {};
   const uid = user.uid;
   console.log(user.uid);
-  const response = await axios.post("/api/signUp", {
+  const response = await axios.post("/api/users/signUp", {
     uid: uid,
   });
 };

@@ -5,11 +5,14 @@ import useUser from "../hooks/useUser";
 const Profile = () => {
   const { user } = useUser();
 
-  const [userDetails, setUserDetails] = useState(null);
+  const [userDetails, setUserDetails] = useState({
+    displayName: "",
+    level: "",
+    rank: "",
+    winLoseRatio: "",
+  });
   const [editMode, setEditMode] = useState({
-    name: false,
-    email: false,
-    bio: false,
+    displayName: false,
   });
 
   useEffect(() => {
@@ -43,43 +46,62 @@ const Profile = () => {
 
   return (
     <div className="container mx-auto mt-8">
-      <h1 className="text-3xl font-bold mb-8">Profile</h1>
+      <h1 className="text-3xl font-bold mb-8">PUBG Profile</h1>
       {userDetails && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {Object.keys(editMode).map((field) => (
-            <div key={field} className="bg-white p-6 rounded shadow-md">
-              <h2 className="text-xl font-semibold mb-4">
-                {field.charAt(0).toUpperCase() + field.slice(1)}:
-              </h2>
-              <div className="flex items-center space-x-4">
-                <input
-                  type="text"
-                  name={field}
-                  value={userDetails[field]}
-                  onChange={handleChange}
-                  className={`bg-gray-100 border-2 border-gray-300 focus:border-blue-500 focus:ring-0 focus:bg-white p-2 w-full ${
-                    editMode[field] ? "text-black" : "text-gray-700"
-                  }`}
-                  readOnly={!editMode[field]}
-                />
-                {editMode[field] ? (
-                  <button
-                    onClick={() => handleSave(field)}
-                    className="bg-green-500 text-white px-4 py-2 rounded"
-                  >
-                    Save
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setEditMode({ ...editMode, [field]: true })}
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
-                  >
-                    Edit
-                  </button>
-                )}
-              </div>
+          <div className="bg-white p-6 rounded shadow-md">
+            <h2 className="text-xl font-semibold mb-4">Display Name:</h2>
+            <div className="flex items-center space-x-4">
+              <input
+                type="text"
+                name="displayName"
+                value={userDetails.displayName}
+                onChange={handleChange}
+                className={`bg-gray-100 border-2 border-gray-300 focus:border-blue-500 focus:ring-0 focus:bg-white p-2 w-full ${
+                  editMode.displayName ? "text-black" : "text-gray-700"
+                }`}
+                readOnly={!editMode.displayName}
+              />
+              {editMode.displayName ? (
+                <button
+                  onClick={() => handleSave("displayName")}
+                  className="bg-green-500 text-white px-4 py-2 rounded"
+                >
+                  Save
+                </button>
+              ) : (
+                <button
+                  onClick={() =>
+                    setEditMode({ ...editMode, displayName: true })
+                  }
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  Edit
+                </button>
+              )}
             </div>
-          ))}
+            <img
+              src="https://via.placeholder.com/150"
+              alt="Profile"
+              className="w-full h-48 object-cover mb-4 rounded"
+            />
+          </div>
+          <div className="bg-white p-6 rounded shadow-md">
+            <h2 className="text-2xl font-bold mb-4">Balance:</h2>
+            <p className="text-lg font-semibold mb-8">{userDetails.balance}</p>
+            <h2 className="text-xl font-semibold mb-4">Stats:</h2>
+            <ul>
+              <li>
+                <h2>Level:</h2> {userDetails.level}
+              </li>
+              <li>
+                <h2>Rank:</h2> {userDetails.rank}
+              </li>
+              <li>
+                <h2>Win/Lose Ratio:</h2> {userDetails.winLoseRatio}
+              </li>
+            </ul>
+          </div>
         </div>
       )}
     </div>

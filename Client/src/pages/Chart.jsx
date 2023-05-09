@@ -41,9 +41,9 @@ const Chart = () => {
       const data = JSON.parse(event.data);
       if (data.k) {
         const timestamp = data.k.t;
-        console.log((Date.now() - prevTime)/ 1000)
         if ((Date.now() - prevTime)/ 1000 >= 60) {
           setPrevTime(Date.now());
+          console.log(prevTime)
           console.log("Draw ! ")
           const price = parseFloat(data.k.c);
           console.log(data)
@@ -85,6 +85,7 @@ const Chart = () => {
 
   const handleBuy = () => {
     setAction('buy');
+    console.log("S")
   };
 
   const handleSell = () => {
@@ -93,6 +94,7 @@ const Chart = () => {
 
   const renderArrow = (data) => {
     if (action === 'buy') {
+
       return <text x={data.cx - 5} y={data.cy + 5} fill="green" fontSize="20">&#x25B2;</text>;
     } else if (action === 'sell') {
       return <text x={data.cx - 5} y={data.cy + 5} fill="red" fontSize="20">&#x25BC;</text>;
@@ -102,49 +104,56 @@ const Chart = () => {
 };
 
 return (
-<div ref={chartContainerRef} onWheel={handleWheel}>
-<ResponsiveContainer width="100%" height={400}>
-<LineChart
-data={data}
-margin={{
-top: 5,
-right: 30,
-left: 20,
-bottom: 5,
-}}
->
-<CartesianGrid strokeDasharray="3 3" />
-<XAxis
-dataKey="timestamp"
-tickFormatter={(timestamp) => moment(timestamp).format('h:mm A')}
-domain={['dataMin', 'dataMax']}
-scale="time"
-type="number"
-/>
-<YAxis domain={domain} />
-<Tooltip labelFormatter={(timestamp) => moment(timestamp).format('MMM DD, YYYY h:mm A')} />
-<Legend />
-<Line type="monotone" dataKey="price" stroke="#8884d8" strokeWidth={2} dot={renderArrow} />
-</LineChart>
-</ResponsiveContainer>
-<div>
-<button onClick={handleBuy}>Buy</button>
-<button onClick={handleSell}>Sell</button>
-</div>
-<div>
-<label>
-Interval:
-<select value={interval} onChange={handleIntervalChange}>
-<option value="1m">1 minute</option>
-<option value="5m">5 minutes</option>
-<option value="15m">15 minutes</option>
-<option value="1h">1 hour</option>
-<option value="6h">6 hours</option>
-<option value="1d">1 day</option>
-</select>
-</label>
-</div>
-</div>
+  <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+    <ResponsiveContainer width="100%" height={400}>
+      <LineChart
+        data={data}
+        margin={{
+          top: 5,
+          right: 30,
+          left: 20,
+          bottom: 5,
+        }}
+        className="bg-white"
+      >
+        <XAxis
+          dataKey="timestamp"
+          tickFormatter={(timestamp) => moment(timestamp).format('h:mm A')}
+          domain={['dataMin', 'dataMax']}
+          scale="time"
+          type="number"
+        />
+        <YAxis domain={domain} />
+        <Tooltip labelFormatter={(timestamp) => moment(timestamp).format('MMM DD, YYYY h:mm A')} />
+        <Line type="monotone" dataKey="price" stroke="#000000" strokeWidth={4} dot={renderArrow} />
+      </LineChart>
+    </ResponsiveContainer>
+    <div className="flex space-x-4 mt-4">
+      <button onClick={handleBuy} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Buy
+      </button>
+      <button onClick={handleSell} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Sell
+      </button>
+    </div>
+    <div className="mt-4">
+      <label className="mr-2">
+        Interval:
+        <select
+          value={interval}
+          onChange={handleIntervalChange}
+          className="ml-2 py-1 px-2 border border-gray-400 rounded"
+        >
+          <option value="1m">1 minute</option>
+          <option value="5m">5 minutes</option>
+          <option value="15m">15 minutes</option>
+          <option value="1h">1 hour</option>
+          <option value="6h">6 hours</option>
+          <option value="1d">1 day</option>
+        </select>
+      </label>
+    </div>
+  </div>
 );
 };
 

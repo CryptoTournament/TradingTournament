@@ -41,7 +41,7 @@ const Chart = () => {
       })
       .catch((error) => console.error(error));
   }, []);
-
+  //addition:
   useEffect(() => {
     const socket = new WebSocket(API_URL);
     socket.onopen = () => {

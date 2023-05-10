@@ -58,6 +58,7 @@ const Chart = () => {
       const data = JSON.parse(event.data);
       if (data.k && shouldUpdate) {
         const timestamp = data.k.t;
+
         const price = parseFloat(data.k.c);
         console.log("Draw ! ");
         setPointToBuySell([timestamp, price]);

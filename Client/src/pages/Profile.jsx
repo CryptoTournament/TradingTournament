@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import useUser from "../hooks/useUser";
-
+import { FiEdit } from "react-icons/fi";
+import EditDisplayNameModal from "../components/EditDisplayNameModal ";
 const Profile = () => {
   const { user } = useUser();
 
@@ -46,40 +47,34 @@ const Profile = () => {
 
   return (
     <div className="container mx-auto mt-8">
-      <h1 className="text-3xl font-bold mb-8">PUBG Profile</h1>
+      <div className="flex space-x-4">
+        <h1 className="text-3xl font-bold mb-8">
+          {userDetails.rank || "Rank"}
+        </h1>
+        <div className="flex items-center space-x-2 mb-8">
+          <h1 className="text-3xl font-bold ">
+            {userDetails.displayName || "PUBG Profile"}
+          </h1>
+          <button
+            onClick={() => setEditMode({ ...editMode, displayName: true })}
+            className="text-black mt-1"
+          >
+            <FiEdit size={24} />
+          </button>
+        </div>
+      </div>
+      {editMode.displayName && (
+        <EditDisplayNameModal
+          show={editMode.displayName}
+          onClose={() => setEditMode({ ...editMode, displayName: false })}
+          userDetails={userDetails}
+          setUserDetails={setUserDetails}
+          user={user}
+        />
+      )}
       {userDetails && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-white p-6 rounded shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Display Name:</h2>
-            <div className="flex items-center space-x-4">
-              <input
-                type="text"
-                name="displayName"
-                value={userDetails.displayName}
-                onChange={handleChange}
-                className={`bg-gray-100 border-2 border-gray-300 focus:border-blue-500 focus:ring-0 focus:bg-white p-2 w-full ${
-                  editMode.displayName ? "text-black" : "text-gray-700"
-                }`}
-                readOnly={!editMode.displayName}
-              />
-              {editMode.displayName ? (
-                <button
-                  onClick={() => handleSave("displayName")}
-                  className="bg-green-500 text-white px-4 py-2 rounded"
-                >
-                  Save
-                </button>
-              ) : (
-                <button
-                  onClick={() =>
-                    setEditMode({ ...editMode, displayName: true })
-                  }
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  Edit
-                </button>
-              )}
-            </div>
             <img
               src="https://via.placeholder.com/150"
               alt="Profile"
@@ -87,8 +82,10 @@ const Profile = () => {
             />
           </div>
           <div className="bg-white p-6 rounded shadow-md">
-            <h2 className="text-2xl font-bold mb-4">Balance:</h2>
-            <p className="text-lg font-semibold mb-8">{userDetails.balance}</p>
+            <div className="flex space-x-3 mb-4">
+              <h2 className="text-2xl font-bold">Balance: </h2>
+              <p className="text-2xl font-bold">{userDetails.balance || 0}</p>
+            </div>
             <h2 className="text-xl font-semibold mb-4">Stats:</h2>
             <ul>
               <li>

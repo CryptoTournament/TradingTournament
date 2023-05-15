@@ -2,7 +2,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
   createUserWithEmailAndPassword,
+  updatePassword,
 } from "firebase/auth";
+
 import { auth } from "./FireBaseAuth";
 import { addNewUserToDb } from "../api/users";
 
@@ -40,6 +42,15 @@ export async function signUp(auth, email, password) {
     const user = userCredential.user;
     console.log(user);
     addNewUserToDb(user);
+    return { status: true };
+  } catch (e) {
+    return { status: false, message: e.message };
+  }
+}
+
+export async function changePassword(user, newPassword) {
+  try {
+    await updatePassword(user, newPassword);
     return { status: true };
   } catch (e) {
     return { status: false, message: e.message };

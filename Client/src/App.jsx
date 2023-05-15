@@ -7,6 +7,8 @@ import SignUpPage from "./pages/SignUpPage";
 import "./App.css";
 import Chart from "./pages/Chart";
 import Profile from "./pages/Profile";
+import BasicInfoPage from "./pages/BasicInfoPage";
+import SettingsPage from "./pages/SettingsPage";
 function App() {
   return (
     <BrowserRouter>
@@ -21,6 +23,8 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/chart" element={<Chart />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/info" element={<BasicInfoPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

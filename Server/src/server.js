@@ -120,6 +120,127 @@ app.post("/api/add_friend", async (req, res) => {
 });
 
 
+
+app.get("/api/get_waiting_list", async (req, res) => {
+  try {
+    const { uid } = req.query;
+
+    // Find all users that have the given UID in their waiting_approval_list
+    const users = await db.collection("users").find({ approve_waiting_list: uid }).toArray();
+
+    const nicknames = [];
+
+    // Loop over the users and fetch the nicknames
+    for (const user of users) {
+      const userWithNickname = await db.collection("users").findOne({ uid: user.uid });
+
+      if (userWithNickname && userWithNickname.nick_name) {
+        nicknames.push(userWithNickname.nick_name);
+      }
+    }
+    res.json({ nicknames });
+  } catch (error) {
+    console.error("Error fetching nicknames from waiting approval list", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+app.post("/api/approve_friend", async (req, res) => {
+  try {
+    const { nickname, uid } = req.body;
+
+    // Find the user with the given nickname
+    const user = await db.collection("users").findOne({ nick_name: nickname });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Remove the given UID from the user's approve_waiting_list
+    const updatedWaitingList = user.approve_waiting_list.filter((id) => id !== uid);
+
+    // Add the given UID to the user's friends list
+    user.friends.push(uid);
+
+    // Find the user who requested to be a friend and add the user's UID to their friends list
+    const friendUser = await db.collection("users").findOne({ uid });
+    if (friendUser) {
+      friendUser.friends.push(user.uid);
+      await db.collection("users").updateOne({ uid: friendUser.uid }, { $set: { friends: friendUser.friends } });
+    }
+
+    // Update the user's approve_waiting_list and friends list in the database
+    await db.collection("users").updateOne(
+      { _id: user._id },
+      { $set: { approve_waiting_list: updatedWaitingList, friends: user.friends } }
+    );
+
+    // Fetch the nicknames of the updated approve_waiting_list
+    const nicknames = [];
+
+    for (const id of updatedWaitingList) {
+      const userWithNickname = await db.collection("users").findOne({ uid: id });
+
+      if (userWithNickname && userWithNickname.nick_name) {
+        nicknames.push(userWithNickname.nick_name);
+      }
+    }
+
+    res.json({ nicknames });
+  } catch (error) {
+    console.error("Error updating user's waiting approval list", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
+
+app.post("/api/deny_friend", async (req, res) => {
+  try {
+    const { nickname, uid } = req.body;
+
+    // Find the user with the given nickname
+    const user = await db.collection("users").findOne({ nick_name: nickname });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Remove the given UID from the user's approve_waiting_list
+    const updatedWaitingList = user.approve_waiting_list.filter((id) => id !== uid);
+
+    // Update the user's approve_waiting_list in the database
+    await db.collection("users").updateOne(
+      { _id: user._id },
+      { $set: { approve_waiting_list: updatedWaitingList } }
+    );
+
+    // Fetch the nicknames of the updated approve_waiting_list
+    const nicknames = [];
+
+    for (const id of updatedWaitingList) {
+      const userWithNickname = await db.collection("users").findOne({ uid: id });
+
+      if (userWithNickname && userWithNickname.nick_name) {
+        nicknames.push(userWithNickname.nick_name);
+      }
+    }
+
+    res.json({ nicknames });
+  } catch (error) {
+    console.error("Error updating user's waiting approval list", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
+
+
+
+
 const runServerApp = () => {
   //console.log(fetchUsersFromMongoDB());
   //fetchKlineData('BTCUSDT');

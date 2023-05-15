@@ -3,25 +3,89 @@ import axios from "axios";
 import useUser from "../hooks/useUser";
 
 const Friends = () => {
-  const { user } = useUser();
-  const userAuth = user;
-  console.log("userAuthId", user && userAuth.uid);
 
+
+
+
+
+
+
+
+
+  const { user } = useUser();
+  const [userAuth, setUserAuth] = useState(""); // Initialize with null instead of undefined
+  console.log("userAuthId", user && userAuth.uid);
   const [userList, setUserList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [userWaitingList, setUserWaitingList] = useState([]);
+
+  useEffect(() => {
+    // Perform any code that relies on the updated `user` value here
+    // For example, you can fetch user data or update the user list
+    fetchUserWaitingList();
+  }, [user]);
+
 
   const handleButtonClick = async (username) => {
     try {
       // Send a POST request to the server with the username/nickname
       console.log("userAuthId", userAuth.uid);
-      const response = await axios.post("/api/add_friend", { nickname: username, uid: userAuth.uid });
+      const response = await axios.post("/api/add_friend", { nickname: username, uid: user.uid });
 
       // Handle the response from the server
       console.log(response.data); // You can handle the response data as needed
+      fetchUserWaitingList();
     } catch (error) {
       console.error("Error adding friend", error);
     }
   };
+  useEffect(() => {
+    if (user) {
+      setUserAuth(user); // Update userAuth once user is available
+    }
+  }, [user]);
+
+  const handleDenyButton = async (username) => {
+    try {
+      console.log(username, user.uid); // You can handle the response data as needed
+
+      const response = await axios.post("/api/deny_friend", { nickname: username, uid: user.uid })
+      fetchUserWaitingList();
+    } catch (error) {
+      console.error("Error deny friend", error);
+    }
+  };
+
+
+
+  const handleApproveButton = async (username) => {
+    try {
+      console.log(username, user.uid); // You can handle the response data as needed
+
+      const response = await axios.post("/api/approve_friend", { nickname: username, uid: user.uid })
+      fetchUserWaitingList();
+    } catch (error) {
+      console.error("Error approving friend", error);
+    }
+  };
+
+
+
+
+  const fetchUserWaitingList = async () => {
+    try {
+      //console.log(userAuth.uid)
+      const response = await axios.get(`/api/get_waiting_list?uid=${user.uid}`);
+      const data = response.data;
+      setUserWaitingList(data.nicknames);
+      //console.log(userWaitingList)
+
+    } catch (error) {
+      console.error("Error fetching user waiting list", error);
+    }
+  };
+
+
 
   const fetchUserData = async () => {
     try {
@@ -36,6 +100,8 @@ const Friends = () => {
 
   useEffect(() => {
     fetchUserData();
+    fetchUserWaitingList();
+
   }, []);
 
   const filteredUserList = userList.filter(
@@ -44,6 +110,7 @@ const Friends = () => {
       user &&
       user.nick_name &&
       user.nick_name.toLowerCase().includes(searchQuery.toLowerCase())
+      
   );
 
   return (
@@ -71,8 +138,7 @@ const Friends = () => {
                 <td className="py-2 px-4 border-b text-center">
                   <button
                     onClick={() => handleButtonClick(user.nick_name)}
-                    className="bg-orange-600 hover:bg-orange-800 text-white font-bold py-2 px-4 rounded-full"
-                  >
+                    className="bg-orange-600 hover:bg-orange-800 text-white font-bold py-2 px-4 rounded-full">
                     Add Friend
                   </button>
                 </td>
@@ -91,14 +157,16 @@ const Friends = () => {
           <tbody>
             {/* Fake data for the new table */}
             {/* Fake data for the new table */}
-            {filteredUserList.map((user, index) => (
+            {userWaitingList.map((nick_name, index) => (
               <tr key={index}>
-                <td className="py-2 px-4 border-b text-center">{user.nick_name}</td>
+                <td className="py-2 px-4 border-b text-center">{nick_name}</td>
                 <td className="py-2 px-4 border-b text-center">
-                  <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full">
+                  <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full"
+                  onClick = {() => handleApproveButton(nick_name)}>
                     Approve
                   </button>
-                  <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full">
+                  <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
+                    onClick = {() => handleDenyButton(nick_name)}>
                     Deny
                   </button>
                 </td>

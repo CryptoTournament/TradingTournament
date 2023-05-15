@@ -32,10 +32,11 @@ const SettingsPage = () => {
     if (firebaseUser && user && user.email) {
       try {
         let response = await login(user.email, currentPassword);
+        console.log(response);
         if (response) {
           if (newPassword.length < 6) {
             setError(true);
-            alert("Password should be at least 6 characters long");
+            alert("New password should be at least 6 characters long");
           } else if (newPassword !== confirmPassword) {
             setError(true);
             alert("Passwords do not match");
@@ -52,6 +53,9 @@ const SettingsPage = () => {
               alert(`Failed to update password: ${error.message}`);
             }
           }
+        } else {
+          setError(true);
+          alert("Error! please make sure your original password is correct");
         }
       } catch (error) {
         alert(`Failed to authenticate user: ${error.message}`);
@@ -143,7 +147,7 @@ const SettingsPage = () => {
                 </div>
                 <button
                   type="submit"
-                  className={`bg-blue-500 text-white rounded px-4 py-2 ${
+                  className={`bg-indigo-600 hover:bg-indigo-500 text-white rounded px-4 py-2 ${
                     loading ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   disabled={loading}
@@ -153,9 +157,6 @@ const SettingsPage = () => {
               </form>
             )}
             {error && <p className="text-red-500 mt-2">{error}</p>}
-            <p className="text-sm sm:text-base">
-              Update your password for security reasons.
-            </p>
           </div>
         </div>
         <div className="p-6 bg-white rounded-xl shadow-md flex items-start">

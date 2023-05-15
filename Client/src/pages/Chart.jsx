@@ -25,6 +25,7 @@ const Chart = () => {
   const [action, setAction] = useState(null);
   const [shouldUpdate, setShouldUpdate] = useState(true);
   const [lastData, setLastData] = useState(null);
+  const [pointToBuySell, setPoint] = useState(null);
 
   useEffect(() => {
     // Fetch historical data for the previous week
@@ -35,6 +36,7 @@ const Chart = () => {
         const formattedData = data.map((item) => {
           const timestamp = item[0];
           const price = parseFloat(item[4]);
+          setPoint([timestamp, price])
           return { timestamp, price };
         });
         // Set the formatted data as the initial state of the `data` variable
@@ -61,7 +63,7 @@ const Chart = () => {
 
         const price = parseFloat(data.k.c);
         console.log("Draw ! ");
-        console.log(data);
+        setPoint([timestamp, price])
         setData((prevData) => [...prevData, { timestamp, price }]);
         setShouldUpdate(false);
         setTimeout(() => {
@@ -90,13 +92,27 @@ const Chart = () => {
       newDomainMidpoint - newPriceRange / 2,
       newDomainMidpoint + newPriceRange / 2,
     ];
-    setDomain(newDomain);
+    //setDomain(newDomain);
+    setPoint(newDomain)
   }, [zoomLevel, data]);
 
   const handleIntervalChange = (e) => {
     setInterval(e.target.value);
   };
 
+
+  const scalePoint = (price, timestamp, chartData, chartHeight, chartWidth, zoomLevel) => {
+    const priceRange = Math.max(...chartData.map((d) => d.price)) - Math.min(...chartData.map((d) => d.price));
+    const pricePerPixel = priceRange / chartHeight;
+    const zoomFactor = zoomLevel / 50;
+    const newPriceRange = priceRange * zoomFactor;
+    const newDomainMidpoint = (Math.max(...chartData.map((d) => d.price)) + Math.min(...chartData.map((d) => d.price))) / 2;
+    const y = chartHeight - ((price - Math.min(...chartData.map((d) => d.price))) / pricePerPixel);
+    const x = (timestamp - chartData[0].timestamp) / (chartData[chartData.length - 1].timestamp - chartData[0].timestamp) * chartWidth;
+    return [x, y];
+  }
+
+  
   const handleWheel = (e) => {
     // Increase/decrease zoom level based on the direction of the scroll
     const newZoomLevel = zoomLevel + (e.deltaY > 0 ? -5 : 5);
@@ -113,24 +129,35 @@ const Chart = () => {
     setAction("sell");
   };
 
-  const renderArrow = (data) => {
-
+  const CustomDot = ({ action, width, height}) => {
+    if (pointToBuySell === null) return;
+    console.log(width/pointToBuySell[0] + width)
+    console.log(height/pointToBuySell[1] + height)
     if (action === "buy") {
       return (
-        <text x={data.cx - 5} y={data.cy + 5} fill="green" fontSize="20">
-          &#x25B2;
-        </text>
+        <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+          <text cx={5} cy={5} fill="green" fontSize="0.5">
+            &#x25B2;
+          </text>
+        </svg>
       );
     } else if (action === "sell") {
       return (
-        <text x={data.cx - 5} y={data.cy + 5} fill="red" fontSize="20">
-          &#x25BC;
-        </text>
+        <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+          <text cx={5} cy={5} fill="red" fontSize="0.5">
+            &#x25BC;
+          </text>
+        </svg>
       );
     }
-
-    return null;
   };
+
+
+
+  
+
+
+
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
@@ -162,8 +189,8 @@ const Chart = () => {
             type="monotone"
             dataKey="price"
             stroke="#000000"
-            strokeWidth={2}
-            dot={renderArrow}
+            strokeWidth={1}
+            dot={<CustomDot action={action}/>}
           />
         </LineChart>
       </ResponsiveContainer>

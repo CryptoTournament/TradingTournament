@@ -49,7 +49,6 @@ app.get("/api/users/:uid", async (req, res) => {
 
 app.put("/api/users/:uid", async (req, res) => {
   console.log("got here");
-  console.log(req.body);
   try {
     const { uid } = req.params;
     const updateData = req.body;
@@ -72,7 +71,57 @@ connectToDb(() => {
   });
 });
 
+const getUsersFromMongoDB = async () => {
+  try {
+    const users = await db.collection("users").find().toArray();
+    return users;
+  } catch (error) {
+    console.error("Error fetching user collection", error);
+    throw error;
+  }
+};
+
+
+app.get("/api/get_all_users", async (req, res) => {
+  try {
+    const users = await getUsersFromMongoDB();
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching user collection", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.post("/api/add_friend", async (req, res) => {
+  try {
+    const { nickname, uid } = req.body;
+    console.log(req.body);
+    console.log("HERE1");
+    // Find the user in the database based on uid
+    const user = await db.collection("users").findOne({ nick_name :nickname });
+    if (user) {
+      console.log("HERE2");
+
+      // Update the user's approve_waiting_list with the nickname
+      await db
+        .collection("users")
+        .updateOne({ nick_name: nickname }, { $push: { approve_waiting_list: uid } });
+        console.log("HERE3");
+
+      res.json({ message: "Friend added successfully" });
+    } else {
+      res.status(404).json({ message: "User not found" });
+      
+    }
+  } catch (error) {
+    console.error("Error adding friend", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 const runServerApp = () => {
+  //console.log(fetchUsersFromMongoDB());
   //fetchKlineData('BTCUSDT');
   //fetchSymbolData('BTCUSDT');
 };

@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import SignUpPage from "./pages/SignUpPage";
+import Friends from "./pages/Friends";
 import "./App.css";
 import Chart from "./pages/Chart";
 import Profile from "./pages/Profile";
@@ -21,6 +22,8 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/chart" element={<Chart />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/friends" element={<Friends />} />
+
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

@@ -9,8 +9,18 @@ async function connectToDb(callback) {
   const client = new MongoClient(uri);
   await client.connect();
   db = client.db("TradingTournamentDb");
-  console.log(db.users);
   callback();
 }
+
+// const fetchUsersFromMongoDB = async () => {
+//   try {
+//     const users = await db.collection("users").find().toArray();
+//     return users;
+//   } catch (error) {
+//     console.error("Error fetching user collection", error);
+//     throw error;
+//   }
+// };
+
 
 export { db, connectToDb };

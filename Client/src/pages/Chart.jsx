@@ -25,12 +25,8 @@ const Chart = () => {
   const [action, setAction] = useState(null);
   const [shouldUpdate, setShouldUpdate] = useState(true);
   const [lastData, setLastData] = useState(null);
-<<<<<<< HEAD
-  const [pointToBuySell, setPoint] = useState(null);
-=======
   const [pointToBuySell, setPointToBuySell] = useState(null);
   const [buySellPoints, setBuySellPoints] = useState([]);
->>>>>>> 232add33b8c11ed4ee7d0a801e380abd554c60cf
 
   useEffect(() => {
     fetch(HISTORY_API_URL)
@@ -39,11 +35,7 @@ const Chart = () => {
         const formattedData = data.map((item) => {
           const timestamp = item[0];
           const price = parseFloat(item[4]);
-<<<<<<< HEAD
-          setPoint([timestamp, price])
-=======
           setPointToBuySell([timestamp, price]);
->>>>>>> 232add33b8c11ed4ee7d0a801e380abd554c60cf
           return { timestamp, price };
         });
         setData(formattedData);
@@ -69,11 +61,7 @@ const Chart = () => {
 
         const price = parseFloat(data.k.c);
         console.log("Draw ! ");
-<<<<<<< HEAD
-        setPoint([timestamp, price])
-=======
         setPointToBuySell([timestamp, price]);
->>>>>>> 232add33b8c11ed4ee7d0a801e380abd554c60cf
         setData((prevData) => [...prevData, { timestamp, price }]);
         setShouldUpdate(false);
         setTimeout(() => {
@@ -102,27 +90,13 @@ const Chart = () => {
       newDomainMidpoint - newPriceRange / 2,
       newDomainMidpoint + newPriceRange / 2,
     ];
-    //setDomain(newDomain);
-    setPoint(newDomain)
+    setDomain(newDomain);
   }, [zoomLevel, data]);
 
   const handleIntervalChange = (e) => {
     setInterval(e.target.value);
   };
 
-
-  const scalePoint = (price, timestamp, chartData, chartHeight, chartWidth, zoomLevel) => {
-    const priceRange = Math.max(...chartData.map((d) => d.price)) - Math.min(...chartData.map((d) => d.price));
-    const pricePerPixel = priceRange / chartHeight;
-    const zoomFactor = zoomLevel / 50;
-    const newPriceRange = priceRange * zoomFactor;
-    const newDomainMidpoint = (Math.max(...chartData.map((d) => d.price)) + Math.min(...chartData.map((d) => d.price))) / 2;
-    const y = chartHeight - ((price - Math.min(...chartData.map((d) => d.price))) / pricePerPixel);
-    const x = (timestamp - chartData[0].timestamp) / (chartData[chartData.length - 1].timestamp - chartData[0].timestamp) * chartWidth;
-    return [x, y];
-  }
-
-  
   const handleWheel = (e) => {
     const newZoomLevel = zoomLevel + (e.deltaY > 0 ? -5 : 5);
     const clampedZoomLevel = Math.max(0, Math.min(100, newZoomLevel));
@@ -142,7 +116,6 @@ const Chart = () => {
       { ...pointToBuySell, action: "sell" },
     ]);
   };
-
 
   const scalePoint = (price, timestamp, chartData, chartHeight, chartWidth) => {
     const minPrice = Math.min(...chartData.map((d) => d.price));
@@ -227,7 +200,6 @@ const Chart = () => {
             dataKey="price"
             stroke="#000000"
             strokeWidth={1}
-
             dot={
               <CustomDot
                 action={action}

@@ -14,7 +14,7 @@ import { w3cwebsocket as WebSocket } from "websocket";
 
 const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m";
 const HISTORY_API_URL =
-  "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=30"; // 10080 minutes = 1 week
+  "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=30";
 
 const Chart = () => {
   const [data, setData] = useState([]);
@@ -25,26 +25,32 @@ const Chart = () => {
   const [action, setAction] = useState(null);
   const [shouldUpdate, setShouldUpdate] = useState(true);
   const [lastData, setLastData] = useState(null);
+<<<<<<< HEAD
   const [pointToBuySell, setPoint] = useState(null);
+=======
+  const [pointToBuySell, setPointToBuySell] = useState(null);
+  const [buySellPoints, setBuySellPoints] = useState([]);
+>>>>>>> 232add33b8c11ed4ee7d0a801e380abd554c60cf
 
   useEffect(() => {
-    // Fetch historical data for the previous week
     fetch(HISTORY_API_URL)
       .then((response) => response.json())
       .then((data) => {
-        // Parse the data and format it as an array of objects
         const formattedData = data.map((item) => {
           const timestamp = item[0];
           const price = parseFloat(item[4]);
+<<<<<<< HEAD
           setPoint([timestamp, price])
+=======
+          setPointToBuySell([timestamp, price]);
+>>>>>>> 232add33b8c11ed4ee7d0a801e380abd554c60cf
           return { timestamp, price };
         });
-        // Set the formatted data as the initial state of the `data` variable
         setData(formattedData);
       })
       .catch((error) => console.error(error));
   }, []);
-  //addition:
+
   useEffect(() => {
     const socket = new WebSocket(API_URL);
     socket.onopen = () => {
@@ -63,7 +69,11 @@ const Chart = () => {
 
         const price = parseFloat(data.k.c);
         console.log("Draw ! ");
+<<<<<<< HEAD
         setPoint([timestamp, price])
+=======
+        setPointToBuySell([timestamp, price]);
+>>>>>>> 232add33b8c11ed4ee7d0a801e380abd554c60cf
         setData((prevData) => [...prevData, { timestamp, price }]);
         setShouldUpdate(false);
         setTimeout(() => {
@@ -77,12 +87,12 @@ const Chart = () => {
   }, [interval, shouldUpdate]);
 
   useEffect(() => {
-    const chartHeight = 400; // set this to the height of your chart
+    const chartHeight = 400;
     const priceRange =
       Math.max(...data.map((d) => d.price)) -
       Math.min(...data.map((d) => d.price));
     const pricePerPixel = priceRange / chartHeight;
-    const zoomFactor = zoomLevel / 50; // scale zoom level from 0-100 to 0-1
+    const zoomFactor = zoomLevel / 50;
     const newPriceRange = priceRange * zoomFactor;
     const newDomainMidpoint =
       (Math.max(...data.map((d) => d.price)) +
@@ -114,54 +124,81 @@ const Chart = () => {
 
   
   const handleWheel = (e) => {
-    // Increase/decrease zoom level based on the direction of the scroll
     const newZoomLevel = zoomLevel + (e.deltaY > 0 ? -5 : 5);
-    // Ensure zoom level stays within the range of 0 to 100
     const clampedZoomLevel = Math.max(0, Math.min(100, newZoomLevel));
     setZoomLevel(clampedZoomLevel);
   };
 
   const handleBuy = () => {
-    setAction("buy");
+    setBuySellPoints((prevPoints) => [
+      ...prevPoints,
+      { ...pointToBuySell, action: "buy" },
+    ]);
   };
 
   const handleSell = () => {
-    setAction("sell");
-  };
-
-  const CustomDot = ({ action, width, height}) => {
-    if (pointToBuySell === null) return;
-    console.log(width/pointToBuySell[0] + width)
-    console.log(height/pointToBuySell[1] + height)
-    if (action === "buy") {
-      return (
-        <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
-          <text cx={5} cy={5} fill="green" fontSize="0.5">
-            &#x25B2;
-          </text>
-        </svg>
-      );
-    } else if (action === "sell") {
-      return (
-        <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
-          <text cx={5} cy={5} fill="red" fontSize="0.5">
-            &#x25BC;
-          </text>
-        </svg>
-      );
-    }
+    setBuySellPoints((prevPoints) => [
+      ...prevPoints,
+      { ...pointToBuySell, action: "sell" },
+    ]);
   };
 
 
+  const scalePoint = (price, timestamp, chartData, chartHeight, chartWidth) => {
+    const minPrice = Math.min(...chartData.map((d) => d.price));
+    const maxPrice = Math.max(...chartData.map((d) => d.price));
+    const minTimestamp = chartData[0].timestamp;
+    const maxTimestamp = chartData[chartData.length - 1].timestamp;
+    console.log("price is:" + price);
+    console.log("minPrice is:" + minPrice);
+    console.log("maxPrice is:" + maxPrice);
+    console.log("chartHeight is:" + chartHeight);
 
-  
+    const y =
+      chartHeight - ((price - minPrice) / (maxPrice - minPrice)) * chartHeight;
+    const x =
+      ((timestamp - minTimestamp) / (maxTimestamp - minTimestamp)) * chartWidth;
 
+    return [x, y];
+  };
 
+  const CustomDot = ({ action, width, height, chartData, cx, cy }) => {
+    return (
+      <>
+        {buySellPoints.map((point, index) => {
+          console.log(buySellPoints);
+          const [x, y] = scalePoint(
+            point[1],
+            point.timestamp,
+            chartData,
+            height,
+            width
+          );
 
+          if (point.action === "buy") {
+            return (
+              <text key={index} x={x} y={y} fill="green" fontSize="10">
+                &#x25B2;
+              </text>
+            );
+          } else if (point.action === "sell") {
+            return (
+              <text key={index} x={x} y={y} fill="red" fontSize="10">
+                &#x25BC;
+              </text>
+            );
+          }
+        })}
+      </>
+    );
+  };
+
+  const chartHeight = 400;
+  const chartWidth = "100%";
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width={chartWidth} height={chartHeight}>
         <LineChart
           data={data}
           margin={{
@@ -190,46 +227,70 @@ const Chart = () => {
             dataKey="price"
             stroke="#000000"
             strokeWidth={1}
-            dot={<CustomDot action={action}/>}
+
+            dot={
+              <CustomDot
+                action={action}
+                chartHeight={chartHeight}
+                chartWidth={chartWidth}
+                chartData={data}
+              />
+            }
           />
+          <CartesianGrid strokeDasharray="3 3" />
+          <Legend />
         </LineChart>
       </ResponsiveContainer>
-      <div className="flex space-x-4 mt-4">
+      <div className="flex items-center mt-2">
+        <div className="mr-2">Interval:</div>
+        <select
+          value={interval}
+          onChange={handleIntervalChange}
+          className="border border-gray-300 rounded-md"
+        >
+          <option value="1m">1m</option>
+          <option value="3m">3m</option>
+          <option value="5m">5m</option>
+          <option value="15m">15m</option>
+          <option value="30m">30m</option>
+          <option value="1h">1h</option>
+          <option value="2h">2h</option>
+          <option value="4h">4h</option>
+          <option value="6h">6h</option>
+          <option value="12h">12h</option>
+          <option value="1d">1d</option>
+          <option value="3d">3d</option>
+          <option value="1w">1w</option>
+        </select>
+      </div>
+      <div className="flex items-center mt-2">
+        <div className="mr-2">Zoom Level:</div>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={zoomLevel}
+          onChange={(e) => setZoomLevel(e.target.value)}
+          onWheel={handleWheel}
+          className="w-40"
+        />
+      </div>
+      <div className="flex items-center mt-2">
         <button
           onClick={handleBuy}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="mr-2 bg-green-500 px-3 py-1 rounded-md text-white"
         >
           Buy
         </button>
         <button
           onClick={handleSell}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-red-500 px-3 py-1 rounded-md text-white"
         >
           Sell
         </button>
-      </div>
-      <div className="mt-4">
-        <label className="mr-2">
-          Interval:
-          <select
-            value={interval}
-            onChange={handleIntervalChange}
-            className="ml-2 py-1 px-2 border border-gray-400 rounded"
-          >
-            <option value="1m">1 minute</option>
-            <option value="5m">5 minutes</option>
-            <option value="15m">15 minutes</option>
-            <option value="1h">1 hour</option>
-            <option value="6h">6 hours</option>
-            <option value="1d">1 day</option>
-          </select>
-        </label>
       </div>
     </div>
   );
 };
 
-
-
 export default Chart;
-

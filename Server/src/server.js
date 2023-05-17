@@ -125,25 +125,33 @@ app.get("/api/get_waiting_list", async (req, res) => {
   try {
     const { uid } = req.query;
 
-    // Find all users that have the given UID in their waiting_approval_list
-    const users = await db.collection("users").find({ approve_waiting_list: uid }).toArray();
+    // Find the user with the given UID
+    const user = await db.collection("users").findOne({ uid });
 
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const approveWaitingList = user.approve_waiting_list || [];
     const nicknames = [];
 
-    // Loop over the users and fetch the nicknames
-    for (const user of users) {
-      const userWithNickname = await db.collection("users").findOne({ uid: user.uid });
+    // Fetch the nicknames for the UIDs in the approve_waiting_list
+    for (const uid of approveWaitingList) {
+      const userWithNickname = await db.collection("users").findOne({ uid });
 
       if (userWithNickname && userWithNickname.nick_name) {
         nicknames.push(userWithNickname.nick_name);
       }
     }
+
     res.json({ nicknames });
   } catch (error) {
     console.error("Error fetching nicknames from waiting approval list", error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 app.post("/api/approve_friend", async (req, res) => {

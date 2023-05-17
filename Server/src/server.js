@@ -82,15 +82,41 @@ const getUsersFromMongoDB = async () => {
 };
 
 
+// app.get("/api/get_all_users", async (req, res) => {
+//   try {
+//     const users = await getUsersFromMongoDB();
+//     res.json(users);
+//   } catch (error) {
+//     console.error("Error fetching user collection", error);
+//     res.status(500).send("Server error");
+//   }
+// });
+
+
+
+
 app.get("/api/get_all_users", async (req, res) => {
   try {
+    const { uid } = req.query;
+
     const users = await getUsersFromMongoDB();
-    res.json(users);
+
+    // Filter out users with the given UID in their "friends" or "approve_waiting_list"
+    const filteredUsers = users.filter(user => 
+      !user.friends.includes(uid) && !user.approve_waiting_list.includes(uid)
+    );
+    console.log(filteredUsers)
+    res.json(filteredUsers);
   } catch (error) {
     console.error("Error fetching user collection", error);
     res.status(500).send("Server error");
   }
 });
+
+
+
+
+
 
 app.post("/api/add_friend", async (req, res) => {
   try {

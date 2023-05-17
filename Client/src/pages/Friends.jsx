@@ -23,6 +23,9 @@ const Friends = () => {
     // Perform any code that relies on the updated `user` value here
     // For example, you can fetch user data or update the user list
     fetchUserWaitingList();
+    if(user && user.uid){
+    fetchUserData(user.uid)
+    }
   }, [user]);
 
 
@@ -35,6 +38,7 @@ const Friends = () => {
       // Handle the response from the server
       console.log(response.data); // You can handle the response data as needed
       fetchUserWaitingList();
+      fetchUserData(user.uid)
     } catch (error) {
       console.error("Error adding friend", error);
     }
@@ -74,12 +78,13 @@ const Friends = () => {
 
   const fetchUserWaitingList = async () => {
     try {
-      //console.log(userAuth.uid)
+      if (user && user.uid){
+        console.log("H!")
       const response = await axios.get(`/api/get_waiting_list?uid=${user.uid}`);
       const data = response.data;
       setUserWaitingList(data.nicknames);
       //console.log(userWaitingList)
-
+      }
     } catch (error) {
       console.error("Error fetching user waiting list", error);
     }
@@ -87,19 +92,24 @@ const Friends = () => {
 
 
 
-  const fetchUserData = async () => {
+  const fetchUserData = async (uid) => {
     try {
-      const response = await axios.get("/api/get_all_users");
+      const response = await axios.get("/api/get_all_users", {
+        params: { uid }
+      });
       const data = response.data;
-
+  
       setUserList(data);
     } catch (error) {
       console.error("Error fetching user data", error);
     }
   };
-
+  
   useEffect(() => {
-    fetchUserData();
+    if(user && user.uid){
+
+      fetchUserData(user.uid);
+    }
     fetchUserWaitingList();
 
   }, []);

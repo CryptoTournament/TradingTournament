@@ -101,17 +101,19 @@ app.get("/api/get_all_users", async (req, res) => {
 
     const users = await getUsersFromMongoDB();
 
-    // Filter out users with the given UID in their "friends" or "approve_waiting_list"
-    const filteredUsers = users.filter(user => 
-      !user.friends.includes(uid) && !user.approve_waiting_list.includes(uid)
-    );
-    console.log(filteredUsers)
+    // Filter out users who are in the given UID's friends list
+    const filteredUsers = users.filter(user =>
+      !user.friends.includes(uid) && user.uid !== uid && !user.approve_waiting_list.includes(uid)
+    ); 
+    console.log(filteredUsers, "DS") 
+
     res.json(filteredUsers);
   } catch (error) {
     console.error("Error fetching user collection", error);
     res.status(500).send("Server error");
   }
 });
+
 
 
 
@@ -161,16 +163,20 @@ app.get("/api/get_waiting_list", async (req, res) => {
 
     const approveWaitingList = user.approve_waiting_list || [];
     const nicknames = [];
-
+    console.log("appr wait list", approveWaitingList)
     // Fetch the nicknames for the UIDs in the approve_waiting_list
-    for (const uid of approveWaitingList) {
-      const userWithNickname = await db.collection("users").findOne({ uid });
+    for (const user_id of approveWaitingList) {
+      console.log(user_id)
+      const userWithNickname = await db.collection("users").findOne({ uid: user_id });
+
+      console.log("IU", userWithNickname)
 
       if (userWithNickname && userWithNickname.nick_name) {
+        console.log("HE")
         nicknames.push(userWithNickname.nick_name);
       }
     }
-
+    console.log("nicknames", nicknames)
     res.json({ nicknames });
   } catch (error) {
     console.error("Error fetching nicknames from waiting approval list", error);
@@ -182,33 +188,45 @@ app.get("/api/get_waiting_list", async (req, res) => {
 
 app.post("/api/approve_friend", async (req, res) => {
   try {
+    console.log("HEEEE")
     const { nickname, uid } = req.body;
-
+    console.log(uid)
     // Find the user with the given nickname
-    const user = await db.collection("users").findOne({ nick_name: nickname });
+    const user = await db.collection("users").findOne({ uid });
+    const friend_user = await db.collection("users").findOne({ nick_name: nickname });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+    console.log("HE1EEE")
 
     // Remove the given UID from the user's approve_waiting_list
-    const updatedWaitingList = user.approve_waiting_list.filter((id) => id !== uid);
+    const updatedWaitingList = user.approve_waiting_list.filter((id) => id !== friend_user.uid);
 
     // Add the given UID to the user's friends list
-    user.friends.push(uid);
+    user.friends.push(friend_user.uid);
+    console.log("HE2EEE")
 
-    // Find the user who requested to be a friend and add the user's UID to their friends list
-    const friendUser = await db.collection("users").findOne({ uid });
-    if (friendUser) {
-      friendUser.friends.push(user.uid);
-      await db.collection("users").updateOne({ uid: friendUser.uid }, { $set: { friends: friendUser.friends } });
-    }
+    const friendUpdatedWaitingList = friend_user.approve_waiting_list.filter((id) => id !== user.uid);
+    console.log("HE4EEE")
+
+    friend_user.friends.push(user.uid);
 
     // Update the user's approve_waiting_list and friends list in the database
     await db.collection("users").updateOne(
-      { _id: user._id },
-      { $set: { approve_waiting_list: updatedWaitingList, friends: user.friends } }
+      { uid: friend_user.uid },
+      { $set: { approve_waiting_list: friendUpdatedWaitingList, friends: friend_user.friends } }
     );
+
+        // Update the user's approve_waiting_list and friends list in the database
+        await db.collection("users").updateOne(
+          { uid: user.uid },
+          { $set: { approve_waiting_list: updatedWaitingList, friends: user.friends } }
+        );
+
+
+
+    await db.collection("users").updateOne({ id: user.id }, { $set: { friends: user.friends } });
 
     // Fetch the nicknames of the updated approve_waiting_list
     const nicknames = [];

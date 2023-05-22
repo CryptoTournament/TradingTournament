@@ -3,9 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import useUser from "../hooks/useUser";
 import { signUp } from "../components/Authenticator";
 import { auth } from "../components/FireBaseAuth";
-import { ImSpinner8 } from "react-icons/im";
 import { FaSpinner } from "react-icons/fa";
-
+import { addNotification } from "../api/notifications";
 const SignUpPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,6 +28,10 @@ const SignUpPage = () => {
     }
     let result = await signUp(auth, email, password);
     if (result.status) {
+      console.log(user);
+
+      // console.log(user);
+      // console.log("got here");
       console.log("User created successfully.");
       navigate("/");
     } else {

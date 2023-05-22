@@ -7,6 +7,7 @@ import {
 
 import { auth } from "./FireBaseAuth";
 import { addNewUserToDb } from "../api/users";
+import { addNotification } from "../api/notifications";
 
 export function login(email, password) {
   try {
@@ -42,6 +43,7 @@ export async function signUp(auth, email, password) {
     const user = userCredential.user;
     console.log(user);
     addNewUserToDb(user);
+    addNotification(user.uid, "Welcome To Trading Tournament!", "welcome");
     return { status: true };
   } catch (e) {
     return { status: false, message: e.message };

@@ -5,7 +5,7 @@ import {
   GoTriangleRight,
   GoTriangleLeft,
 } from "react-icons/go";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const DropDown = ({ dropDownLinks, navBarLinks, user }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -62,24 +62,24 @@ const DropDown = ({ dropDownLinks, navBarLinks, user }) => {
             aria-labelledby="options-menu"
           >
             {navBarLinks.map((link, index) => (
-              <a
+              <Link
                 key={index}
-                href={link.path}
+                to={link.path}
                 className="sm:hidden block px-4 pb-4 mb-4  text-lg  text-gray-50 hover:bg-gray-50 hover:text-black border-b-2 border-gray-500"
                 role="menuitem"
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
             {dropDownLinks.map((link, index) => (
-              <a
+              <Link
                 key={index}
-                href={link.path}
+                to={link.path}
                 className="block px-4 py-4 sm:py-2 text-lg sm:text-sm text-gray-50 hover:bg-gray-50 hover:text-black border-b-2 border-gray-500"
                 role="menuitem"
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
             {user ? (
               <button
@@ -91,14 +91,14 @@ const DropDown = ({ dropDownLinks, navBarLinks, user }) => {
                 Sign Out
               </button>
             ) : (
-              <a
+              <Link
                 key={"loginBtn"}
                 href={"/login"}
                 className="block px-4 py-4 sm:py-2 text-lg sm:text-sm text-gray-50 hover:bg-green-400 hover:text-black border-b-2 border-gray-500"
                 role="menuitem"
               >
                 {"Login"}
-              </a>
+              </Link>
             )}
           </div>
         </div>

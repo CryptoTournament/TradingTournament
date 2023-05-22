@@ -4,6 +4,7 @@ import useUser from "../hooks/useUser";
 import { MdOutlineDeliveryDining } from "react-icons/md";
 import DropDown from "./DropDown";
 import NavHeaders from "./NavHeaders";
+import NotificationBell from "./NotificationBell";
 
 const NavBar = () => {
   const { user } = useUser();
@@ -45,11 +46,14 @@ const NavBar = () => {
             <NavHeaders navBarLinks={unRegisteredUserNavLinks} />
           )}
           {user ? (
-            <DropDown
-              dropDownLinks={registeredDropDownLinks}
-              navBarLinks={registeredUserNavLinks}
-              user={user}
-            />
+            <>
+              <NotificationBell userId={user.uid} />
+              <DropDown
+                dropDownLinks={registeredDropDownLinks}
+                navBarLinks={registeredUserNavLinks}
+                user={user}
+              />
+            </>
           ) : (
             <DropDown
               dropDownLinks={unRegisteredDropDownLinks}

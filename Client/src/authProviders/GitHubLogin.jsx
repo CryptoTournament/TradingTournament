@@ -15,7 +15,8 @@ const GithubLogin = () => {
       if (userCredential._tokenResponse.isNewUser) {
         const user = userCredential.user;
 
-        await addNewUserToDb(user);
+        addNewUserToDb(user);
+        addNotification(user.uid, "Welcome To Trading Tournament!", "welcome");
       }
       console.log("successfully logged in with github account");
 

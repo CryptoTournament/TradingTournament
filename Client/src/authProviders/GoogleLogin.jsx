@@ -3,7 +3,7 @@ import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { addNewUserToDb } from "../api/users";
 import { auth } from "../components/FireBaseAuth";
 import { FcGoogle } from "react-icons/fc";
-
+import { addNotification } from "../api/notifications";
 const GoogleLogin = () => {
   const provider = new GoogleAuthProvider();
 
@@ -15,7 +15,9 @@ const GoogleLogin = () => {
       if (userCredential._tokenResponse.isNewUser) {
         const user = userCredential.user;
 
-        await addNewUserToDb(user);
+        addNewUserToDb(user);
+        console.log("new user");
+        addNotification(user.uid, "Welcome To Trading Tournament!", "welcome");
       }
       console.log("successfully logged in with google account");
 

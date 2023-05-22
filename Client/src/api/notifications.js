@@ -1,9 +1,13 @@
 import axios from "axios";
 
-export const addNotification = async (userId, message, type) => {
+export const addNotification = async (uid, message, type) => {
+  console.log("msg");
+  console.log(message);
+  console.log(type);
+
   try {
     const res = await axios.post("/api/notifications", {
-      userId,
+      uid,
       message,
       type,
     });

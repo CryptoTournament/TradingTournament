@@ -305,9 +305,9 @@ app.post("/api/deny_friend", async (req, res) => {
 
 // // Create a new notification
 app.post("/api/notifications", async (req, res) => {
-  const { userId, message, type } = req.body;
+  const { uid, message, type } = req.body;
   const status = await db.collection("notifications").insertOne({
-    userId: userId,
+    uid: uid,
     message: message,
     type: type,
     seen: false,
@@ -317,10 +317,10 @@ app.post("/api/notifications", async (req, res) => {
 });
 
 // Get notifications for a user
-app.get("/api/notifications/:userId", async (req, res) => {
+app.get("/api/notifications/:uid", async (req, res) => {
   const notifications = await db
     .collection("notifications")
-    .find({ userId: req.params.userId })
+    .find({ uid: req.params.uid })
     .toArray();
   res.send(notifications);
 });

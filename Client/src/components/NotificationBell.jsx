@@ -4,7 +4,7 @@ import { AiOutlineBell } from "react-icons/ai";
 import { markNotificationAsSeen } from "../api/notifications";
 import { useNavigate } from "react-router-dom";
 
-const NotificationBell = ({ userId }) => {
+const NotificationBell = ({ uid }) => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -12,7 +12,7 @@ const NotificationBell = ({ userId }) => {
 
   useEffect(() => {
     async function fetchNotifications() {
-      const res = await axios.get(`/api/notifications/${userId}`);
+      const res = await axios.get(`/api/notifications/${uid}`);
       setNotifications(res.data.slice(-5)); // Show only the last 5 notifications
     }
     fetchNotifications();
@@ -24,7 +24,7 @@ const NotificationBell = ({ userId }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [userId]);
+  }, [uid]);
 
   const handleClickOutside = (event) => {
     if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {

@@ -47,7 +47,7 @@ const NavBar = () => {
           )}
           {user ? (
             <>
-              <NotificationBell userId={user.uid} />
+              <NotificationBell uid={user.uid} />
               <DropDown
                 dropDownLinks={registeredDropDownLinks}
                 navBarLinks={registeredUserNavLinks}

@@ -350,6 +350,47 @@ app.patch("/api/notifications/:id", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+app.get("/api/displaynames/:displayName", async (req, res) => {
+  console.log("did get");
+  try {
+    const { displayName } = req.params;
+
+    const user = await db.collection("users").findOne({ displayName });
+
+    if (user) {
+      res.json({ valid: false });
+    } else {
+      res.json({ valid: true });
+    }
+  } catch (error) {
+    console.error("Error validating display name", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.put("/api/displaynames/:uid", async (req, res) => {
+  console.log("did put");
+
+  try {
+    const { uid } = req.params;
+    const { displayName } = req.body;
+
+    const result = await db
+      .collection("users")
+      .updateOne({ uid }, { $set: { displayName } });
+
+    if (result.modifiedCount > 0) {
+      res.status(200).json({ success: true });
+    } else {
+      res.status(404).send("User not found");
+    }
+  } catch (error) {
+    console.error("Error updating user data", error);
+    res.status(500).send("Server error");
+  }
+});
+
 const runServerApp = () => {
   //console.log(fetchUsersFromMongoDB());
   //fetchKlineData('BTCUSDT');

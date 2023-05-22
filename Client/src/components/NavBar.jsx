@@ -34,7 +34,7 @@ const NavBar = () => {
         <div className="flex items-center">
           <Link
             to="/"
-            className="text-gray-200 hover:animate-pulse hover:bg-gray-700 hover:text-white px-3 rounded-md text-sm font-medium"
+            className="text-gray-200 hover:animate-pulse hover:bg-gray-700 hover:text-white px-3 rounded-md text-sm font-medium "
           >
             <MdOutlineDeliveryDining size={48} />
           </Link>

@@ -4,7 +4,7 @@ import { addNewUserToDb } from "../api/users";
 import { auth } from "../components/FireBaseAuth";
 import { FcGoogle } from "react-icons/fc";
 import { addNotification } from "../api/notifications";
-const GoogleLogin = () => {
+const GoogleLogin = ({ setShowAddMoreInfo }) => {
   const provider = new GoogleAuthProvider();
 
   const signIn = async () => {
@@ -13,6 +13,7 @@ const GoogleLogin = () => {
       console.log(userCredential);
       // Check if the user is new and add to the database
       if (userCredential._tokenResponse.isNewUser) {
+        setShowAddMoreInfo(true);
         const user = userCredential.user;
 
         addNewUserToDb(user);

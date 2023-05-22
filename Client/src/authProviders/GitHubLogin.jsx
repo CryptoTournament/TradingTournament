@@ -4,7 +4,7 @@ import { addNewUserToDb } from "../api/users";
 import { auth } from "../components/FireBaseAuth";
 import { AiFillGithub } from "react-icons/ai";
 
-const GithubLogin = () => {
+const GithubLogin = ({ setShowAddMoreInfo }) => {
   const provider = new GithubAuthProvider();
 
   const signIn = async () => {
@@ -13,6 +13,8 @@ const GithubLogin = () => {
       console.log(userCredential);
       // Check if the user is new and add to the database
       if (userCredential._tokenResponse.isNewUser) {
+        setShowAddMoreInfo(true);
+
         const user = userCredential.user;
 
         addNewUserToDb(user);

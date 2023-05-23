@@ -5,7 +5,7 @@ import { FiEdit } from "react-icons/fi";
 import EditDisplayNameModal from "../components/EditDisplayNameModal ";
 const Profile = () => {
   const { user } = useUser();
-
+  console.log(user);
   const [userDetails, setUserDetails] = useState({
     displayName: "",
     level: "",

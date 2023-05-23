@@ -4,6 +4,7 @@ import useUser from "../hooks/useUser";
 import { MdOutlineDeliveryDining } from "react-icons/md";
 import DropDown from "./DropDown";
 import NavHeaders from "./NavHeaders";
+import NotificationBell from "./NotificationBell";
 
 const NavBar = () => {
   const { user } = useUser();
@@ -33,7 +34,7 @@ const NavBar = () => {
         <div className="flex items-center">
           <Link
             to="/"
-            className="text-gray-200 hover:animate-pulse hover:bg-gray-700 hover:text-white px-3 rounded-md text-sm font-medium"
+            className="text-gray-200 hover:animate-pulse hover:bg-gray-700 hover:text-white px-3 rounded-md text-sm font-medium "
           >
             <MdOutlineDeliveryDining size={48} />
           </Link>
@@ -45,11 +46,14 @@ const NavBar = () => {
             <NavHeaders navBarLinks={unRegisteredUserNavLinks} />
           )}
           {user ? (
-            <DropDown
-              dropDownLinks={registeredDropDownLinks}
-              navBarLinks={registeredUserNavLinks}
-              user={user}
-            />
+            <>
+              <NotificationBell uid={user.uid} />
+              <DropDown
+                dropDownLinks={registeredDropDownLinks}
+                navBarLinks={registeredUserNavLinks}
+                user={user}
+              />
+            </>
           ) : (
             <DropDown
               dropDownLinks={unRegisteredDropDownLinks}

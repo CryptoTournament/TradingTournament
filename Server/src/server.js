@@ -124,7 +124,7 @@ app.post("/api/add_friend", async (req, res) => {
     console.log(req.body);
     console.log("HERE1");
     // Find the user in the database based on uid
-    const user = await db.collection("users").findOne({ nick_name: nickname });
+    const user = await db.collection("users").findOne({ displayName: nickname });
     if (user) {
       console.log("HERE2");
 
@@ -132,7 +132,7 @@ app.post("/api/add_friend", async (req, res) => {
       await db
         .collection("users")
         .updateOne(
-          { nick_name: nickname },
+          { displayName: nickname },
           { $push: { approve_waiting_list: uid } }
         );
       console.log("HERE3");
@@ -171,9 +171,9 @@ app.get("/api/get_waiting_list", async (req, res) => {
 
       console.log("IU", userWithNickname);
 
-      if (userWithNickname && userWithNickname.nick_name) {
+      if (userWithNickname && userWithNickname.displayName) {
         console.log("HE");
-        nicknames.push(userWithNickname.nick_name);
+        nicknames.push(userWithNickname.displayName);
       }
     }
     console.log("nicknames", nicknames);
@@ -193,7 +193,7 @@ app.post("/api/approve_friend", async (req, res) => {
     const user = await db.collection("users").findOne({ uid });
     const friend_user = await db
       .collection("users")
-      .findOne({ nick_name: nickname });
+      .findOne({ displayName: nickname });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -250,8 +250,8 @@ app.post("/api/approve_friend", async (req, res) => {
         .collection("users")
         .findOne({ uid: id });
 
-      if (userWithNickname && userWithNickname.nick_name) {
-        nicknames.push(userWithNickname.nick_name);
+      if (userWithNickname && userWithNickname.displayName) {
+        nicknames.push(userWithNickname.displayName);
       }
     }
 
@@ -267,7 +267,7 @@ app.post("/api/deny_friend", async (req, res) => {
     const { nickname, uid } = req.body;
 
     // Find the user with the given nickname
-    const user = await db.collection("users").findOne({ nick_name: nickname });
+    const user = await db.collection("users").findOne({ displayName: nickname });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -294,8 +294,8 @@ app.post("/api/deny_friend", async (req, res) => {
         .collection("users")
         .findOne({ uid: id });
 
-      if (userWithNickname && userWithNickname.nick_name) {
-        nicknames.push(userWithNickname.nick_name);
+      if (userWithNickname && userWithNickname.displayName) {
+        nicknames.push(userWithNickname.displayName);
       }
     }
 

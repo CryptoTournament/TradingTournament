@@ -26,9 +26,12 @@ app.use((req, res, next) => {
 app.post("/api/users/signUp", async (req, res) => {
   console.log("got something");
   const { uid } = req.body;
+
   const status = await db.collection("users").insertOne({
     uid: uid,
-    // username: username,
+    approve_waiting_list: [],
+    friends: [],
+    displayName: "",
   });
 });
 

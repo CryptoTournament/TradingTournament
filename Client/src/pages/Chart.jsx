@@ -1,32 +1,24 @@
-import React, { useState, useEffect, useRef } from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import React, { useState, useEffect } from "react";
 import moment from "moment";
 import { w3cwebsocket as WebSocket } from "websocket";
+import { Line } from "react-chartjs-2";
+import "chartjs-adapter-moment";
 
 const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m";
 const HISTORY_API_URL =
   "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=30";
 
-const Chart = () => {
+const CryptoChart = () => {
   const [data, setData] = useState([]);
   const [interval, setInterval] = useState("1m");
   const [domain, setDomain] = useState([null, null]);
   const [zoomLevel, setZoomLevel] = useState(50);
-  const chartContainerRef = useRef(null);
-  const [action, setAction] = useState(null);
   const [shouldUpdate, setShouldUpdate] = useState(true);
   const [lastData, setLastData] = useState(null);
   const [pointToBuySell, setPointToBuySell] = useState(null);
   const [buySellPoints, setBuySellPoints] = useState([]);
+  const [buyMarker, setBuyMarker] = useState(null);
+  const [sellMarker, setSellMarker] = useState(null);
 
   useEffect(() => {
     fetch(HISTORY_API_URL)
@@ -58,9 +50,7 @@ const Chart = () => {
       const data = JSON.parse(event.data);
       if (data.k && shouldUpdate) {
         const timestamp = data.k.t;
-
         const price = parseFloat(data.k.c);
-        console.log("Draw ! ");
         setPointToBuySell([timestamp, price]);
         setData((prevData) => [...prevData, { timestamp, price }]);
         setShouldUpdate(false);
@@ -99,170 +89,149 @@ const Chart = () => {
 
   const handleWheel = (e) => {
     const newZoomLevel = zoomLevel + (e.deltaY > 0 ? -5 : 5);
-    const clampedZoomLevel = Math.max(0, Math.min(100, newZoomLevel));
-    setZoomLevel(clampedZoomLevel);
+    if (newZoomLevel >= 5 && newZoomLevel <= 100) {
+      setZoomLevel(newZoomLevel);
+    }
   };
 
-  const handleBuy = () => {
-    setBuySellPoints((prevPoints) => [
-      ...prevPoints,
-      { ...pointToBuySell, action: "buy" },
-    ]);
+  const handleBuyButtonClick = () => {
+    if (pointToBuySell) {
+      setBuySellPoints((prevPoints) => [...prevPoints, pointToBuySell]);
+      setBuyMarker(pointToBuySell);
+    }
   };
 
-  const handleSell = () => {
-    setBuySellPoints((prevPoints) => [
-      ...prevPoints,
-      { ...pointToBuySell, action: "sell" },
-    ]);
+  const handleSellButtonClick = () => {
+    if (pointToBuySell) {
+      setBuySellPoints((prevPoints) => [...prevPoints, pointToBuySell]);
+      setSellMarker(pointToBuySell);
+    }
   };
 
-  const scalePoint = (price, timestamp, chartData, chartHeight, chartWidth) => {
-    const minPrice = Math.min(...chartData.map((d) => d.price));
-    const maxPrice = Math.max(...chartData.map((d) => d.price));
-    const minTimestamp = chartData[0].timestamp;
-    const maxTimestamp = chartData[chartData.length - 1].timestamp;
-    console.log("price is:" + price);
-    console.log("minPrice is:" + minPrice);
-    console.log("maxPrice is:" + maxPrice);
-    console.log("chartHeight is:" + chartHeight);
-
-    const y =
-      chartHeight - ((price - minPrice) / (maxPrice - minPrice)) * chartHeight;
-    const x =
-      ((timestamp - minTimestamp) / (maxTimestamp - minTimestamp)) * chartWidth;
-
-    return [x, y];
-  };
-
-  const CustomDot = ({ action, width, height, chartData, cx, cy }) => {
-    return (
-      <>
-        {buySellPoints.map((point, index) => {
-          console.log(buySellPoints);
-          const [x, y] = scalePoint(
-            point[1],
-            point.timestamp,
-            chartData,
-            height,
-            width
+  const options = {
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+    },
+    interaction: {
+      mode: "index",
+      intersect: false,
+      axis: "x",
+      callbacks: {
+        label: (context) => {
+          const labelTimestamp = context.parsed.x;
+          const matchingDataPoint = data.find(
+            (d) => d.timestamp === labelTimestamp
           );
-
-          if (point.action === "buy") {
-            return (
-              <text key={index} x={x} y={y} fill="green" fontSize="10">
-                &#x25B2;
-              </text>
-            );
-          } else if (point.action === "sell") {
-            return (
-              <text key={index} x={x} y={y} fill="red" fontSize="10">
-                &#x25BC;
-              </text>
-            );
+          if (matchingDataPoint) {
+            return [
+              moment(matchingDataPoint.timestamp).format("YYYY-MM-DD HH:mm"),
+              `Price: $${matchingDataPoint.price.toFixed(2)}`,
+            ];
           }
-        })}
-      </>
-    );
+          return null;
+        },
+      },
+    },
+    scales: {
+      x: {
+        type: "time",
+        time: {
+          unit: "minute",
+          displayFormats: {
+            minute: "YYYY-MM-DD HH:mm",
+          },
+        },
+        ticks: {
+          color: "rgba(255,255,255,0.7)",
+          autoSkip: true,
+          maxTicksLimit: 15,
+        },
+        grid: {
+          display: false,
+        },
+      },
+      y: {
+        display: true,
+        ticks: {
+          color: "rgba(255,255,255,0.7)",
+        },
+      },
+    },
   };
 
-  const chartHeight = 400;
-  const chartWidth = "100%";
+  const chartData = {
+    datasets: [
+      {
+        data: data.map((d) => ({
+          x: d.timestamp,
+          y: d.price,
+        })),
+        type: "line",
+        backgroundColor: "rgba(75,192,192,0.4)",
+        borderColor: "rgba(75,192,192,1)",
+        borderWidth: 2,
+        pointRadius: 0,
+        tension: 0.1,
+      },
+      {
+        data: buySellPoints.map((point) => ({
+          x: point[0],
+          y: point[1],
+        })),
+        type: "scatter",
+        backgroundColor: "rgba(255,0,0,1)",
+        borderColor: "rgba(255,0,0,1)",
+        borderWidth: 1,
+        pointRadius: 5,
+        pointStyle: "circle",
+      },
+      {
+        data: [buyMarker].filter(Boolean).map((point) => ({
+          x: point[0],
+          y: point[1],
+        })),
+        type: "scatter",
+        backgroundColor: "green", // Set the color to green
+        borderColor: "green", // Set the border color to green
+        borderWidth: 0,
+        pointRadius: 25,
+        pointStyle: "arrow-up", // Set the point style to "arrow-up"
+      },
+      {
+        data: [sellMarker].filter(Boolean).map((point) => ({
+          x: point[0],
+          y: point[1],
+        })),
+        type: "scatter",
+        backgroundColor: "red",
+        borderColor: "red",
+        borderWidth: 0,
+        pointRadius: 25,
+        pointStyle: "arrow-down",
+      },
+    ],
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <ResponsiveContainer width={chartWidth} height={chartHeight}>
-        <LineChart
-          data={data}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
-          className="bg-white"
-        >
-          <XAxis
-            dataKey="timestamp"
-            tickFormatter={(timestamp) => moment(timestamp).format("h:mm A")}
-            domain={["dataMin", "dataMax"]}
-            scale="time"
-            type="number"
-          />
-          <YAxis domain={domain} />
-          <Tooltip
-            labelFormatter={(timestamp) =>
-              moment(timestamp).format("MMM DD, YYYY h:mm A")
-            }
-          />
-          <Line
-            type="monotone"
-            dataKey="price"
-            stroke="#000000"
-            strokeWidth={1}
-            dot={
-              <CustomDot
-                action={action}
-                chartHeight={chartHeight}
-                chartWidth={chartWidth}
-                chartData={data}
-              />
-            }
-          />
-          <CartesianGrid strokeDasharray="3 3" />
-          <Legend />
-        </LineChart>
-      </ResponsiveContainer>
-      <div className="flex items-center mt-2">
-        <div className="mr-2">Interval:</div>
-        <select
-          value={interval}
-          onChange={handleIntervalChange}
-          className="border border-gray-300 rounded-md"
-        >
-          <option value="1m">1m</option>
-          <option value="3m">3m</option>
-          <option value="5m">5m</option>
-          <option value="15m">15m</option>
-          <option value="30m">30m</option>
-          <option value="1h">1h</option>
-          <option value="2h">2h</option>
-          <option value="4h">4h</option>
-          <option value="6h">6h</option>
-          <option value="12h">12h</option>
-          <option value="1d">1d</option>
-          <option value="3d">3d</option>
-          <option value="1w">1w</option>
+    <div>
+      <div>
+        <label htmlFor="interval">Interval: </label>
+        <select id="interval" value={interval} onChange={handleIntervalChange}>
+          <option value="1m">1 minute</option>
+          <option value="5m">5 minutes</option>
+          <option value="15m">15 minutes</option>
         </select>
       </div>
-      <div className="flex items-center mt-2">
-        <div className="mr-2">Zoom Level:</div>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={zoomLevel}
-          onChange={(e) => setZoomLevel(e.target.value)}
-          onWheel={handleWheel}
-          className="w-40"
-        />
-      </div>
-      <div className="flex items-center mt-2">
-        <button
-          onClick={handleBuy}
-          className="mr-2 bg-green-500 px-3 py-1 rounded-md text-white"
-        >
-          Buy
-        </button>
-        <button
-          onClick={handleSell}
-          className="bg-red-500 px-3 py-1 rounded-md text-white"
-        >
-          Sell
-        </button>
+      <div style={{ position: "relative" }}>
+        <Line data={chartData} options={options} height={400} onWheel={handleWheel} />
+        <div style={{ position: "absolute", top: 10, right: 10 }}>
+          <button onClick={handleBuyButtonClick}>Buy</button>
+          <button onClick={handleSellButtonClick}>Sell</button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Chart;
+export default CryptoChart;

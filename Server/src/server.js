@@ -35,7 +35,7 @@ app.get("/api/users/:uid", async (req, res) => {
     const { uid } = req.params;
 
     const user = await db.collection("users").findOne({ uid });
-
+    console.log(user, "user")
     if (user) {
       res.json(user);
     } else {
@@ -100,7 +100,7 @@ app.get("/api/get_all_users", async (req, res) => {
     const { uid } = req.query;
 
     const users = await getUsersFromMongoDB();
-
+    console.log("userssss", users)
     // Filter out users who are in the given UID's friends list
     const filteredUsers = users.filter(user =>
       !user.friends.includes(uid) && user.uid !== uid && !user.approve_waiting_list.includes(uid)

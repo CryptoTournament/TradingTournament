@@ -97,6 +97,7 @@ const Friends = () => {
       const response = await axios.get("/api/get_all_users", {
         params: { uid }
       });
+      console.log("response",response)
       const data = response.data;
   
       setUserList(data);
@@ -118,8 +119,8 @@ const Friends = () => {
     (user) =>
       userAuth.uid !== user.uid &&
       user &&
-      user.nick_name &&
-      user.nick_name.toLowerCase().includes(searchQuery.toLowerCase())
+      user.displayName &&
+      user.displayName.toLowerCase().includes(searchQuery.toLowerCase())
       
   );
 
@@ -144,10 +145,10 @@ const Friends = () => {
           <tbody>
             {filteredUserList.map((user, index) => (
               <tr key={index}>
-                <td className="py-2 px-4 border-b text-center">{user.nick_name}</td>
+                <td className="py-2 px-4 border-b text-center">{user.displayName}</td>
                 <td className="py-2 px-4 border-b text-center">
                   <button
-                    onClick={() => handleButtonClick(user.nick_name)}
+                    onClick={() => handleButtonClick(user.displayName)}
                     className="bg-orange-600 hover:bg-orange-800 text-white font-bold py-2 px-4 rounded-full">
                     Add Friend
                   </button>
@@ -167,16 +168,16 @@ const Friends = () => {
           <tbody>
             {/* Fake data for the new table */}
             {/* Fake data for the new table */}
-            {userWaitingList.map((nick_name, index) => (
+            {userWaitingList.map((displayName, index) => (
               <tr key={index}>
-                <td className="py-2 px-4 border-b text-center">{nick_name}</td>
+                <td className="py-2 px-4 border-b text-center">{displayName}</td>
                 <td className="py-2 px-4 border-b text-center">
                   <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full"
-                  onClick = {() => handleApproveButton(nick_name)}>
+                  onClick = {() => handleApproveButton(displayName)}>
                     Approve
                   </button>
                   <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
-                    onClick = {() => handleDenyButton(nick_name)}>
+                    onClick = {() => handleDenyButton(displayName)}>
                     Deny
                   </button>
                 </td>

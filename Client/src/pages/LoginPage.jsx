@@ -46,11 +46,11 @@ function LoginPage() {
     }
   };
 
-  // useEffect(() => {
-  //   if (user) {
-  //     navigate("/"); // navigate to home page on successful login
-  //   }
-  // }, [user]);
+  useEffect(() => {
+    if (user) {
+      navigate("/"); // navigate to home page on successful login
+    }
+  }, [user]);
 
   return (
     <>

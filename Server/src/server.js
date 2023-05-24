@@ -32,6 +32,12 @@ app.post("/api/users/signUp", async (req, res) => {
     approve_waiting_list: [],
     friends: [],
     displayName: "",
+    rank: "BronzeOne",
+    balance: 0,
+    wins: 0,
+    gamesPlayed: 0,
+    gameTokens: 200,
+    accountType: "Regular",
   });
 });
 
@@ -40,7 +46,7 @@ app.get("/api/users/:uid", async (req, res) => {
     const { uid } = req.params;
 
     const user = await db.collection("users").findOne({ uid });
-    console.log(user, "user")
+    console.log(user, "user");
     if (user) {
       res.json(user);
     } else {
@@ -99,15 +105,17 @@ const getUsersFromMongoDB = async () => {
 app.get("/api/get_all_users", async (req, res) => {
   try {
     const { uid } = req.query;
+    const my_user = await db.collection("users").findOne({ uid: uid });
 
     const users = await getUsersFromMongoDB();
-    console.log("userssss", users)
     // Filter out users who are in the given UID's friends list
     const filteredUsers = users.filter(
       (user) =>
         !user.friends.includes(uid) &&
         user.uid !== uid &&
-        !user.approve_waiting_list.includes(uid)
+        !user.approve_waiting_list.includes(uid) &&
+        !my_user.friends.includes(user.id) && 
+        !my_user.approve_waiting_list.includes(user.id)
     );
     console.log(filteredUsers, "DS");
 
@@ -124,7 +132,9 @@ app.post("/api/add_friend", async (req, res) => {
     console.log(req.body);
     console.log("HERE1");
     // Find the user in the database based on uid
-    const user = await db.collection("users").findOne({ displayName: nickname });
+    const user = await db
+      .collection("users")
+      .findOne({ displayName: nickname });
     if (user) {
       console.log("HERE2");
 
@@ -267,7 +277,9 @@ app.post("/api/deny_friend", async (req, res) => {
     const { nickname, uid } = req.body;
 
     // Find the user with the given nickname
-    const user = await db.collection("users").findOne({ displayName: nickname });
+    const user = await db
+      .collection("users")
+      .findOne({ displayName: nickname });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -355,7 +367,6 @@ app.patch("/api/notifications/:id", async (req, res) => {
 });
 
 app.get("/api/displaynames/:displayName", async (req, res) => {
-  console.log("did get");
   try {
     const { displayName } = req.params;
 

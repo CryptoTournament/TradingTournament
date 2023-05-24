@@ -14,6 +14,10 @@ const MoreInfoPage = ({ userProp }) => {
       setErrorMessage("Display name must be at least 4 characters long.");
       return;
     }
+    if (displayName.length > 12) {
+      setErrorMessage("Display name must be shorter than 12 characters long.");
+      return;
+    }
     try {
       const response = await axios.get(`/api/displaynames/${displayName}`);
       if (response.data.valid) {

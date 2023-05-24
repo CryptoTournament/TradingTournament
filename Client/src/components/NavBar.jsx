@@ -1,35 +1,51 @@
-import React, { useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useUser from "../hooks/useUser";
 import { MdOutlineDeliveryDining } from "react-icons/md";
 import DropDown from "./DropDown";
 import NavHeaders from "./NavHeaders";
 import NotificationBell from "./NotificationBell";
-
+import axios from "axios";
 const NavBar = () => {
   const { user } = useUser();
   const registeredUserNavLinks = [
-    { name: "Inventory", path: "/inventory" },
     { name: "Shop", path: "/shop" },
     { name: "Chart", path: "/chart" },
   ];
   const unRegisteredUserNavLinks = [
-    { name: "Leaderboard", path: "/inventory" },
+    { name: "Leaderboard", path: "/leaderboard" },
     { name: "Shop", path: "/shop" },
   ];
   const registeredDropDownLinks = [
     { name: "My Profile", path: "/profile" },
     { name: "Basic Info", path: "/info" },
-    { name: "Team Info", path: "/team" },
     { name: "Friends", path: "/friends" },
-    { name: "Statistics", path: "/statistics" },
-    { name: "Achievements", path: "/achievements" },
+    { name: "Leaderboard", path: "/leaderboard" },
     { name: "Settings", path: "/settings" },
   ];
   const unRegisteredDropDownLinks = [{ name: "Settings", path: "/settings" }];
+  const [userDetails, setUserDetails] = useState({
+    displayName: "",
+    level: "",
+    rank: "",
+    winLoseRatio: "",
+    balance: 0,
+  });
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) return;
+      try {
+        const response = await axios.get(`/api/users/${user.uid}`);
+        setUserDetails(response.data);
+      } catch (error) {
+        console.error("Error fetching user data", error);
+      }
+    };
+    fetchData();
+  }, [user]);
 
   return (
-    <nav className="bg-bg-navbar-custom border-b-4 border-black fixed top-0 w-full">
+    <nav className="bg-gradient-to-r from-bg-navbar-gradient-from to-bg-navbar-gradient-to border-b-4 border-black fixed top-0 w-full">
       <div className="flex justify-between items-center px-4 py-3 md:px-10 md:py-5">
         <div className="flex items-center">
           <Link
@@ -52,6 +68,7 @@ const NavBar = () => {
                 dropDownLinks={registeredDropDownLinks}
                 navBarLinks={registeredUserNavLinks}
                 user={user}
+                userDetails={userDetails}
               />
             </>
           ) : (

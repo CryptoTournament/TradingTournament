@@ -36,6 +36,8 @@ app.post("/api/users/signUp", async (req, res) => {
     balance: 0,
     wins: 0,
     gamesPlayed: 0,
+    gameTokens: 200,
+    accountType: "Regular",
   });
 });
 
@@ -363,7 +365,6 @@ app.patch("/api/notifications/:id", async (req, res) => {
 });
 
 app.get("/api/displaynames/:displayName", async (req, res) => {
-  console.log("did get");
   try {
     const { displayName } = req.params;
 

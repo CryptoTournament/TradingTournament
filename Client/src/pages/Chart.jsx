@@ -1,24 +1,63 @@
 import React, { useState, useEffect } from "react";
+import { Line } from "react-chartjs-2";
 import moment from "moment";
 import { w3cwebsocket as WebSocket } from "websocket";
-import { Line } from "react-chartjs-2";
+import Chart from "chart.js/auto";
 import "chartjs-adapter-moment";
 
 const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m";
 const HISTORY_API_URL =
-  "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=30";
+  "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=60";
 
 const CryptoChart = () => {
+  const initBalance = 1000;
   const [data, setData] = useState([]);
   const [interval, setInterval] = useState("1m");
   const [domain, setDomain] = useState([null, null]);
   const [zoomLevel, setZoomLevel] = useState(50);
   const [shouldUpdate, setShouldUpdate] = useState(true);
-  const [lastData, setLastData] = useState(null);
   const [pointToBuySell, setPointToBuySell] = useState(null);
-  const [buySellPoints, setBuySellPoints] = useState([]);
-  const [buyMarker, setBuyMarker] = useState(null);
-  const [sellMarker, setSellMarker] = useState(null);
+  const [buyPoints, setBuyPoints] = useState([]);
+  const [sellPoints, setSellPoints] = useState([]);
+  const [amount, setAmount] = useState(0);
+  const [canTrade, setCanTrade] = useState(true);
+  const [gameBalance, setGameBalance] = useState(initBalance);
+  const [showButton, setShowButton] = useState(false);
+
+  const updateBalance = () => {
+    let balance = initBalance
+    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    console.log(buyPoints);
+    console.log(sellPoints);
+    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+    for (const buyPoint of buyPoints) {
+      const [timestamp, price, amount, closePrice] = buyPoint;
+      if (closePrice !== 0) {
+        balance-= amount
+        balance += (closePrice / price) * amount;
+      } else {
+        balance -= amount;
+      }
+    }
+  
+    for (const sellPoint of sellPoints) {
+      const [timestamp, price, amount, closePrice] = sellPoint;
+      if (closePrice !== 0) {
+        balance-= amount
+        balance += (price / closePrice) * amount;
+      } else {
+        balance -= amount;
+      }
+    }
+
+    setGameBalance(balance);
+  };
+  // useEffect(() => {
+    
+  //   ;
+
+  // },[]);
 
   useEffect(() => {
     fetch(HISTORY_API_URL)
@@ -56,6 +95,7 @@ const CryptoChart = () => {
         setShouldUpdate(false);
         setTimeout(() => {
           setShouldUpdate(true);
+          setCanTrade(true);
         }, 60000); // 60 seconds
       }
     };
@@ -65,7 +105,7 @@ const CryptoChart = () => {
   }, [interval, shouldUpdate]);
 
   useEffect(() => {
-    const chartHeight = 400;
+    const chartHeight = 600; // Increase the chart height
     const priceRange =
       Math.max(...data.map((d) => d.price)) -
       Math.min(...data.map((d) => d.price));
@@ -83,33 +123,81 @@ const CryptoChart = () => {
     setDomain(newDomain);
   }, [zoomLevel, data]);
 
-  const handleIntervalChange = (e) => {
-    setInterval(e.target.value);
-  };
+  useEffect(() => {
+    // Update balance whenever buyPoints or sellPoints change
+    updateBalance();
+  }, [buyPoints, sellPoints]);
 
-  const handleWheel = (e) => {
-    const newZoomLevel = zoomLevel + (e.deltaY > 0 ? -5 : 5);
-    if (newZoomLevel >= 5 && newZoomLevel <= 100) {
-      setZoomLevel(newZoomLevel);
-    }
+  const closePosition = () => {
+    const newBuyPoints = buyPoints.map((buyPoint) => {
+
+      if (buyPoint[3] === 0) {
+        const closePrice = pointToBuySell[1];
+        const updatedBuyPoint = [...buyPoint];
+        updatedBuyPoint[3] = closePrice === 0 ? pointToBuySell[1] : closePrice;
+        console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        console.log(closePrice);
+        console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+
+
+        return updatedBuyPoint;
+      }
+      console.log("1213");
+
+      return buyPoint;
+    });
+  
+    const newSellPoints = sellPoints.map((sellPoint) => {
+      if (sellPoint[3] === 0) {
+        const closePrice = pointToBuySell[1];
+        const updatedSellPoint = [...sellPoint];
+        updatedSellPoint[3] = closePrice === 0 ? pointToBuySell[1] : closePrice;
+        return updatedSellPoint;
+      }
+      return sellPoint;
+    });
+
+    setBuyPoints(newBuyPoints);
+    setSellPoints(newSellPoints);
+    updateBalance();
+    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    console.log(buyPoints);
+    console.log(sellPoints);
+    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    setCanTrade(true);
   };
+  
+
 
   const handleBuyButtonClick = () => {
-    if (pointToBuySell) {
-      setBuySellPoints((prevPoints) => [...prevPoints, pointToBuySell]);
-      setBuyMarker(pointToBuySell);
+    
+    if (pointToBuySell && amount > 0) {
+            console.log(buyPoints);
+      console.log(sellPoints);
+      setBuyPoints((prevPoints) => [
+        ...prevPoints,
+        [pointToBuySell[0], pointToBuySell[1], amount, 0],
+      ]);
+      setCanTrade(false);
+      setGameBalance(gameBalance-amount)
     }
   };
 
   const handleSellButtonClick = () => {
-    if (pointToBuySell) {
-      setBuySellPoints((prevPoints) => [...prevPoints, pointToBuySell]);
-      setSellMarker(pointToBuySell);
+    if (pointToBuySell && amount > 0) {
+      setSellPoints((prevPoints) => [
+        ...prevPoints,
+        [pointToBuySell[0], pointToBuySell[1], amount, 0],
+      ]);
+      setCanTrade(false);
+      setGameBalance(gameBalance-amount)
     }
   };
 
   const options = {
     maintainAspectRatio: false,
+    responsive: true,
+    //aspectRatio: 1,
     plugins: {
       legend: { display: false },
     },
@@ -139,13 +227,13 @@ const CryptoChart = () => {
         time: {
           unit: "minute",
           displayFormats: {
-            minute: "YYYY-MM-DD HH:mm",
+            minute: "HH:mm", // Show only hour and minutes
           },
         },
         ticks: {
           color: "rgba(255,255,255,0.7)",
           autoSkip: true,
-          maxTicksLimit: 15,
+          maxTicksLimit: 4,
         },
         grid: {
           display: false,
@@ -171,65 +259,93 @@ const CryptoChart = () => {
         backgroundColor: "rgba(75,192,192,0.4)",
         borderColor: "rgba(75,192,192,1)",
         borderWidth: 2,
-        pointRadius: 0,
-        tension: 0.1,
-      },
-      {
-        data: buySellPoints.map((point) => ({
-          x: point[0],
-          y: point[1],
-        })),
-        type: "scatter",
-        backgroundColor: "rgba(255,0,0,1)",
-        borderColor: "rgba(255,0,0,1)",
-        borderWidth: 1,
-        pointRadius: 5,
-        pointStyle: "circle",
-      },
-      {
-        data: [buyMarker].filter(Boolean).map((point) => ({
-          x: point[0],
-          y: point[1],
-        })),
-        type: "scatter",
-        backgroundColor: "green", // Set the color to green
-        borderColor: "green", // Set the border color to green
-        borderWidth: 0,
-        pointRadius: 25,
-        pointStyle: "arrow-up", // Set the point style to "arrow-up"
-      },
-      {
-        data: [sellMarker].filter(Boolean).map((point) => ({
-          x: point[0],
-          y: point[1],
-        })),
-        type: "scatter",
-        backgroundColor: "red",
-        borderColor: "red",
-        borderWidth: 0,
-        pointRadius: 25,
-        pointStyle: "arrow-down",
+        tension: 0.3,
+        borderJoinStyle: "bevel",
+        pointBorderWidth: 1,
+        backgroundColor: function (context) {
+          const index = context.dataIndex;
+          const value = context.dataset.data[index];
+          if (
+            value &&
+            buyPoints.some((innerArray) => innerArray.includes(value["x"]))
+          ) {
+            return "rgba(0,200,0,0.4)";
+          }
+          if (
+            value &&
+            sellPoints.some((innerArray) => innerArray.includes(value["x"]))
+          ) {
+            return "rgba(200,0,0,0.4)";
+          }
+          return "rgba(75,192,192,0.4)";
+        },
+        pointRadius: function (context) {
+          const index = context.dataIndex;
+          const value = context.dataset.data[index];
+          if (
+            value &&
+            buyPoints.some((innerArray) => innerArray.includes(value["x"]))
+          ) {
+            const innerArray = buyPoints.find((innerArray) =>
+              innerArray.includes(value["x"])
+            );
+            return innerArray[2];
+          }
+          if (
+            value &&
+            sellPoints.some((innerArray) => innerArray.includes(value["x"]))
+          ) {
+            const innerArray = sellPoints.find((innerArray) =>
+              innerArray.includes(value["x"])
+            );
+            return innerArray[2];
+          }
+          return 0;
+        },
       },
     ],
   };
 
   return (
-    <div>
-      <div>
-        <label htmlFor="interval">Interval: </label>
-        <select id="interval" value={interval} onChange={handleIntervalChange}>
-          <option value="1m">1 minute</option>
-          <option value="5m">5 minutes</option>
-          <option value="15m">15 minutes</option>
-        </select>
+    <div className="flex flex-col items-center">
+      <div className="chart-container mx-auto w-full h-96 relative">
+        <Line data={chartData} options={options} />
       </div>
-      <div style={{ position: "relative" }}>
-        <Line data={chartData} options={options} height={400} onWheel={handleWheel} />
-        <div style={{ position: "absolute", top: 10, right: 10 }}>
-          <button onClick={handleBuyButtonClick}>Buy</button>
-          <button onClick={handleSellButtonClick}>Sell</button>
-        </div>
+      <div className="flex justify-center mt-4">
+        <input
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(parseFloat(e.target.value))}
+          placeholder="Amount"
+        />
+        <button
+          className={`px-4 py-2 mr-2 bg-green-500 text-white rounded ${
+            canTrade ? "" : "opacity-50 cursor-not-allowed"
+          }`}
+          onClick={handleBuyButtonClick}
+          disabled={!canTrade}
+        >
+          Buy
+        </button>
+        <button
+          className={`px-4 py-2 mr-2 bg-red-500 text-white rounded ${
+            canTrade ? "" : "opacity-50 cursor-not-allowed"
+          }`}
+          onClick={handleSellButtonClick}
+          disabled={!canTrade}
+        >
+          Sell
+        </button>
+        <button
+          className="px-4 py-2 mr-2 bg-red-500 text-white rounded"
+          onClick={closePosition}
+          
+        >
+          Close Position
+          
+        </button>
       </div>
+      <div>{gameBalance}</div>
     </div>
   );
 };

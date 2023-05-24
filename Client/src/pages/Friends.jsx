@@ -1,30 +1,59 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import useUser from "../hooks/useUser";
+import { addNotification } from "../api/notifications";
 
 const Friends = () => {
   const { user } = useUser();
   const [userAuth, setUserAuth] = useState("");
-  const [userList, setUserList] = useState([]);
+  const [nonFriendsUserList, setNonFriendsUserList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [userWaitingList, setUserWaitingList] = useState([]);
+  const [userFriendsList, setUserFriendsList] = useState([]);
 
   useEffect(() => {
     fetchUserWaitingList();
+    fetchFriends();
     if (user && user.uid) {
-      fetchUserData(user.uid);
+      getNonFriendsList(user.uid);
     }
   }, [user]);
 
-  const handleButtonClick = async (username) => {
+  const getUserByDisplayName = async (displayName) => {
+    try {
+      if (displayName) {
+        const response = await axios.get(
+          `/api/getUserByDisplayName?displayName=${displayName}`
+        );
+        const data = response.data;
+        console.log("fetch user1");
+        console.log(data);
+        console.log(data.uid);
+        console.log("fetch user2");
+
+        return data;
+      }
+    } catch (error) {
+      console.error("Error fetching user waiting list", error);
+    }
+  };
+
+  const addFriendClicked = async (username) => {
     try {
       const response = await axios.post("/api/add_friend", {
         nickname: username,
-        uid: user.uid
+        uid: user.uid,
       });
       console.log(response.data);
       fetchUserWaitingList();
-      fetchUserData(user.uid);
+      getNonFriendsList(user.uid);
+      let userToNotify = await getUserByDisplayName(username);
+      console.log(userToNotify);
+      addNotification(
+        userToNotify.uid,
+        `${user.displayName} sent you a friend request!`,
+        "friends"
+      );
     } catch (error) {
       console.error("Error adding friend", error);
     }
@@ -40,7 +69,7 @@ const Friends = () => {
     try {
       const response = await axios.post("/api/deny_friend", {
         nickname: username,
-        uid: user.uid
+        uid: user.uid,
       });
       fetchUserWaitingList();
     } catch (error) {
@@ -52,18 +81,39 @@ const Friends = () => {
     try {
       const response = await axios.post("/api/approve_friend", {
         nickname: username,
-        uid: user.uid
+        uid: user.uid,
       });
       fetchUserWaitingList();
+      let userToNotify = await getUserByDisplayName(username);
+      addNotification(
+        userToNotify.uid,
+        `${user.displayName} Approved your friend request!`,
+        "friends"
+      );
     } catch (error) {
       console.error("Error approving friend", error);
     }
   };
 
+  const fetchFriends = async () => {
+    console.log("fetching friends");
+    try {
+      if (user && user.uid) {
+        const response = await axios.get(`/api/getFriends?uid=${user.uid}`);
+        const data = response.data;
+        console.log(data);
+        setUserFriendsList(data.friends);
+      }
+    } catch (error) {
+      console.error("Error fetching user waiting list", error);
+    }
+  };
   const fetchUserWaitingList = async () => {
     try {
       if (user && user.uid) {
-        const response = await axios.get(`/api/get_waiting_list?uid=${user.uid}`);
+        const response = await axios.get(
+          `/api/get_waiting_list?uid=${user.uid}`
+        );
         const data = response.data;
         setUserWaitingList(data.nicknames);
       }
@@ -72,13 +122,14 @@ const Friends = () => {
     }
   };
 
-  const fetchUserData = async (uid) => {
+  const getNonFriendsList = async (uid) => {
+    //getting a list of all users that arent friend of the given user with uid.
     try {
-      const response = await axios.get("/api/get_all_users", {
-        params: { uid }
+      const response = await axios.get("/api/getNonFriends", {
+        params: { uid },
       });
       const data = response.data;
-      setUserList(data);
+      setNonFriendsUserList(data);
     } catch (error) {
       console.error("Error fetching user data", error);
     }
@@ -86,12 +137,12 @@ const Friends = () => {
 
   useEffect(() => {
     if (user && user.uid) {
-      fetchUserData(user.uid);
+      getNonFriendsList(user.uid);
     }
     fetchUserWaitingList();
   }, []);
 
-  const filteredUserList = userList.filter(
+  const filteredNonFriendsUserList = nonFriendsUserList.filter(
     (user) =>
       userAuth.uid !== user.uid &&
       user &&
@@ -100,90 +151,109 @@ const Friends = () => {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-3xl font-bold mb-6">User List</h1>
-      <input
-        type="text"
-        placeholder="Search by name"
-        className="px-4 py-2 mb-6 rounded border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
-      <div className="grid grid-cols-3 gap-8">
-        <div>
-          <h2 className="text-xl font-bold mb-4">Add new friend</h2>
-          <table className="w-full max-w-md bg-white border border-gray-300 rounded">
-            <thead>
-              <tr>
-                <th className="py-2 px-4 border-b text-center">Username</th>
-                <th className="py-2 px-4 border-b text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUserList.map((user, index) => (
-                <tr key={index}>
-                  <td className="py-2 px-4 border-b text-center">{user.displayName}</td>
-                  <td className="py-2 px-4 border-b text-center">
-                    <button
-                      onClick={() => handleButtonClick(user.displayName)}
-                      className="bg-orange-600 hover:bg-orange-800 text-white font-bold py-2 px-4 rounded-full"
-                    >
-                      Add Friend
-                    </button>
-                  </td>
+    <div className="flex flex-col items-center justify-center mt-8 mx-4 py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 w-full max-w-7xl">
+        <div className="lg:col-span-2">
+          <h2 className="text-3xl font-bold mb-4">Friends</h2>
+
+          <div className="bg-gradient-to-r from-black to-gray-800 shadow-lg rounded-lg p-6">
+            <table className="table-fixed w-full">
+              <thead className="text-white">
+                <tr className="border-b-4 border-gray-500">
+                  <th className="w-1/4 py-2 text-center">Rank</th>
+                  <th className="w-1/4 text-center">Username</th>
+                  <th className="w-1/4 text-center">Win Ratio</th>
+                  <th className="w-1/4 text-center">Balance</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {userFriendsList &&
+                  userFriendsList.map((user, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-gray-500 text-white "
+                    >
+                      <td className="py-2 text-center">
+                        {
+                          <img
+                            src={`/images/ranks/${user.rank}.png`}
+                            alt="Profile"
+                            className="w-10 h-10 object-cover mb-4 rounded-full mx-auto mt-4 shadow-lg "
+                          />
+                        }
+                      </td>
+                      <td className="text-center">{user.displayName}</td>
+                      <td className="text-center">
+                        {user.gamesPlayed === 0
+                          ? 0
+                          : (user.wins / user.gamesPlayed).toFixed(2)}
+                      </td>
+                      <td className="text-center">{user.balance}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
         </div>
         <div>
-          <h2 className="text-xl font-bold mb-4">Friend requests</h2>
-          <table className="w-full max-w-md bg-white border border-gray-300 rounded">
-            <thead>
-              <tr>
-                <th className="py-2 px-4 border-b text-center">Username</th>
-                <th className="py-2 px-4 border-b text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
+          <div className="mb-10">
+            <h2 className="text-3xl font-bold mb-4">Add new friend</h2>
+            <input
+              type="text"
+              placeholder="Search by name"
+              className="px-4 py-2 mb-6 rounded border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 w-full max-w-lg"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <div className="bg-gradient-to-r from-black to-gray-800 shadow-lg rounded-lg p-6">
+              {filteredNonFriendsUserList.map((user, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center border-b border-gray-500 py-4 text-white"
+                >
+                  <p>{user.displayName}</p>
+                  <button
+                    onClick={() => addFriendClicked(user.displayName)}
+                    className="bg-indigo-600 hover:bg-indigo-800 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Add Friend
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold mb-4">Friend requests</h2>
+            <div className="bg-gradient-to-r from-black to-gray-800 shadow-lg rounded-lg p-6">
               {userWaitingList.map((displayName, index) => (
-                <tr key={index}>
-                  <td className="py-2 px-4 border-b text-center">{displayName}</td>
-                  <td className="py-2 px-4 border-b text-center">
+                <div
+                  key={index}
+                  className="flex justify-between items-center border-b border-gray-500 py-4 text-white"
+                >
+                  <p>{displayName}</p>
+                  <div>
                     <button
-                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full"
+                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
                       onClick={() => handleApproveButton(displayName)}
                     >
                       Approve
                     </button>
                     <button
-                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
+                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                       onClick={() => handleDenyButton(displayName)}
                     >
                       Deny
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
-        <div>
-          <h2 className="text-xl font-bold mb-4">Friends</h2>
-          <table className="w-full max-w-md bg-white border border-gray-300 rounded">
-            <thead>
-              <tr>
-                <th className="py-2 px-4 border-b text-center">Username</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Render the list of friends */}
-            </tbody>
-          </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
+//
 
 export default Friends;

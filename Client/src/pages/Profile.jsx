@@ -16,6 +16,7 @@ const Profile = () => {
     wins: 0,
     gamesPlayed: 0,
     gameTokens: 0,
+    accountType: "Regular",
   });
   const [editMode, setEditMode] = useState({
     displayName: false,
@@ -84,7 +85,7 @@ const Profile = () => {
           />
           <div className="flex items-center space-x-2 mb-8">
             <h1 className="text-xl md:text-3xl font-bold ">
-              {userDetails.displayName || "PUBG Profile"}
+              {userDetails.displayName || "Profile"}
             </h1>
             <button
               onClick={() => setEditMode({ ...editMode, displayName: true })}

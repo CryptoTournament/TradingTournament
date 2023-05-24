@@ -51,7 +51,7 @@ const NotificationBell = ({ uid }) => {
         navigate("/");
         setDropdownVisible(false);
         break;
-      case "friendRequest":
+      case "friends":
         navigate("/friends");
         setDropdownVisible(false);
         break;

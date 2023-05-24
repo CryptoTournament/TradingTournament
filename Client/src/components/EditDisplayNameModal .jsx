@@ -9,20 +9,41 @@ const EditDisplayNameModal = ({
   user,
 }) => {
   const [displayName, setDisplayName] = useState(userDetails.displayName);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e) => {
     setDisplayName(e.target.value);
   };
 
   const handleSave = async () => {
+    // try {
+    //   const response = await axios.put(`/api/users/${user.uid}`, {
+    //     displayName,
+    //   });
+    //   setUserDetails({ ...userDetails, displayName });
+    //   onClose();
+    // } catch (error) {
+    //   console.error("Error updating user data", error);
+    // }
+    if (displayName.length < 4) {
+      setErrorMessage("Display name must be at least 4 characters long.");
+      return;
+    }
+    if (displayName.length > 12) {
+      setErrorMessage("Display name must be shorter than 12 characters long.");
+      return;
+    }
     try {
-      const response = await axios.put(`/api/users/${user.uid}`, {
-        displayName,
-      });
-      setUserDetails({ ...userDetails, displayName });
-      onClose();
+      const response = await axios.get(`/api/displaynames/${displayName}`);
+      if (response.data.valid) {
+        await axios.put(`/api/displaynames/${user.uid}`, { displayName });
+        setUserDetails({ ...userDetails, displayName });
+        onClose();
+      } else {
+        setErrorMessage("Display name is already in use.");
+      }
     } catch (error) {
-      console.error("Error updating user data", error);
+      console.error("Error validating display name", error);
     }
   };
 
@@ -56,6 +77,11 @@ const EditDisplayNameModal = ({
               Save
             </button>
           </div>
+          {errorMessage && (
+            <p className="mt-2 bg-red-100 border border-red-400 text-red-700 mb-4 px-4 py-3 rounded relative select-none hover:bg-red-200 text-center">
+              {errorMessage}
+            </p>
+          )}
         </div>
       </div>
       <div className="fixed inset-0 bg-gray-900 opacity-50" />

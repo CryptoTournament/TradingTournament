@@ -10,6 +10,17 @@ const Friends = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [userWaitingList, setUserWaitingList] = useState([]);
   const [userFriendsList, setUserFriendsList] = useState([]);
+  const [userDetails, setUserDetails] = useState({
+    displayName: "",
+    level: "",
+    rank: "",
+    winLoseRatio: "",
+    balance: 0,
+    wins: 0,
+    gamesPlayed: 0,
+    gameTokens: 0,
+    accountType: "Regular",
+  });
 
   useEffect(() => {
     fetchUserWaitingList();
@@ -17,6 +28,16 @@ const Friends = () => {
     if (user && user.uid) {
       getNonFriendsList(user.uid);
     }
+    const fetchData = async () => {
+      if (!user) return;
+      try {
+        const response = await axios.get(`/api/users/${user.uid}`);
+        setUserDetails(response.data);
+      } catch (error) {
+        console.error("Error fetching user data", error);
+      }
+    };
+    fetchData();
   }, [user]);
 
   const getUserByDisplayName = async (displayName) => {
@@ -51,7 +72,7 @@ const Friends = () => {
       console.log(userToNotify);
       addNotification(
         userToNotify.uid,
-        `${user.displayName} sent you a friend request!`,
+        `${userDetails.displayName} sent you a friend request!`,
         "friends"
       );
     } catch (error) {
@@ -85,9 +106,18 @@ const Friends = () => {
       });
       fetchUserWaitingList();
       let userToNotify = await getUserByDisplayName(username);
+      setUserFriendsList((userFriendsList) => [
+        ...userFriendsList,
+        userToNotify,
+      ]);
+      setNonFriendsUserList(
+        nonFriendsUserList.filter(
+          (item) => item.displayName !== userToNotify.displayName
+        )
+      );
       addNotification(
         userToNotify.uid,
-        `${user.displayName} Approved your friend request!`,
+        `${userDetails.displayName} Approved your friend request!`,
         "friends"
       );
     } catch (error) {
@@ -116,6 +146,11 @@ const Friends = () => {
         );
         const data = response.data;
         setUserWaitingList(data.nicknames);
+        // const updatedNonFriendsList = nonFriendsUserList.filter(
+        //   (nonFriend) => !data.nicknames.includes(nonFriend.displayName)
+        // );
+
+        // setNonFriendsUserList(updatedNonFriendsList);
       }
     } catch (error) {
       console.error("Error fetching user waiting list", error);

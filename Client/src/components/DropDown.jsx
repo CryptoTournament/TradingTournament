@@ -7,7 +7,7 @@ import {
 } from "react-icons/go";
 import { useNavigate, Link } from "react-router-dom";
 
-const DropDown = ({ dropDownLinks, navBarLinks, user }) => {
+const DropDown = ({ dropDownLinks, navBarLinks, user, userDetails }) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const menuRef = useRef();
@@ -28,8 +28,13 @@ const DropDown = ({ dropDownLinks, navBarLinks, user }) => {
     }
   };
 
-  let userDisplay = user ? user.displayName || user.email : "Menu";
-
+  // let userDisplay = user ? user.displayName || user.email : "Menu";
+  let userDisplay = userDetails
+    ? userDetails.displayName
+    : user
+    ? user.displayName || user.email
+    : "Menu";
+  // console.log(userDetails);
   const handleLogOut = async (navigate) => {
     await logout();
     navigate("/login");
@@ -93,11 +98,11 @@ const DropDown = ({ dropDownLinks, navBarLinks, user }) => {
             ) : (
               <Link
                 key={"loginBtn"}
-                href={"/login"}
+                to="/login"
                 className="block px-4 py-4 sm:py-2 text-lg sm:text-sm text-gray-50 hover:bg-green-400 hover:text-black border-b-2 border-gray-500"
                 role="menuitem"
               >
-                {"Login"}
+                Login
               </Link>
             )}
           </div>

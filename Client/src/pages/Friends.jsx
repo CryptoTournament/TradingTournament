@@ -93,6 +93,12 @@ const Friends = () => {
         uid: user.uid,
       });
       fetchUserWaitingList();
+      let userToNotify = await getUserByDisplayName(username);
+      addNotification(
+        userToNotify.uid,
+        `${userDetails.displayName} Denied your friend request!`,
+        "friends"
+      );
     } catch (error) {
       console.error("Error denying friend", error);
     }

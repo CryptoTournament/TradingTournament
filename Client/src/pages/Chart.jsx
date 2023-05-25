@@ -4,15 +4,15 @@ import moment from "moment";
 import { w3cwebsocket as WebSocket } from "websocket";
 import Chart from "chart.js/auto";
 import "chartjs-adapter-moment";
-
-const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m";
+import PositionTable from "../components/PositionTable";
+const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1s";
 const HISTORY_API_URL =
   "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=60";
 
 const CryptoChart = () => {
   const initBalance = 1000;
   const [data, setData] = useState([]);
-  const [interval, setInterval] = useState("1m");
+  const [interval, setInterval] = useState("1s");
   const [domain, setDomain] = useState([null, null]);
   const [zoomLevel, setZoomLevel] = useState(50);
   const [shouldUpdate, setShouldUpdate] = useState(true);
@@ -24,38 +24,60 @@ const CryptoChart = () => {
   const [gameBalance, setGameBalance] = useState(initBalance);
   const [showButton, setShowButton] = useState(false);
   const [positions, setPositions] = useState([]);
+  // poition=[Time,openPrice,Amount,closePrice,type]
+  // const updateBalance = () => {
+  //   let balance = initBalance;
+  //   console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+  //   console.log(buyPoints);
+  //   console.log(sellPoints);
+  //   console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+  //   for (const buyPoint of buyPoints) {
+  //     const [timestamp, price, amount, closePrice] = buyPoint;
+  //     if (closePrice !== 0) {
+  //       balance -= amount;
+  //       balance += (closePrice / price) * amount;
+  //     } else {
+  //       balance -= amount;
+  //     }
+  //   }
+
+  //   for (const sellPoint of sellPoints) {
+  //     const [timestamp, price, amount, closePrice] = sellPoint;
+  //     if (closePrice !== 0) {
+  //       balance -= amount;
+  //       balance += (price / closePrice) * amount;
+  //     } else {
+  //       balance -= amount;
+  //     }
+  //   }
+
+  //   setGameBalance(balance);
+  // };
 
   const updateBalance = () => {
-    let balance = initBalance
+    let balance = initBalance;
     console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    console.log(buyPoints);
-    console.log(sellPoints);
+    console.log(positions);
     console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-    for (const buyPoint of buyPoints) {
-      const [timestamp, price, amount, closePrice] = buyPoint;
+    for (const position of positions) {
+      const [timestamp, price, amount, closePrice, type] = position;
+      balance -= amount;
       if (closePrice !== 0) {
-        balance-= amount
-        balance += (closePrice / price) * amount;
-      } else {
-        balance -= amount;
-      }
-    }
-  
-    for (const sellPoint of sellPoints) {
-      const [timestamp, price, amount, closePrice] = sellPoint;
-      if (closePrice !== 0) {
-        balance-= amount
-        balance += (price / closePrice) * amount;
-      } else {
-        balance -= amount;
+        if (type == "long") {
+          balance += (closePrice / price) * amount;
+        } else {
+          //Short
+          balance += (price / closePrice) * amount;
+        }
       }
     }
 
     setGameBalance(balance);
   };
   // useEffect(() => {
-    
+
   //   ;
 
   // },[]);
@@ -97,7 +119,7 @@ const CryptoChart = () => {
         setTimeout(() => {
           setShouldUpdate(true);
           setCanTrade(true);
-        }, 60000); // 60 seconds
+        }, 10000); // 10 seconds
       }
     };
     return () => {
@@ -127,60 +149,51 @@ const CryptoChart = () => {
   useEffect(() => {
     // Update balance whenever buyPoints or sellPoints change
     updateBalance();
-  }, [buyPoints, sellPoints]);
-  
+  }, [positions]);
+
   const closePosition = () => {
-    const newBuyPoints = buyPoints.map((buyPoint) => {
-      if (buyPoint[3] === 0) {
-        const closePrice = pointToBuySell[1];
-        const updatedBuyPoint = [...buyPoint];
-        updatedBuyPoint[3] = closePrice === 0 ? pointToBuySell[1] : closePrice;
-        return updatedBuyPoint;
-      }
-      return buyPoint;
-    });
-  
-    const newSellPoints = sellPoints.map((sellPoint) => {
-      if (sellPoint[3] === 0) {
-        const closePrice = pointToBuySell[1];
-        const updatedSellPoint = [...sellPoint];
-        updatedSellPoint[3] = closePrice === 0 ? pointToBuySell[1] : closePrice;
-        return updatedSellPoint;
-      }
-      return sellPoint;
-    });
-  
-    setBuyPoints(newBuyPoints);
-    setSellPoints(newSellPoints);
-    updateBalance();
-  
-    // Update positions with profits
     const updatedPositions = positions.map((position) => {
-      const [timestamp, price, amount, closePrice] = position;
-      const profit = closePrice !== 0 ? ((closePrice / price) * amount) - amount : 0;
-      return [...position, profit];
+      if (position[3] === 0) {
+        const closePrice = pointToBuySell[1];
+        const updatedPosition = [...position];
+        updatedPosition[3] = closePrice === 0 ? pointToBuySell[1] : closePrice;
+        return updatedPosition;
+      }
+      return position;
     });
-  
+
     setPositions(updatedPositions);
-  
+    updateBalance();
     setCanTrade(true);
   };
 
   const handleBuyButtonClick = () => {
     if (pointToBuySell && amount > 0) {
-      const position = [pointToBuySell[0], pointToBuySell[1], amount, 0];
+      const position = [
+        pointToBuySell[0],
+        pointToBuySell[1],
+        amount,
+        0,
+        "long",
+      ];
       setPositions((prevPositions) => [...prevPositions, position]);
       setBuyPoints((prevPoints) => [...prevPoints, position]);
       setCanTrade(false);
       setGameBalance(gameBalance - amount);
     }
   };
-  
+
   const handleSellButtonClick = () => {
     if (pointToBuySell && amount > 0) {
-      const position = [pointToBuySell[0], pointToBuySell[1], amount, 0];
+      const position = [
+        pointToBuySell[0],
+        pointToBuySell[1],
+        amount,
+        0,
+        "short",
+      ];
       setPositions((prevPositions) => [...prevPositions, position]);
-      setSellPoints((prevPoints) => [...prevPoints, position]);
+      // setSellPoints((prevPoints) => [...prevPoints, position]);
       setCanTrade(false);
       setGameBalance(gameBalance - amount);
     }
@@ -251,47 +264,43 @@ const CryptoChart = () => {
         backgroundColor: "rgba(75,192,192,0.4)",
         borderColor: "rgba(75,192,192,1)",
         borderWidth: 2,
-        tension: 0.3,
+        tension: 0.5,
         borderJoinStyle: "bevel",
         pointBorderWidth: 1,
         backgroundColor: function (context) {
           const index = context.dataIndex;
           const value = context.dataset.data[index];
-          if (
-            value &&
-            buyPoints.some((innerArray) => innerArray.includes(value["x"]))
-          ) {
-            return "rgba(0,200,0,0.4)";
+
+          if (value) {
+            const matchingPosition = positions.find(
+              ([timestamp]) => timestamp === value.x
+            );
+
+            if (matchingPosition) {
+              const [, , , , type] = matchingPosition;
+              return type === "long"
+                ? "rgba(0,200,0,0.4)"
+                : "rgba(200,0,0,0.4)";
+            }
           }
-          if (
-            value &&
-            sellPoints.some((innerArray) => innerArray.includes(value["x"]))
-          ) {
-            return "rgba(200,0,0,0.4)";
-          }
+
           return "rgba(75,192,192,0.4)";
         },
         pointRadius: function (context) {
           const index = context.dataIndex;
           const value = context.dataset.data[index];
-          if (
-            value &&
-            buyPoints.some((innerArray) => innerArray.includes(value["x"]))
-          ) {
-            const innerArray = buyPoints.find((innerArray) =>
-              innerArray.includes(value["x"])
+
+          if (value) {
+            const matchingPosition = positions.find(
+              ([timestamp]) => timestamp === value.x
             );
-            return innerArray[2];
+
+            if (matchingPosition) {
+              const [, , amount] = matchingPosition;
+              return amount;
+            }
           }
-          if (
-            value &&
-            sellPoints.some((innerArray) => innerArray.includes(value["x"]))
-          ) {
-            const innerArray = sellPoints.find((innerArray) =>
-              innerArray.includes(value["x"])
-            );
-            return innerArray[2];
-          }
+
           return 0;
         },
       },
@@ -336,29 +345,48 @@ const CryptoChart = () => {
         </button>
       </div>
       <div>{gameBalance}</div>
-  
+
       {/* Display positions */}
       <div className="mt-4">
         <h2>Positions</h2>
-        <ul>
-          {buyPoints.map((position, index) => (
+        {/* <ul>
+          {positions.map((position, index) => (
             <li key={index}>
-              {`Buy Position ${index + 1}: ${position[2]} at $${position[1].toFixed(3)}`}
+              {`${
+                position[4].charAt(0).toUpperCase() + position[4].slice(1)
+              } Position ${index + 1}: ${position[2]} at $${position[1].toFixed(
+                3
+              )}`}
               <br />
-              {`Profit: $${((pointToBuySell[1]/position[1]) * position[2]).toFixed(3)}`}
+              {`Profit: $${
+                position[4] === "long"
+                  ? position[3] == 0
+                    ? ((pointToBuySell[1] / position[1]) * position[2]).toFixed(
+                        3
+                      )
+                    : ((position[3] / position[1]) * position[2]).toFixed(3)
+                  : position[3] == 0
+                  ? ((position[1] / pointToBuySell[1]) * position[2]).toFixed(3)
+                  : ((position[1] / position[3]) * position[2]).toFixed(3)
+              }`}
             </li>
           ))}
-          {sellPoints.map((position, index) => (
-            <li key={index}>
-              {`Sell Position ${index + 1}: ${position[2]} at $${position[1].toFixed(3)}`}
-              <br />
-              {`Profit: $${((position[1]/pointToBuySell[1]) * position[2]).toFixed(3)}`}
-            </li>
-          ))}
-        </ul>
+        </ul> */}
+      </div>
+
+      <div className="mt-4">
+        <h2>Positions</h2>
+        {pointToBuySell ? (
+          <PositionTable
+            positions={positions}
+            currentPrice={pointToBuySell[1]}
+          />
+        ) : (
+          ""
+        )}
       </div>
     </div>
   );
-}  
+};
 
 export default CryptoChart;

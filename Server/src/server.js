@@ -24,7 +24,6 @@ app.use((req, res, next) => {
 });
 
 app.post("/api/users/signUp", async (req, res) => {
-  console.log("got something");
   const { uid } = req.body;
 
   const status = await db.collection("users").insertOne({
@@ -46,7 +45,6 @@ app.get("/api/users/:uid", async (req, res) => {
     const { uid } = req.params;
 
     const user = await db.collection("users").findOne({ uid });
-    console.log(user, "user");
     if (user) {
       res.json(user);
     } else {
@@ -59,7 +57,6 @@ app.get("/api/users/:uid", async (req, res) => {
 });
 
 app.put("/api/users/:uid", async (req, res) => {
-  console.log("got here");
   try {
     const { uid } = req.params;
     const updateData = req.body;
@@ -77,7 +74,6 @@ app.put("/api/users/:uid", async (req, res) => {
 // connecting to db and then connecting to express server.
 connectToDb(() => {
   app.listen(process.env.PORT || 3000, () => {
-    console.log("Server(Express And Mongo) started on port 3000");
     runServerApp();
   });
 });
@@ -123,14 +119,15 @@ app.get("/api/getNonFriends", async (req, res) => {
     const users = await getUsersFromMongoDB();
     // Filter out users who are in the given UID's friends list
     const filteredUsers = users.filter(
-      (user) =>
-        !user.friends.includes(uid) &&
+      (user) =>{
+        return !user.friends.includes(uid) &&
         user.uid !== uid &&
         !user.approve_waiting_list.includes(uid) &&
-        !my_user.friends.includes(user.id) &&
-        !my_user.approve_waiting_list.includes(user.id)
+        !my_user.friends.includes(user.uid) &&
+        !my_user.approve_waiting_list.includes(user.uid)
+
+      }
     );
-    console.log(filteredUsers, "DS");
 
     res.json(filteredUsers);
   } catch (error) {
@@ -142,14 +139,11 @@ app.get("/api/getNonFriends", async (req, res) => {
 app.post("/api/add_friend", async (req, res) => {
   try {
     const { nickname, uid } = req.body;
-    console.log(req.body);
-    console.log("HERE1");
     // Find the user in the database based on uid
     const user = await db
       .collection("users")
       .findOne({ displayName: nickname });
     if (user) {
-      console.log("HERE2");
 
       // Update the user's approve_waiting_list with the nickname
       await db
@@ -158,7 +152,6 @@ app.post("/api/add_friend", async (req, res) => {
           { displayName: nickname },
           { $push: { approve_waiting_list: uid } }
         );
-      console.log("HERE3");
 
       res.json({ message: "Friend added successfully" });
     } else {
@@ -216,22 +209,17 @@ app.get("/api/get_waiting_list", async (req, res) => {
 
     const approveWaitingList = user.approve_waiting_list || [];
     const nicknames = [];
-    console.log("appr wait list", approveWaitingList);
     // Fetch the nicknames for the UIDs in the approve_waiting_list
     for (const user_id of approveWaitingList) {
-      console.log(user_id);
       const userWithNickname = await db
         .collection("users")
         .findOne({ uid: user_id });
 
-      console.log("IU", userWithNickname);
 
       if (userWithNickname && userWithNickname.displayName) {
-        console.log("HE");
         nicknames.push(userWithNickname.displayName);
       }
     }
-    console.log("nicknames", nicknames);
     res.json({ nicknames });
   } catch (error) {
     console.error("Error fetching nicknames from waiting approval list", error);
@@ -241,9 +229,7 @@ app.get("/api/get_waiting_list", async (req, res) => {
 
 app.post("/api/approve_friend", async (req, res) => {
   try {
-    console.log("HEEEE");
     const { nickname, uid } = req.body;
-    console.log(uid);
     // Find the user with the given nickname
     const user = await db.collection("users").findOne({ uid });
     const friend_user = await db
@@ -253,7 +239,6 @@ app.post("/api/approve_friend", async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    console.log("HE1EEE");
 
     // Remove the given UID from the user's approve_waiting_list
     const updatedWaitingList = user.approve_waiting_list.filter(
@@ -262,12 +247,10 @@ app.post("/api/approve_friend", async (req, res) => {
 
     // Add the given UID to the user's friends list
     user.friends.push(friend_user.uid);
-    console.log("HE2EEE");
 
     const friendUpdatedWaitingList = friend_user.approve_waiting_list.filter(
       (id) => id !== user.uid
     );
-    console.log("HE4EEE");
 
     friend_user.friends.push(user.uid);
 
@@ -326,25 +309,45 @@ app.post("/api/deny_friend", async (req, res) => {
       .collection("users")
       .findOne({ displayName: nickname });
 
-    if (!user) {
+
+    const my_user = await db
+      .collection("users")
+      .findOne({ uid: uid });
+
+    if (!user || !my_user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     // Remove the given UID from the user's approve_waiting_list
     const updatedWaitingList = user.approve_waiting_list.filter(
-      (id) => id !== uid
+      (id) => id === uid
     );
 
     // Update the user's approve_waiting_list in the database
     await db
       .collection("users")
       .updateOne(
-        { _id: user._id },
+        { uid: user.uid },
         { $set: { approve_waiting_list: updatedWaitingList } }
       );
 
+
+
+
+    const updatedWaitingListForMyUser = my_user.approve_waiting_list.filter(
+      (id) => id === user.id
+    );
+
+    // Update the user's approve_waiting_list in the database
+    await db
+      .collection("users")
+      .updateOne(
+        { uid: my_user.uid },
+        { $set: { approve_waiting_list: updatedWaitingListForMyUser } }
+      ); 
     // Fetch the nicknames of the updated approve_waiting_list
     const nicknames = [];
+    console.log(updatedWaitingListForMyUser)
 
     for (const id of updatedWaitingList) {
       const userWithNickname = await db
@@ -429,7 +432,6 @@ app.get("/api/displaynames/:displayName", async (req, res) => {
 });
 
 app.put("/api/displaynames/:uid", async (req, res) => {
-  console.log("did put");
 
   try {
     const { uid } = req.params;
@@ -451,7 +453,6 @@ app.put("/api/displaynames/:uid", async (req, res) => {
 });
 
 const runServerApp = () => {
-  //console.log(fetchUsersFromMongoDB());
   //fetchKlineData('BTCUSDT');
   //fetchSymbolData('BTCUSDT');
 };

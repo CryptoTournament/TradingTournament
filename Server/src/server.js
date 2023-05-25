@@ -266,14 +266,11 @@ app.post("/api/approve_friend", async (req, res) => {
 
     // Add the given UID to the user's friends list
     user.friends.push(friend_user.uid);
-
     const friendUpdatedWaitingList = friend_user.approve_waiting_list.filter(
       (id) => id !== user.uid
     );
 
-    friend_user.friends.push(uid);
-    console.log(friend_user.friends);
-
+    friend_user.friends.push(user.uid);
     // Update the user's approve_waiting_list and friends list in the database
     await db.collection("users").updateOne(
       { uid: friend_user.uid },

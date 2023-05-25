@@ -128,13 +128,36 @@ app.get("/api/getNonFriends", async (req, res) => {
 
       }
     );
-
     res.json(filteredUsers);
   } catch (error) {
     console.error("Error fetching user collection", error);
     res.status(500).send("Server error");
   }
 });
+
+app.get("/api/getPendingFriends", async (req, res) => {
+  try {
+    const { uid } = req.query;
+    const my_user = await db.collection("users").findOne({ uid: uid });
+
+    const users = await getUsersFromMongoDB();
+    let display_names = []
+    console.log(users, "users")
+    for(const user of users){
+      if(user.approve_waiting_list.includes(uid)){
+        display_names.push(user.displayName)
+      }
+    }
+    console.log(display_names)
+    res.json(display_names);
+
+  } catch (error) {
+    console.error("Error fetching user collection", error);
+    res.status(500).send("Server error");
+  }
+});
+
+
 
 app.post("/api/add_friend", async (req, res) => {
   try {
@@ -252,7 +275,7 @@ app.post("/api/approve_friend", async (req, res) => {
       (id) => id !== user.uid
     );
 
-    friend_user.friends.push(user.uid);
+    friend_user.friends.push(uid);
 
     // Update the user's approve_waiting_list and friends list in the database
     await db.collection("users").updateOne(

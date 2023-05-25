@@ -10,6 +10,7 @@ const Friends = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [userWaitingList, setUserWaitingList] = useState([]);
   const [userFriendsList, setUserFriendsList] = useState([]);
+  const [userPendingFriends, setUserPendingFriends] = useState([]);
   const [userDetails, setUserDetails] = useState({
     displayName: "",
     level: "",
@@ -27,6 +28,8 @@ const Friends = () => {
     fetchFriends();
     if (user && user.uid) {
       getNonFriendsList(user.uid);
+      getPendingFriendsList(user.uid);
+
     }
     const fetchData = async () => {
       if (!user) return;
@@ -75,6 +78,7 @@ const Friends = () => {
         `${userDetails.displayName} sent you a friend request!`,
         "friends"
       );
+      getPendingFriendsList(user.uid)
     } catch (error) {
       console.error("Error adding friend", error);
     }
@@ -93,6 +97,12 @@ const Friends = () => {
         uid: user.uid,
       });
       fetchUserWaitingList();
+      let userToNotify = await getUserByDisplayName(username);
+      addNotification(
+        userToNotify.uid,
+        `${userDetails.displayName} Denied your friend request!`,
+        "friends"
+      );
     } catch (error) {
       console.error("Error denying friend", error);
     }
@@ -170,6 +180,20 @@ const Friends = () => {
     }
   };
 
+  const getPendingFriendsList = async (uid) => {
+    //getting a list of all users that arent friend of the given user with uid.
+    try {
+      const response = await axios.get("/api/getPendingFriends", {
+        params: { uid },
+      });
+      const data = response.data;
+      setUserPendingFriends(data);
+    } catch (error) {
+      console.error("Error fetching user data", error);
+    }
+  };
+
+
   useEffect(() => {
     if (user && user.uid) {
       getNonFriendsList(user.uid);
@@ -190,7 +214,7 @@ const Friends = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 w-full max-w-7xl">
         <div className="lg:col-span-2">
           <h2 className="text-3xl font-bold mb-4">Friends</h2>
-
+  
           <div className="bg-gradient-to-r from-black to-gray-800 shadow-lg rounded-lg p-6">
             <table className="table-fixed w-full">
               <thead className="text-white">
@@ -252,6 +276,20 @@ const Friends = () => {
                     className="bg-indigo-600 hover:bg-indigo-800 text-white font-bold py-2 px-4 rounded"
                   >
                     Add Friend
+                  </button>
+                </div>
+              ))}
+              {userPendingFriends.map((displayName, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center border-b border-gray-500 py-4 text-white"
+                >
+                  <p>{displayName}</p>
+                  <button
+                    className="bg-gray-500 text-white font-bold py-2 px-4 rounded cursor-not-allowed"
+                    disabled
+                  >
+                    Pending
                   </button>
                 </div>
               ))}

@@ -51,7 +51,7 @@ const NotificationBell = ({ uid }) => {
         navigate("/");
         setDropdownVisible(false);
         break;
-      case "friendRequest":
+      case "friends":
         navigate("/friends");
         setDropdownVisible(false);
         break;
@@ -80,7 +80,7 @@ const NotificationBell = ({ uid }) => {
           <div className="py-2 px-4 bg-gray-200 font-semibold">
             Notifications
           </div>
-          {notifications.map((notification) => (
+          {[...notifications].reverse().map((notification) => (
             <div
               key={notification._id}
               className={`border-b border-gray-200 py-2 px-4 cursor-pointer ${

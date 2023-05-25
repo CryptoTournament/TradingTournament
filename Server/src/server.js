@@ -92,7 +92,7 @@ const getUsersFromMongoDB = async () => {
   }
 };
 
-// app.get("/api/get_all_users", async (req, res) => {
+// app.get("/api/getNonFriends", async (req, res) => {
 //   try {
 //     const users = await getUsersFromMongoDB();
 //     res.json(users);
@@ -102,7 +102,20 @@ const getUsersFromMongoDB = async () => {
 //   }
 // });
 
-app.get("/api/get_all_users", async (req, res) => {
+app.get("/api/getUserByDisplayName", async (req, res) => {
+  try {
+    const { displayName } = req.query;
+    const my_user = await db
+      .collection("users")
+      .findOne({ displayName: displayName });
+    res.json(my_user);
+  } catch (error) {
+    console.error("Error fetching user collection", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.get("/api/getNonFriends", async (req, res) => {
   try {
     const { uid } = req.query;
     const my_user = await db.collection("users").findOne({ uid: uid });
@@ -114,7 +127,7 @@ app.get("/api/get_all_users", async (req, res) => {
         !user.friends.includes(uid) &&
         user.uid !== uid &&
         !user.approve_waiting_list.includes(uid) &&
-        !my_user.friends.includes(user.id) && 
+        !my_user.friends.includes(user.id) &&
         !my_user.approve_waiting_list.includes(user.id)
     );
     console.log(filteredUsers, "DS");
@@ -153,6 +166,38 @@ app.post("/api/add_friend", async (req, res) => {
     }
   } catch (error) {
     console.error("Error adding friend", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.get("/api/getFriends", async (req, res) => {
+  try {
+    const { uid } = req.query;
+
+    // Find the user with the given UID
+    const user = await db.collection("users").findOne({ uid });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const friendsList = user.friends || [];
+    const friends = [];
+    // Fetch the names for the UIDs of my friends
+    for (const user_id of friendsList) {
+      const friendData = await db.collection("users").findOne({ uid: user_id });
+
+      if (friendData) {
+        friends.push(friendData);
+      }
+    }
+    res.json({ friends });
+  } catch (error) {
+    console.error(
+      "Error fetching friendNames from waiting approval list",
+      error
+    );
     res.status(500).json({ message: "Server error" });
   }
 });

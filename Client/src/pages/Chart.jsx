@@ -23,6 +23,7 @@ const CryptoChart = () => {
   const [canTrade, setCanTrade] = useState(true);
   const [gameBalance, setGameBalance] = useState(initBalance);
   const [showButton, setShowButton] = useState(false);
+  const [positions, setPositions] = useState([]);
 
   const updateBalance = () => {
     let balance = initBalance
@@ -127,23 +128,15 @@ const CryptoChart = () => {
     // Update balance whenever buyPoints or sellPoints change
     updateBalance();
   }, [buyPoints, sellPoints]);
-
+  
   const closePosition = () => {
     const newBuyPoints = buyPoints.map((buyPoint) => {
-
       if (buyPoint[3] === 0) {
         const closePrice = pointToBuySell[1];
         const updatedBuyPoint = [...buyPoint];
         updatedBuyPoint[3] = closePrice === 0 ? pointToBuySell[1] : closePrice;
-        console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        console.log(closePrice);
-        console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-
-
         return updatedBuyPoint;
       }
-      console.log("1213");
-
       return buyPoint;
     });
   
@@ -156,41 +149,40 @@ const CryptoChart = () => {
       }
       return sellPoint;
     });
-
+  
     setBuyPoints(newBuyPoints);
     setSellPoints(newSellPoints);
     updateBalance();
-    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-    console.log(buyPoints);
-    console.log(sellPoints);
-    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+  
+    // Update positions with profits
+    const updatedPositions = positions.map((position) => {
+      const [timestamp, price, amount, closePrice] = position;
+      const profit = closePrice !== 0 ? ((closePrice / price) * amount) - amount : 0;
+      return [...position, profit];
+    });
+  
+    setPositions(updatedPositions);
+  
     setCanTrade(true);
   };
-  
-
 
   const handleBuyButtonClick = () => {
-    
     if (pointToBuySell && amount > 0) {
-            console.log(buyPoints);
-      console.log(sellPoints);
-      setBuyPoints((prevPoints) => [
-        ...prevPoints,
-        [pointToBuySell[0], pointToBuySell[1], amount, 0],
-      ]);
+      const position = [pointToBuySell[0], pointToBuySell[1], amount, 0];
+      setPositions((prevPositions) => [...prevPositions, position]);
+      setBuyPoints((prevPoints) => [...prevPoints, position]);
       setCanTrade(false);
-      setGameBalance(gameBalance-amount)
+      setGameBalance(gameBalance - amount);
     }
   };
-
+  
   const handleSellButtonClick = () => {
     if (pointToBuySell && amount > 0) {
-      setSellPoints((prevPoints) => [
-        ...prevPoints,
-        [pointToBuySell[0], pointToBuySell[1], amount, 0],
-      ]);
+      const position = [pointToBuySell[0], pointToBuySell[1], amount, 0];
+      setPositions((prevPositions) => [...prevPositions, position]);
+      setSellPoints((prevPoints) => [...prevPoints, position]);
       setCanTrade(false);
-      setGameBalance(gameBalance-amount)
+      setGameBalance(gameBalance - amount);
     }
   };
 
@@ -339,15 +331,34 @@ const CryptoChart = () => {
         <button
           className="px-4 py-2 mr-2 bg-red-500 text-white rounded"
           onClick={closePosition}
-          
         >
           Close Position
-          
         </button>
       </div>
       <div>{gameBalance}</div>
+  
+      {/* Display positions */}
+      <div className="mt-4">
+        <h2>Positions</h2>
+        <ul>
+          {buyPoints.map((position, index) => (
+            <li key={index}>
+              {`Buy Position ${index + 1}: ${position[2]} at $${position[1].toFixed(3)}`}
+              <br />
+              {`Profit: $${((pointToBuySell[1]/position[1]) * position[2]).toFixed(3)}`}
+            </li>
+          ))}
+          {sellPoints.map((position, index) => (
+            <li key={index}>
+              {`Sell Position ${index + 1}: ${position[2]} at $${position[1].toFixed(3)}`}
+              <br />
+              {`Profit: $${((position[1]/pointToBuySell[1]) * position[2]).toFixed(3)}`}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
-};
+}  
 
 export default CryptoChart;

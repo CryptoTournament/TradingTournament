@@ -2,10 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import moment from "moment";
 import { w3cwebsocket as WebSocket } from "websocket";
+import useUser from "../hooks/useUser";
 import Chart from "chart.js/auto";
 import "chartjs-adapter-moment";
 import PositionTable from "../components/PositionTable";
 import OpenPosition from "../components/OpenPosition";
+import axios from "axios";
+
+
 
 const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m";
 const HISTORY_API_URL =
@@ -13,8 +17,20 @@ const HISTORY_API_URL =
 
 const CryptoChart = () => {
   const initBalance = 1000;
+  const { user } = useUser();
+  const [userDetails, setUserDetails] = useState({
+    displayName: "",
+    level: "",
+    rank: "",
+    winLoseRatio: "",
+    balance: 0,
+    wins: 0,
+    gamesPlayed: 0,
+    gameTokens: 0,
+    accountType: "Regular",
+  });
   const [data, setData] = useState([]);
-  const [interval, setInterval] = useState("1s");
+  const [interval, setInterval] = useState("1m");
   const [domain, setDomain] = useState([null, null]);
   const [zoomLevel, setZoomLevel] = useState(50);
   const [shouldUpdate, setShouldUpdate] = useState(true);
@@ -56,6 +72,22 @@ const CryptoChart = () => {
 
   //   setGameBalance(balance);
   // };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) return;
+      try {
+        const response = await axios.get(`/api/users/${user.uid}`);
+        setUserDetails(response.data);
+      } catch (error) {
+        console.error("Error fetching user data", error);
+      }
+    };
+    fetchData();
+  }, [user]);
+
+
+
 
   const updateBalance = () => {
     let balance = initBalance;
@@ -177,6 +209,7 @@ const CryptoChart = () => {
         amount,
         0,
         "long",
+        userDetails.displayName,
       ];
       setPositions((prevPositions) => [...prevPositions, position]);
       setBuyPoints((prevPoints) => [...prevPoints, position]);
@@ -193,6 +226,8 @@ const CryptoChart = () => {
         amount,
         0,
         "short",
+        userDetails.displayName,
+
       ];
       setPositions((prevPositions) => [...prevPositions, position]);
       // setSellPoints((prevPoints) => [...prevPoints, position]);
@@ -311,7 +346,7 @@ const CryptoChart = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="chart-container mx-auto mt-20 w-11/12 h-96 relative border-2 border-black">
+      <div className="chart-container mx-auto w-full h-96 relative">
         <Line data={chartData} options={options} />
       </div>
       <div className="flex justify-center mt-4">
@@ -347,29 +382,29 @@ const CryptoChart = () => {
         </button>
       </div>
       <div>{gameBalance}</div>
-      <div className="flex flex-col items-center w-full">
-        <div className="mt-4 w-full">
-          {pointToBuySell ? (
-            <OpenPosition
-              positions={positions}
-              currentPrice={pointToBuySell[1]}
-            />
-          ) : (
-            ""
-          )}
-        </div>
 
-        <div className="mt-4 w-full">
-          {pointToBuySell ? (
-            <PositionTable
-              positions={positions}
-              currentPrice={pointToBuySell[1]}
-            />
-          ) : (
-            ""
-          )}
-        </div>
+      <div className="mt-4">
+        {pointToBuySell ? (
+          <OpenPosition
+            positions={positions}
+            currentPrice={pointToBuySell[1]}
+          />
+        ) : (
+          ""
+        )}
       </div>
+
+      <div className="mt-4">
+        {pointToBuySell ? (
+          <PositionTable
+            positions={positions}
+            currentPrice={pointToBuySell[1]}
+          />
+        ) : (
+          ""
+        )}
+      </div>
+
     </div>
   );
 };

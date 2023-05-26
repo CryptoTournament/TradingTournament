@@ -40,6 +40,33 @@ app.post("/api/users/signUp", async (req, res) => {
   });
 });
 
+const getUsersFromMongoDB = async () => {
+  try {
+    const users = await db.collection("users").find().toArray();
+    return users;
+  } catch (error) {
+    console.error("Error fetching user collection", error);
+    throw error;
+  }
+};
+
+//get all users
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = await getUsersFromMongoDB();
+    console.log(users);
+    if (users.length === 0) {
+      res.status(404).send("No users found");
+    } else {
+      res.json(users);
+    }
+  } catch (error) {
+    console.error("Error fetching users data", error);
+    res.status(500).send("Server error");
+  }
+});
+
+//get a user by his id
 app.get("/api/users/:uid", async (req, res) => {
   try {
     const { uid } = req.params;
@@ -77,16 +104,6 @@ connectToDb(() => {
     runServerApp();
   });
 });
-
-const getUsersFromMongoDB = async () => {
-  try {
-    const users = await db.collection("users").find().toArray();
-    return users;
-  } catch (error) {
-    console.error("Error fetching user collection", error);
-    throw error;
-  }
-};
 
 // app.get("/api/getNonFriends", async (req, res) => {
 //   try {

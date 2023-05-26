@@ -9,3 +9,8 @@ export const addNewUserToDb = async (user) => {
     uid: uid,
   });
 };
+
+export const getUsers = async () => {
+  const response = await axios.get("/api/users", {});
+  return response.data;
+};

@@ -11,6 +11,8 @@ import Profile from "./pages/Profile";
 import BasicInfoPage from "./pages/BasicInfoPage";
 import SettingsPage from "./pages/SettingsPage";
 import Shop from "./pages/Shop";
+import LeaderBoard from "./pages/LeaderBoard";
+
 function App() {
   return (
     <BrowserRouter>
@@ -29,6 +31,7 @@ function App() {
             <Route path="/info" element={<BasicInfoPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/leaderboard" element={<LeaderBoard />} />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

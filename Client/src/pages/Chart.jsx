@@ -7,7 +7,6 @@ import "chartjs-adapter-moment";
 import PositionTable from "../components/PositionTable";
 import OpenPosition from "../components/OpenPosition";
 
-
 const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m";
 const HISTORY_API_URL =
   "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=60";
@@ -312,7 +311,7 @@ const CryptoChart = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="chart-container mx-auto w-full h-96 relative">
+      <div className="chart-container mx-auto mt-20 w-11/12 h-96 relative border-2 border-black">
         <Line data={chartData} options={options} />
       </div>
       <div className="flex justify-center mt-4">
@@ -348,30 +347,29 @@ const CryptoChart = () => {
         </button>
       </div>
       <div>{gameBalance}</div>
+      <div className="flex flex-col items-center w-full">
+        <div className="mt-4 w-full">
+          {pointToBuySell ? (
+            <OpenPosition
+              positions={positions}
+              currentPrice={pointToBuySell[1]}
+            />
+          ) : (
+            ""
+          )}
+        </div>
 
-      <div className="mt-4">
-        {pointToBuySell ? (
-          <OpenPosition
-            positions={positions}
-            currentPrice={pointToBuySell[1]}
-          />
-        ) : (
-          ""
-        )}
+        <div className="mt-4 w-full">
+          {pointToBuySell ? (
+            <PositionTable
+              positions={positions}
+              currentPrice={pointToBuySell[1]}
+            />
+          ) : (
+            ""
+          )}
+        </div>
       </div>
-
-
-      <div className="mt-4">
-        {pointToBuySell ? (
-          <PositionTable
-            positions={positions}
-            currentPrice={pointToBuySell[1]}
-          />
-        ) : (
-          ""
-        )}
-      </div>
-
     </div>
   );
 };

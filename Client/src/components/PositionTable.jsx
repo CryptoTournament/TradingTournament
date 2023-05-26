@@ -40,21 +40,6 @@ const PositionTable = ({ positions, currentPrice }) => {
     <div className="overflow-x-auto">
       <div className="min-w-screen  flex items-center justify-center font-sans overflow-hidden">
         <div className="w-full">
-          <h2 className="text-xl font-bold mb-5">Open Positions</h2>
-          <div className="shadow-md rounded my-6">
-            <table className="min-w-max w-full table-auto">
-              <thead>
-                <tr className=" text-gray-600 uppercase text-sm leading-normal">
-                  <th className="py-3 px-6 text-left">Timestamp</th>
-                  <th className="py-3 px-6 text-left">Open Price</th>
-                  <th className="py-3 px-6 text-center">Amount</th>
-                  <th className="py-3 px-6 text-center">Close Price</th>
-                  <th className="py-3 px-6 text-center">Profit</th>
-                </tr>
-              </thead>
-              <tbody>{openPositions.map(renderTableRow)}</tbody>
-            </table>
-          </div>
           <h2 className="text-xl font-bold mb-5">Closed Positions</h2>
           <div className="shadow-md rounded my-6">
             <table className="min-w-max w-full table-auto">

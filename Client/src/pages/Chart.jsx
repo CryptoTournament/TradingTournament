@@ -5,7 +5,10 @@ import { w3cwebsocket as WebSocket } from "websocket";
 import Chart from "chart.js/auto";
 import "chartjs-adapter-moment";
 import PositionTable from "../components/PositionTable";
-const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1s";
+import OpenPosition from "../components/OpenPosition";
+
+
+const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m";
 const HISTORY_API_URL =
   "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=60";
 
@@ -119,7 +122,7 @@ const CryptoChart = () => {
         setTimeout(() => {
           setShouldUpdate(true);
           setCanTrade(true);
-        }, 10000); // 10 seconds
+        }, 60000); // 60 seconds
       }
     };
     return () => {
@@ -346,36 +349,19 @@ const CryptoChart = () => {
       </div>
       <div>{gameBalance}</div>
 
-      {/* Display positions */}
       <div className="mt-4">
-        <h2>Positions</h2>
-        {/* <ul>
-          {positions.map((position, index) => (
-            <li key={index}>
-              {`${
-                position[4].charAt(0).toUpperCase() + position[4].slice(1)
-              } Position ${index + 1}: ${position[2]} at $${position[1].toFixed(
-                3
-              )}`}
-              <br />
-              {`Profit: $${
-                position[4] === "long"
-                  ? position[3] == 0
-                    ? ((pointToBuySell[1] / position[1]) * position[2]).toFixed(
-                        3
-                      )
-                    : ((position[3] / position[1]) * position[2]).toFixed(3)
-                  : position[3] == 0
-                  ? ((position[1] / pointToBuySell[1]) * position[2]).toFixed(3)
-                  : ((position[1] / position[3]) * position[2]).toFixed(3)
-              }`}
-            </li>
-          ))}
-        </ul> */}
+        {pointToBuySell ? (
+          <OpenPosition
+            positions={positions}
+            currentPrice={pointToBuySell[1]}
+          />
+        ) : (
+          ""
+        )}
       </div>
 
+
       <div className="mt-4">
-        <h2>Positions</h2>
         {pointToBuySell ? (
           <PositionTable
             positions={positions}
@@ -385,6 +371,7 @@ const CryptoChart = () => {
           ""
         )}
       </div>
+
     </div>
   );
 };

@@ -266,7 +266,7 @@ const CryptoChart = () => {
   const options = {
     maintainAspectRatio: false,
     responsive: true,
-    //aspectRatio: 1,
+
     animations: {
       tension: {
         duration: chartPulses,
@@ -276,8 +276,28 @@ const CryptoChart = () => {
         loop: true
       }
     },
+
     plugins: {
       legend: { display: false },
+
+      title: {
+        display: true,
+      },
+      zoom: {
+        pan: {
+            enabled: true,
+            mode: 'x'
+        },
+        zoom: {
+            pinch: {
+                enabled: true       // Enable pinch zooming
+            },
+            wheel: {
+                enabled: true       // Enable wheel zooming
+            },
+            mode: 'x',
+        }
+      }
     },
 
     interaction: {
@@ -327,6 +347,9 @@ const CryptoChart = () => {
     },
   };
 
+
+  
+
   const chartData = {
     datasets: [
       {
@@ -335,58 +358,97 @@ const CryptoChart = () => {
           y: d.price,
         })),
         type: "line",
-        backgroundColor: "rgba(75,192,192,0.4)",
-        borderColor: "rgba(75,192,192,1)",
+        borderColor: "rgba(75,192,192,0.7)",
+        backgroundColor: "rgba(75,192,192,0.7)",
         borderWidth: 2,
         tension: 0.5,
         borderJoinStyle: "bevel",
-        pointBorderWidth: 1,
-        backgroundColor: function (context) {
+        pointBorderWidth: 7,
+        fill: true,
+        pointBackgroundColor: function (context) {
           const index = context.dataIndex;
           const value = context.dataset.data[index];
-
+        
           if (value) {
-            const matchingPosition = positions.find(
+            const matchingPositions = positions.filter(
               ([timestamp]) => timestamp === value.x
             );
-
-            if (matchingPosition) {
-              const [, , , , type] = matchingPosition;
-              return type === "long"
-                ? "rgba(0,200,0,0.4)"
-                : "rgba(200,0,0,0.4)";
+        
+            if (matchingPositions.length > 0) {
+              const longCount = matchingPositions.filter(
+                ([, , , , type]) => type === "long"
+              ).length;
+              const shortCount = matchingPositions.filter(
+                ([, , , , type]) => type === "short"
+              ).length;
+              const totalCount = matchingPositions.length;
+        
+              if (longCount === totalCount) {
+                return "rgba(0, 255, 0, 0.4)"; // Total green if there are only longs
+              } else if (shortCount === totalCount) {
+                return "rgba(255, 0, 0, 0.4)"; // Total red if there are only shorts
+              } else {
+                const greenRatio = longCount / totalCount;
+                const redRatio = shortCount / totalCount;
+        
+                const gradient = context.chart.ctx.createLinearGradient(
+                  0,
+                  0,
+                  0,
+                  context.chart.height
+                );
+        
+                gradient.addColorStop(0, `rgba(255, 0, 0, ${1 - redRatio * 0.6})`); // Adjust red color stop
+                gradient.addColorStop(1, `rgba(0, 255, 0, ${1 - greenRatio * 0.6})`); // Adjust green color stop
+        
+                return gradient;
+              }
             }
           }
-
-          return "rgba(75,192,192,0.4)";
+        
+          return "rgba(75, 192, 192, 0.4)"; // Default color
         },
         
-    
+
         pointRadius: function (context) {
           const index = context.dataIndex;
           const value = context.dataset.data[index];
-
+          let totAmount = 0;
+        
           if (value) {
-            const matchingPosition = positions.find(
+            const matchingPositions = positions.filter(
               ([timestamp]) => timestamp === value.x
             );
-
-            if (matchingPosition) {
-              const [, , amount] = matchingPosition;
-              return amount;
+        
+            if (matchingPositions.length > 0) {
+              matchingPositions.forEach(([, , amount]) => {
+                totAmount += amount;
+              });
             }
           }
-
-          return 0;
-        },
         
+          return totAmount;
+        },
+        // backgroundColor: function (context) {
+        //   const chart = context.chart;
+        //   const ctx = chart.ctx;
+        //   const chartArea = chart.chartArea;
+        //   const gradient = ctx.createLinearGradient(
+        //     chartArea.left,
+        //     chartArea.bottom,
+        //     chartArea.left,
+        //     chartArea.top
+        //   );
+        //   gradient.addColorStop(0, "rgba(0, 255, 255, 0.2)"); // Aqua color at the bottom
+        //   gradient.addColorStop(1, "rgba(0, 128, 0, 0.2)"); // Green color at the top
+        //   return gradient;
+        // },
       },
     ],
   };
-
   return (
     <div className="flex flex-col items-center">
-      <div className="chart-container mx-auto w-full h-96 relative">
+      <div className="chart-container mx-auto w-5/6 h-96 relative">
         <Line data={chartData} options={options} />
       </div>
       <div className="flex justify-center mt-4">

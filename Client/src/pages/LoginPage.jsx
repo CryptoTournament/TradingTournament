@@ -47,7 +47,7 @@ function LoginPage() {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && !showAddMoreInfo) {
       navigate("/"); // navigate to home page on successful login
     }
   }, [user]);

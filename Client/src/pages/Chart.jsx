@@ -17,6 +17,7 @@ const HISTORY_API_URL =
 
 const CryptoChart = () => {
   const initBalance = 1000;
+  const initChartPulses = 800;
   const { user } = useUser();
   const [userDetails, setUserDetails] = useState({
     displayName: "",
@@ -42,6 +43,11 @@ const CryptoChart = () => {
   const [gameBalance, setGameBalance] = useState(initBalance);
   const [showButton, setShowButton] = useState(false);
   const [positions, setPositions] = useState([]);
+  const [chartPulses, setChartPulses] = useState(initChartPulses);
+
+
+
+
   // poition=[Time,openPrice,Amount,closePrice,type]
   // const updateBalance = () => {
   //   let balance = initBalance;
@@ -73,6 +79,8 @@ const CryptoChart = () => {
   //   setGameBalance(balance);
   // };
 
+
+
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
@@ -88,6 +96,21 @@ const CryptoChart = () => {
 
 
 
+  useEffect(() => {
+    const sendPositions = async () => {
+    try {
+      const gid = 123
+      const response = await axios.put(`/api/games/${gid}`, {positions});
+
+    } catch (error) {
+      console.error("Error updating user data", error);
+    }
+  }
+  sendPositions();
+  }, [positions]);
+
+
+
 
   const updateBalance = () => {
     let balance = initBalance;
@@ -96,18 +119,20 @@ const CryptoChart = () => {
     console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
     for (const position of positions) {
-      const [timestamp, price, amount, closePrice, type] = position;
-      balance -= amount;
-      if (closePrice !== 0) {
-        if (type == "long") {
-          balance += (closePrice / price) * amount;
-        } else {
-          //Short
-          balance += (price / closePrice) * amount;
+      const [timestamp, price, amount, closePrice, type, displayname] = position;
+      if(displayname == userDetails.displayName)
+      {
+          balance -= amount;
+          if (closePrice !== 0) {
+            if (type == "long") {
+              balance += (closePrice / price) * amount;
+            } else {
+              //Short
+              balance += (price / closePrice) * amount;
+            }
+          }
         }
       }
-    }
-
     setGameBalance(balance);
   };
   // useEffect(() => {
@@ -150,6 +175,7 @@ const CryptoChart = () => {
         setPointToBuySell([timestamp, price]);
         setData((prevData) => [...prevData, { timestamp, price }]);
         setShouldUpdate(false);
+        setChartPulses(initChartPulses)
         setTimeout(() => {
           setShouldUpdate(true);
           setCanTrade(true);
@@ -187,7 +213,7 @@ const CryptoChart = () => {
 
   const closePosition = () => {
     const updatedPositions = positions.map((position) => {
-      if (position[3] === 0) {
+      if (position[3] === 0 && position[5] == userDetails.displayName) {
         const closePrice = pointToBuySell[1];
         const updatedPosition = [...position];
         updatedPosition[3] = closePrice === 0 ? pointToBuySell[1] : closePrice;
@@ -236,13 +262,24 @@ const CryptoChart = () => {
     }
   };
 
+
   const options = {
     maintainAspectRatio: false,
     responsive: true,
     //aspectRatio: 1,
+    animations: {
+      tension: {
+        duration: chartPulses,
+        easing: 'linear',
+        from: 0.6,
+        to: 0.2,
+        loop: true
+      }
+    },
     plugins: {
       legend: { display: false },
     },
+
     interaction: {
       mode: "index",
       intersect: false,
@@ -323,6 +360,8 @@ const CryptoChart = () => {
 
           return "rgba(75,192,192,0.4)";
         },
+        
+    
         pointRadius: function (context) {
           const index = context.dataIndex;
           const value = context.dataset.data[index];
@@ -340,6 +379,7 @@ const CryptoChart = () => {
 
           return 0;
         },
+        
       },
     ],
   };

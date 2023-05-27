@@ -475,7 +475,23 @@ app.put("/api/displaynames/:uid", async (req, res) => {
   }
 });
 
+
+app.put("/api/games/:gid", async (req, res) => {
+  try {
+    console.log("###############");
+    //console.log(req);
+    console.log(req.body);
+    console.log("###############");
+  } catch (error) {
+    console.error("Error validating display name", error);
+    res.status(500).send("Server error");
+  }
+});
+
+
 const runServerApp = () => {
   //fetchKlineData('BTCUSDT');
   //fetchSymbolData('BTCUSDT');
 };
+
+

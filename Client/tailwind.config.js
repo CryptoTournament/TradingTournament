@@ -13,6 +13,9 @@ export default {
         "bg-home-gradient-from": "#1c92d2  ",
         "bg-home-gradient-to": "#f2fcfe",
       },
+      screens: {
+        notComputer: "1500px",
+      },
     },
   },
 

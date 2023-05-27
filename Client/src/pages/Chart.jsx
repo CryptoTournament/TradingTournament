@@ -13,10 +13,13 @@ const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m";
 const HISTORY_API_URL =
   "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=60";
 
-const CryptoChart = () => {
+const CryptoChart = ({ tournament, showChart }) => {
+  const { game_name, number_of_players, max_players, players, tournament_id } =
+    tournament;
   const initBalance = 1000;
   const initChartPulses = 800;
   const { user } = useUser();
+  console.log(user);
   const [userDetails, setUserDetails] = useState({
     displayName: "",
     level: "",
@@ -39,40 +42,10 @@ const CryptoChart = () => {
   const [amount, setAmount] = useState(0);
   const [canTrade, setCanTrade] = useState(true);
   const [gameBalance, setGameBalance] = useState(initBalance);
-  const [showButton, setShowButton] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(true);
+  const [showChartFullWidth, setShowChartFullWidth] = useState(false);
   const [positions, setPositions] = useState([]);
   const [chartPulses, setChartPulses] = useState(initChartPulses);
-
-  // poition=[Time,openPrice,Amount,closePrice,type]
-  // const updateBalance = () => {
-  //   let balance = initBalance;
-  //   console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-  //   console.log(buyPoints);
-  //   console.log(sellPoints);
-  //   console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-
-  //   for (const buyPoint of buyPoints) {
-  //     const [timestamp, price, amount, closePrice] = buyPoint;
-  //     if (closePrice !== 0) {
-  //       balance -= amount;
-  //       balance += (closePrice / price) * amount;
-  //     } else {
-  //       balance -= amount;
-  //     }
-  //   }
-
-  //   for (const sellPoint of sellPoints) {
-  //     const [timestamp, price, amount, closePrice] = sellPoint;
-  //     if (closePrice !== 0) {
-  //       balance -= amount;
-  //       balance += (price / closePrice) * amount;
-  //     } else {
-  //       balance -= amount;
-  //     }
-  //   }
-
-  //   setGameBalance(balance);
-  // };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -106,12 +79,12 @@ const CryptoChart = () => {
     console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
     for (const position of positions) {
-      const [timestamp, price, amount, closePrice, type, displayname] =
+      const [timestamp, price, amount, closePrice, type, displayName] =
         position;
-      if (displayname == userDetails.displayName) {
+      if (displayName === userDetails.displayName) {
         balance -= amount;
         if (closePrice !== 0) {
-          if (type == "long") {
+          if (type === "long") {
             balance += (closePrice / price) * amount;
           } else {
             //Short
@@ -122,11 +95,6 @@ const CryptoChart = () => {
     }
     setGameBalance(balance);
   };
-  // useEffect(() => {
-
-  //   ;
-
-  // },[]);
 
   useEffect(() => {
     fetch(HISTORY_API_URL)
@@ -175,7 +143,7 @@ const CryptoChart = () => {
   }, [interval, shouldUpdate]);
 
   useEffect(() => {
-    const chartHeight = 600; // Increase the chart height
+    const chartHeight = 900; // Increase the chart height
     const priceRange =
       Math.max(...data.map((d) => d.price)) -
       Math.min(...data.map((d) => d.price));
@@ -200,7 +168,7 @@ const CryptoChart = () => {
 
   const closePosition = () => {
     const updatedPositions = positions.map((position) => {
-      if (position[3] === 0 && position[5] == userDetails.displayName) {
+      if (position[3] === 0 && position[5] === userDetails.displayName) {
         const closePrice = pointToBuySell[1];
         const updatedPosition = [...position];
         updatedPosition[3] = closePrice === 0 ? pointToBuySell[1] : closePrice;
@@ -251,7 +219,6 @@ const CryptoChart = () => {
   const options = {
     maintainAspectRatio: false,
     responsive: true,
-
     animations: {
       tension: {
         duration: chartPulses,
@@ -261,10 +228,8 @@ const CryptoChart = () => {
         loop: true,
       },
     },
-
     plugins: {
       legend: { display: false },
-
       title: {
         display: true,
       },
@@ -284,7 +249,6 @@ const CryptoChart = () => {
         },
       },
     },
-
     interaction: {
       mode: "index",
       intersect: false,
@@ -340,7 +304,6 @@ const CryptoChart = () => {
           y: d.price,
         })),
         type: "line",
-
         borderColor: "rgba(75,192,192,0.7)",
         backgroundColor: "rgba(75,192,192,0.7)",
         borderWidth: 2,
@@ -417,82 +380,165 @@ const CryptoChart = () => {
 
           return totAmount;
         },
-        // backgroundColor: function (context) {
-        //   const chart = context.chart;
-        //   const ctx = chart.ctx;
-        //   const chartArea = chart.chartArea;
-        //   const gradient = ctx.createLinearGradient(
-        //     chartArea.left,
-        //     chartArea.bottom,
-        //     chartArea.left,
-        //     chartArea.top
-        //   );
-        //   gradient.addColorStop(0, "rgba(0, 255, 255, 0.2)"); // Aqua color at the bottom
-        //   gradient.addColorStop(1, "rgba(0, 128, 0, 0.2)"); // Green color at the top
-        //   return gradient;
-        // },
       },
     ],
   };
+
+  // Sort players by scores
+  const sortedPlayers = [...players].sort(
+    (a, b) => b.game_currency - a.game_currency
+  );
+
   return (
     <div className="flex flex-col items-center">
-      <div className="chart-container mx-auto w-5/6 h-96 relative">
-        <Line data={chartData} options={options} />
-      </div>
-      <div className="flex justify-center mt-4">
-        <input
-          type="number"
-          value={amount}
-          onChange={(e) => setAmount(parseFloat(e.target.value))}
-          placeholder="Amount"
-        />
+      <div className="flex">
         <button
-          className={`px-4 py-2 mr-2 bg-green-500 text-white rounded ${
-            canTrade ? "" : "opacity-50 cursor-not-allowed"
-          }`}
-          onClick={handleBuyButtonClick}
-          disabled={!canTrade}
+          className="absolute top-28 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-700 text-2xl"
+          onClick={() => showChart(false)}
         >
-          Buy
+          X
         </button>
-        <button
-          className={`px-4 py-2 mr-2 bg-red-500 text-white rounded ${
-            canTrade ? "" : "opacity-50 cursor-not-allowed"
-          }`}
-          onClick={handleSellButtonClick}
-          disabled={!canTrade}
-        >
-          Sell
-        </button>
-        <button
-          className="px-4 py-2 mr-2 bg-red-500 text-white rounded"
-          onClick={closePosition}
-        >
-          Close Position
-        </button>
-      </div>
-      <div>{gameBalance}</div>
-
-      <div className="mt-4">
-        {pointToBuySell ? (
-          <OpenPosition
-            positions={positions}
-            currentPrice={pointToBuySell[1]}
-          />
-        ) : (
-          ""
-        )}
+        <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">
+          {game_name}{" "}
+          <span className="text-gray-500 text-lg">
+            ({number_of_players} / {max_players})
+          </span>
+        </h1>
       </div>
 
-      <div className="mt-4">
-        {pointToBuySell ? (
-          <PositionTable
-            positions={positions}
-            currentPrice={pointToBuySell[1]}
-          />
-        ) : (
-          ""
-        )}
+      <div className="flex flex-col notComputer:flex-row w-full px-10">
+        <div
+          className={`transition-all duration-1000 w-full sm:w-${
+            showChartFullWidth ? "" : "full"
+          }`}
+        >
+          <div
+            className={`chart-container   w-11/12 h-96 relative transition-all duration-500 ${
+              showChartFullWidth ? "sm:w-11/12" : "sm:w-full"
+            }`}
+          >
+            <Line data={chartData} options={options} />
+          </div>
+          <div className="flex justify-center mt-4">
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(parseFloat(e.target.value))}
+              placeholder="Amount"
+            />
+            <button
+              className={`px-4 py-2 mr-2 bg-green-500 text-white rounded ${
+                canTrade ? "" : "opacity-50 cursor-not-allowed"
+              }`}
+              onClick={handleBuyButtonClick}
+              disabled={!canTrade}
+            >
+              Buy
+            </button>
+            <button
+              className={`px-4 py-2 mr-2 bg-red-500 text-white rounded ${
+                canTrade ? "" : "opacity-50 cursor-not-allowed"
+              }`}
+              onClick={handleSellButtonClick}
+              disabled={!canTrade}
+            >
+              Sell
+            </button>
+            <button
+              className="px-4 py-2 mr-2 bg-red-500 text-white rounded"
+              onClick={closePosition}
+            >
+              Close Position
+            </button>
+          </div>
+          <div className="mt-4">{gameBalance}</div>
+          <div className="mt-4">
+            {pointToBuySell ? (
+              <OpenPosition
+                positions={positions}
+                currentPrice={pointToBuySell[1]}
+              />
+            ) : (
+              ""
+            )}
+          </div>
+          <div className="mt-4">
+            {pointToBuySell ? (
+              <PositionTable
+                positions={positions}
+                currentPrice={pointToBuySell[1]}
+              />
+            ) : (
+              ""
+            )}
+          </div>
+        </div>
+        <div
+          className={`w-full ml-4  mt-4 sm:mt-0 transition-all duration-1000 ${
+            showLeaderboard ? "sm:w-1/4" : "sm:w-1/12 "
+          }`}
+        >
+          <button
+            className="mt-4  bg-gray-500 text-white px-4 py-2 rounded hidden 2xl:block"
+            onClick={() => {
+              setShowLeaderboard(!showLeaderboard);
+              setShowChartFullWidth(!showLeaderboard);
+            }}
+          >
+            {!showLeaderboard ? "< Show" : "> Hide"}
+          </button>
+          <div
+            className={`transition-all ease-in-out duration-500 transform ${
+              showLeaderboard ? "opacity-100 scale-100" : "opacity-0 scale-90"
+            }`}
+          >
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">
+              Leaderboard
+            </h2>
+            <table className="min-w-full bg-white border border-gray-300">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2 bg-gray-100 border-b w-1/12">
+                    Rank
+                  </th>
+                  <th className="px-4 py-2 bg-gray-100 border-b">Player</th>
+                  <th className="px-4 py-2 bg-gray-100 border-b">Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedPlayers.map((player, index) => (
+                  <tr key={player.uid} className="h-11">
+                    {user && (
+                      <>
+                        <td
+                          className={`px-4 py-2 border-b  ${
+                            player.uid === user.uid ? "text-black" : ""
+                          }`}
+                        >
+                          {index + 1}
+                        </td>
+                        <td
+                          className={`px-4 py-2 border-b ${
+                            player.uid === user.uid ? "text-black" : ""
+                          }`}
+                        >
+                          {player.displayName}
+                        </td>
+                        <td
+                          className={`px-4 py-2 border-b ${
+                            player.uid === user.uid ? "text-black" : ""
+                          }`}
+                        >
+                          {player.game_currency}
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

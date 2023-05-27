@@ -475,7 +475,6 @@ app.put("/api/displaynames/:uid", async (req, res) => {
   }
 });
 
-
 app.put("/api/games/:gid", async (req, res) => {
   try {
     console.log("###############");
@@ -488,10 +487,85 @@ app.put("/api/games/:gid", async (req, res) => {
   }
 });
 
+//tournaments calls
+app.get("/api/tournaments", async (req, res) => {
+  try {
+    const tournaments = await db.collection("tournaments").find().toArray();
+    console.log(tournaments);
+    if (tournaments.length === 0) {
+      res.status(404).send("No tournaments found");
+    } else {
+      res.json(tournaments);
+    }
+  } catch (error) {
+    console.error("Error fetching tournaments data", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.get("/api/tournaments/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const tournament = await db
+      .collection("tournaments")
+      .findOne({ tournament_id: id });
+    if (!tournament) {
+      res.status(404).send("Tournament not found");
+    } else {
+      res.json(tournament);
+    }
+  } catch (error) {
+    console.error("Error fetching tournament data", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.put("/api/tournaments/:tournament_id/join", async (req, res) => {
+  try {
+    const { tournament_id } = req.params;
+    const { uid } = req.body; // You should provide user id in the request body
+
+    const user = await db.collection("users").findOne({ uid });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    const tournament = await db
+      .collection("Tournaments")
+      .findOne({ tournament_id });
+    if (!tournament) {
+      return res.status(404).send("Tournament not found");
+    }
+
+    if (tournament.number_of_players >= tournament.max_players) {
+      return res.status(400).send("Tournament is already full");
+    }
+
+    // Convert the user data to the format used in the tournament
+    const player = {
+      uid: user.uid,
+      displayName: user.displayName,
+      game_currency: user.balance,
+      positions: [],
+    };
+
+    // Add the player to the tournament and increment the number of players
+    await db.collection("Tournaments").updateOne(
+      { tournament_id },
+      {
+        $push: { players: player },
+        $inc: { number_of_players: 1 },
+      }
+    );
+
+    res.status(200).send("Successfully joined the tournament");
+  } catch (error) {
+    console.error("Error joining the tournament", error);
+    res.status(500).send("Server error");
+  }
+});
 
 const runServerApp = () => {
   //fetchKlineData('BTCUSDT');
   //fetchSymbolData('BTCUSDT');
 };
-
-

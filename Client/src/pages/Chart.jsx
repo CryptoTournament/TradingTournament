@@ -9,8 +9,6 @@ import PositionTable from "../components/PositionTable";
 import OpenPosition from "../components/OpenPosition";
 import axios from "axios";
 
-
-
 const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m";
 const HISTORY_API_URL =
   "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=60";
@@ -45,9 +43,6 @@ const CryptoChart = () => {
   const [positions, setPositions] = useState([]);
   const [chartPulses, setChartPulses] = useState(initChartPulses);
 
-
-
-
   // poition=[Time,openPrice,Amount,closePrice,type]
   // const updateBalance = () => {
   //   let balance = initBalance;
@@ -79,8 +74,6 @@ const CryptoChart = () => {
   //   setGameBalance(balance);
   // };
 
-
-
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
@@ -94,23 +87,17 @@ const CryptoChart = () => {
     fetchData();
   }, [user]);
 
-
-
   useEffect(() => {
     const sendPositions = async () => {
-    try {
-      const gid = 123
-      const response = await axios.put(`/api/games/${gid}`, {positions});
-
-    } catch (error) {
-      console.error("Error updating user data", error);
-    }
-  }
-  sendPositions();
+      try {
+        const gid = 123;
+        const response = await axios.put(`/api/games/${gid}`, { positions });
+      } catch (error) {
+        console.error("Error updating user data", error);
+      }
+    };
+    sendPositions();
   }, [positions]);
-
-
-
 
   const updateBalance = () => {
     let balance = initBalance;
@@ -119,20 +106,20 @@ const CryptoChart = () => {
     console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
     for (const position of positions) {
-      const [timestamp, price, amount, closePrice, type, displayname] = position;
-      if(displayname == userDetails.displayName)
-      {
-          balance -= amount;
-          if (closePrice !== 0) {
-            if (type == "long") {
-              balance += (closePrice / price) * amount;
-            } else {
-              //Short
-              balance += (price / closePrice) * amount;
-            }
+      const [timestamp, price, amount, closePrice, type, displayname] =
+        position;
+      if (displayname == userDetails.displayName) {
+        balance -= amount;
+        if (closePrice !== 0) {
+          if (type == "long") {
+            balance += (closePrice / price) * amount;
+          } else {
+            //Short
+            balance += (price / closePrice) * amount;
           }
         }
       }
+    }
     setGameBalance(balance);
   };
   // useEffect(() => {
@@ -175,7 +162,7 @@ const CryptoChart = () => {
         setPointToBuySell([timestamp, price]);
         setData((prevData) => [...prevData, { timestamp, price }]);
         setShouldUpdate(false);
-        setChartPulses(initChartPulses)
+        setChartPulses(initChartPulses);
         setTimeout(() => {
           setShouldUpdate(true);
           setCanTrade(true);
@@ -253,7 +240,6 @@ const CryptoChart = () => {
         0,
         "short",
         userDetails.displayName,
-
       ];
       setPositions((prevPositions) => [...prevPositions, position]);
       // setSellPoints((prevPoints) => [...prevPoints, position]);
@@ -262,7 +248,6 @@ const CryptoChart = () => {
     }
   };
 
-
   const options = {
     maintainAspectRatio: false,
     responsive: true,
@@ -270,11 +255,11 @@ const CryptoChart = () => {
     animations: {
       tension: {
         duration: chartPulses,
-        easing: 'linear',
+        easing: "linear",
         from: 0.6,
         to: 0.2,
-        loop: true
-      }
+        loop: true,
+      },
     },
     plugins: {
       legend: { display: false },
@@ -335,7 +320,7 @@ const CryptoChart = () => {
           y: d.price,
         })),
         type: "line",
-        backgroundColor: "rgba(75,192,192,0.4)",
+        // backgroundColor: "rgba(75,192,192,0.4)",
         borderColor: "rgba(75,192,192,1)",
         borderWidth: 2,
         tension: 0.5,
@@ -360,8 +345,7 @@ const CryptoChart = () => {
 
           return "rgba(75,192,192,0.4)";
         },
-        
-    
+
         pointRadius: function (context) {
           const index = context.dataIndex;
           const value = context.dataset.data[index];
@@ -379,14 +363,13 @@ const CryptoChart = () => {
 
           return 0;
         },
-        
       },
     ],
   };
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="chart-container mx-auto w-full h-96 relative">
+    <div className="flex flex-col items-center px-7 ">
+      <div className="chart-container w-full h-96 relative  m-6 border-2 border-black ">
         <Line data={chartData} options={options} />
       </div>
       <div className="flex justify-center mt-4">
@@ -444,7 +427,6 @@ const CryptoChart = () => {
           ""
         )}
       </div>
-
     </div>
   );
 };

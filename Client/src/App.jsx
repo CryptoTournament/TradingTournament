@@ -12,7 +12,7 @@ import BasicInfoPage from "./pages/BasicInfoPage";
 import SettingsPage from "./pages/SettingsPage";
 import Shop from "./pages/Shop";
 import LeaderBoard from "./pages/LeaderBoard";
-
+import TournamentsPage from "./pages/TournamentsPage";
 function App() {
   return (
     <BrowserRouter>
@@ -25,7 +25,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/register" element={<SignUpPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/chart" element={<Chart />} />
+            <Route path="/chart" element={<TournamentsPage />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/info" element={<BasicInfoPage />} />

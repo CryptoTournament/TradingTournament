@@ -46,6 +46,8 @@ const CryptoChart = ({ tournament, showChart }) => {
   const [showChartFullWidth, setShowChartFullWidth] = useState(false);
   const [positions, setPositions] = useState([]);
   const [chartPulses, setChartPulses] = useState(initChartPulses);
+  const [mainGameColor, setMainGameColor] = useState("rgba(0, 255, 255, 1)")
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -229,6 +231,7 @@ const CryptoChart = ({ tournament, showChart }) => {
       },
     },
     plugins: {
+
       legend: { display: false },
       title: {
         display: true,
@@ -291,6 +294,8 @@ const CryptoChart = ({ tournament, showChart }) => {
         display: true,
         ticks: {
           color: "rgba(255,255,255,0.7)",
+          enabled: false,
+
         },
       },
     },
@@ -305,7 +310,19 @@ const CryptoChart = ({ tournament, showChart }) => {
         })),
         type: "line",
         borderColor: "rgba(75,192,192,0.7)",
-        backgroundColor: "rgba(75,192,192,0.7)",
+        backgroundColor: function (context) {
+          const gradient = context.chart.ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            context.chart.height
+          );
+      
+          gradient.addColorStop(1, "rgba(0, 0, 0, 0.1)"); // Faded black color
+          gradient.addColorStop(0, mainGameColor); // Aqua color
+      
+          return gradient;
+        },
         borderWidth: 2,
         tension: 0.5,
         borderJoinStyle: "bevel",
@@ -389,22 +406,35 @@ const CryptoChart = ({ tournament, showChart }) => {
     (a, b) => b.game_currency - a.game_currency
   );
 
+  const PriceDisplay = () => {
+    if (pointToBuySell !== null) {
+      return <p className="text-2xl sm:text-4xl font-bold">{pointToBuySell[1]}</p>;
+    } else {
+      return null;
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center">
-      <div className="flex">
-        <button
-          className="absolute top-28 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-700 text-2xl"
-          onClick={() => showChart(false)}
-        >
-          X
-        </button>
-        <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">
-          {game_name}{" "}
-          <span className="text-gray-500 text-lg">
-            ({number_of_players} / {max_players})
-          </span>
-        </h1>
-      </div>
+      <div className="flex flex-col items-center">
+        <div className="flex">
+          <div className="flex flex-col items-end pr-8">
+            <PriceDisplay />
+    
+            <button
+              className="absolute top-28 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-700 text-2xl"
+              onClick={() => showChart(false)}
+            >
+              X
+            </button>
+            <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">
+              {game_name}{" "}
+              <span className="text-gray-500 text-lg">
+                ({number_of_players} / {max_players})
+              </span>
+            </h1>
+          </div>
+        </div>
+        
 
       <div className="flex flex-col notComputer:flex-row w-full px-10">
         <div
@@ -417,6 +447,7 @@ const CryptoChart = ({ tournament, showChart }) => {
               showChartFullWidth ? "sm:w-11/12" : "sm:w-full"
             }`}
           >
+            
             <Line data={chartData} options={options} />
           </div>
           <div className="flex justify-center mt-4">

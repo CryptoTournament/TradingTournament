@@ -8,6 +8,11 @@ import "chartjs-adapter-moment";
 import PositionTable from "../components/PositionTable";
 import OpenPosition from "../components/OpenPosition";
 import axios from "axios";
+import {
+  addPosition,
+  closePositionOnServer,
+  updatePlayerTournamentBalance,
+} from "../api/tournaments";
 
 const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m";
 const HISTORY_API_URL =
@@ -16,10 +21,9 @@ const HISTORY_API_URL =
 const CryptoChart = ({ tournament, showChart }) => {
   const { game_name, number_of_players, max_players, players, tournament_id } =
     tournament;
-  const initBalance = 1000;
+  const initBalance = 1000000;
   const initChartPulses = 800;
   const { user } = useUser();
-  console.log(user);
   const [userDetails, setUserDetails] = useState({
     displayName: "",
     level: "",
@@ -37,8 +41,6 @@ const CryptoChart = ({ tournament, showChart }) => {
   const [zoomLevel, setZoomLevel] = useState(50);
   const [shouldUpdate, setShouldUpdate] = useState(true);
   const [pointToBuySell, setPointToBuySell] = useState(null);
-  const [buyPoints, setBuyPoints] = useState([]);
-  const [sellPoints, setSellPoints] = useState([]);
   const [amount, setAmount] = useState(0);
   const [canTrade, setCanTrade] = useState(true);
   const [gameBalance, setGameBalance] = useState(initBalance);
@@ -46,9 +48,8 @@ const CryptoChart = ({ tournament, showChart }) => {
   const [showChartFullWidth, setShowChartFullWidth] = useState(false);
   const [positions, setPositions] = useState([]);
   const [chartPulses, setChartPulses] = useState(initChartPulses);
-  const [mainGameColor, setMainGameColor] = useState("rgba(0, 255, 255, 1)")
-
-
+  const [mainGameColor, setMainGameColor] = useState("rgba(0, 255, 255, 1)");
+  const [sortedPlayers, setSortedPlayers] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
@@ -62,28 +63,27 @@ const CryptoChart = ({ tournament, showChart }) => {
     fetchData();
   }, [user]);
 
-  useEffect(() => {
-    const sendPositions = async () => {
-      try {
-        const gid = 123;
-        const response = await axios.put(`/api/games/${gid}`, { positions });
-      } catch (error) {
-        console.error("Error updating user data", error);
-      }
-    };
-    sendPositions();
-  }, [positions]);
+  // useEffect(() => {
+  //   const sendPositions = async () => {
+  //     try {
+  //       const gid = 123;
+  //       const response = await axios.put(`/api/games/${gid}`, { positions });
+  //     } catch (error) {
+  //       console.error("Error updating user data", error);
+  //     }
+  //   };
+  //   sendPositions();
+  // }, [positions]);
 
-  const updateBalance = () => {
+  const updateBalance = (positionsArray) => {
     let balance = initBalance;
-    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    console.log(positions);
-    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    console.log("calculating...");
+    console.log(positionsArray);
+    for (const position of positionsArray) {
+      const [timestamp, price, amount, closePrice, type, uid] = position;
 
-    for (const position of positions) {
-      const [timestamp, price, amount, closePrice, type, displayName] =
-        position;
-      if (displayName === userDetails.displayName) {
+      if (user && uid === user.uid) {
+        console.log("thats my position!");
         balance -= amount;
         if (closePrice !== 0) {
           if (type === "long") {
@@ -95,7 +95,15 @@ const CryptoChart = ({ tournament, showChart }) => {
         }
       }
     }
-    setGameBalance(balance);
+    console.log("http call");
+    if (user) {
+      updatePlayerTournamentBalance(
+        tournament.tournament_id,
+        user.uid,
+        balance
+      );
+      setGameBalance(balance);
+    }
   };
 
   useEffect(() => {
@@ -125,17 +133,33 @@ const CryptoChart = ({ tournament, showChart }) => {
       );
     };
     socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.k && shouldUpdate) {
-        const timestamp = data.k.t;
-        const price = parseFloat(data.k.c);
+      const newData = JSON.parse(event.data);
+      if (newData.k && shouldUpdate) {
+        const timestamp = newData.k.t;
+        const price = parseFloat(newData.k.c);
         setPointToBuySell([timestamp, price]);
-        setData((prevData) => [...prevData, { timestamp, price }]);
+        setData((prevData) => {
+          const lastDataTimestamp = prevData[prevData.length - 1]?.timestamp; // Get the timestamp of the last element in the array
+
+          // If the last data timestamp is not the same as the new data timestamp, add the new data.
+          if (lastDataTimestamp !== timestamp) {
+            return [...prevData, { timestamp, price }];
+          }
+
+          // If the last data timestamp is the same, just return the existing data without modification.
+          return prevData;
+        });
         setShouldUpdate(false);
         setChartPulses(initChartPulses);
         setTimeout(() => {
           setShouldUpdate(true);
-          setCanTrade(true);
+          if (user) {
+            const hasOpenPosition = positionsArray.some(
+              (position) => position[3] === 0 && position[5] === user.uid
+            );
+
+            setCanTrade(!hasOpenPosition);
+          }
         }, 60000); // 60 seconds
       }
     };
@@ -164,59 +188,140 @@ const CryptoChart = ({ tournament, showChart }) => {
   }, [zoomLevel, data]);
 
   useEffect(() => {
-    // Update balance whenever buyPoints or sellPoints change
-    updateBalance();
-  }, [positions]);
+    console.log(tournament);
+    // Sort players by scores
+    const sortedPlayersCalculation = [...players].sort(
+      (a, b) => b.game_currency - a.game_currency
+    );
+    setSortedPlayers(sortedPlayersCalculation);
+    const positionsArray = tournament.players.flatMap((player) => {
+      return player.positions.map((position) => {
+        const { type, open_price, status, start_time, amount, close_price } =
+          position;
+        let timestamp = start_time;
+        let closePrice = close_price ? close_price : 0; // If close_price is not defined set it as null
+        let userid = player.uid;
+        return [timestamp, open_price, amount, closePrice, type, userid];
+      });
+    });
+    console.log(positionsArray);
+    setPositions(positionsArray);
+    updateBalance(positionsArray);
 
-  const closePosition = () => {
-    const updatedPositions = positions.map((position) => {
-      if (position[3] === 0 && position[5] === userDetails.displayName) {
+    // Check if there is an open position for the user
+    if (user) {
+      const hasOpenPosition = positionsArray.some(
+        (position) => position[3] === 0 && position[5] === user.uid
+      );
+
+      setCanTrade(!hasOpenPosition);
+    }
+  }, [tournament, user]);
+
+  const closePosition = async () => {
+    const updatedPositions = [];
+
+    for (let position of positions) {
+      if (position[3] === 0 && position[5] === user.uid) {
         const closePrice = pointToBuySell[1];
         const updatedPosition = [...position];
         updatedPosition[3] = closePrice === 0 ? pointToBuySell[1] : closePrice;
-        return updatedPosition;
+
+        // Close the position on the server
+        try {
+          await closePositionOnServer(tournament_id, updatedPosition);
+          updatedPositions.push(updatedPosition);
+        } catch (error) {
+          console.error("Error closing position", error);
+        }
+      } else {
+        updatedPositions.push(position);
       }
-      return position;
-    });
+    }
 
     setPositions(updatedPositions);
-    updateBalance();
+    updateBalance(updatedPositions);
     setCanTrade(true);
   };
 
-  const handleBuyButtonClick = () => {
+  const handleBuyButtonClick = async () => {
     if (pointToBuySell && amount > 0) {
-      const position = [
-        pointToBuySell[0],
-        pointToBuySell[1],
-        amount,
-        0,
-        "long",
-        userDetails.displayName,
-      ];
-      setPositions((prevPositions) => [...prevPositions, position]);
-      setBuyPoints((prevPoints) => [...prevPoints, position]);
-      setCanTrade(false);
-      setGameBalance(gameBalance - amount);
+      // Check if the user already has an open position
+      const hasOpenPosition = positions.some(
+        (position) => position[3] === 0 && position[5] === user.uid
+      );
+
+      if (!hasOpenPosition) {
+        const position = [
+          pointToBuySell[0],
+          pointToBuySell[1],
+          amount,
+          0,
+          "long",
+          user.uid,
+        ];
+
+        try {
+          await addPosition(tournament.tournament_id, position);
+          setPositions((prevPositions) => [...prevPositions, position]);
+          setGameBalance(gameBalance - amount);
+          setCanTrade(false);
+        } catch (error) {
+          console.error("Error adding position", error);
+          // here you can handle the error, for example show a message to the user
+        }
+      } else {
+        // User already has an open position
+        console.log("User already has an open position");
+      }
     }
   };
 
-  const handleSellButtonClick = () => {
+  const handleSellButtonClick = async () => {
     if (pointToBuySell && amount > 0) {
-      const position = [
-        pointToBuySell[0],
-        pointToBuySell[1],
-        amount,
-        0,
-        "short",
-        userDetails.displayName,
-      ];
-      setPositions((prevPositions) => [...prevPositions, position]);
-      // setSellPoints((prevPoints) => [...prevPoints, position]);
-      setCanTrade(false);
-      setGameBalance(gameBalance - amount);
+      // Check if the user already has an open position
+      const hasOpenPosition = positions.some(
+        (position) => position[3] === 0 && position[5] === user.uid
+      );
+
+      if (!hasOpenPosition) {
+        const position = [
+          pointToBuySell[0],
+          pointToBuySell[1],
+          amount,
+          0,
+          "short",
+          user.uid,
+        ];
+
+        try {
+          await addPosition(tournament.tournament_id, position);
+          setPositions((prevPositions) => [...prevPositions, position]);
+          setGameBalance(gameBalance - amount);
+          setCanTrade(false);
+        } catch (error) {
+          console.error("Error adding position", error);
+          // here you can handle the error, for example show a message to the user
+        }
+      } else {
+        // User already has an open position
+        console.log("User already has an open position");
+      }
     }
   };
+
+  function normalizeRadius(value) {
+    const minOldRange = 0;
+    const maxOldRange = 1000000;
+    const minNewRange = 5;
+    const maxNewRange = 50;
+
+    return (
+      ((value - minOldRange) / (maxOldRange - minOldRange)) *
+        (maxNewRange - minNewRange) +
+      minNewRange
+    );
+  }
 
   const options = {
     maintainAspectRatio: false,
@@ -231,7 +336,6 @@ const CryptoChart = ({ tournament, showChart }) => {
       },
     },
     plugins: {
-
       legend: { display: false },
       title: {
         display: true,
@@ -295,12 +399,10 @@ const CryptoChart = ({ tournament, showChart }) => {
         ticks: {
           color: "rgba(255,255,255,0.7)",
           enabled: false,
-
         },
       },
     },
   };
-
   const chartData = {
     datasets: [
       {
@@ -317,10 +419,10 @@ const CryptoChart = ({ tournament, showChart }) => {
             0,
             context.chart.height
           );
-      
+
           gradient.addColorStop(1, "rgba(0, 0, 0, 0.1)"); // Faded black color
           gradient.addColorStop(0, mainGameColor); // Aqua color
-      
+
           return gradient;
         },
         borderWidth: 2,
@@ -394,48 +496,66 @@ const CryptoChart = ({ tournament, showChart }) => {
               });
             }
           }
-
-          return totAmount;
+          if (totAmount == 0) {
+            return 0;
+          }
+          return normalizeRadius(totAmount);
         },
       },
     ],
   };
 
-  // Sort players by scores
-  const sortedPlayers = [...players].sort(
-    (a, b) => b.game_currency - a.game_currency
-  );
-
   const PriceDisplay = () => {
     if (pointToBuySell !== null) {
-      return <p className="text-2xl sm:text-4xl font-bold">{pointToBuySell[1]}</p>;
+      return (
+        <p className="text-2xl sm:text-4xl font-bold text-black">
+          Bitcoin Price: {pointToBuySell[1]}
+        </p>
+      );
     } else {
       return null;
     }
   };
+  console.log(sortedPlayers);
+
+  const formatGameCurrency = (value) => {
+    if (value >= 1000000) {
+      return (value / 1000000).toFixed(1) + "M";
+    } else if (value >= 100000) {
+      return (value / 1000).toLocaleString() + "k";
+    } else {
+      return value.toLocaleString();
+    }
+  };
 
   return (
-      <div className="flex flex-col items-center">
-        <div className="flex">
-          <div className="flex flex-col items-end pr-8">
-            <PriceDisplay />
-    
-            <button
-              className="absolute top-28 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-700 text-2xl"
-              onClick={() => showChart(false)}
-            >
-              X
-            </button>
-            <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">
-              {game_name}{" "}
-              <span className="text-gray-500 text-lg">
-                ({number_of_players} / {max_players})
-              </span>
-            </h1>
+    <div className="flex flex-col items-center">
+      <div className="flex">
+        <div className="flex flex-col items-start pl-8">
+          {" "}
+          {/* Change items-end to items-start */}
+          <button
+            className="absolute top-28 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-700 text-2xl"
+            onClick={() => showChart(false)}
+          >
+            X
+          </button>
+          <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">
+            {game_name}{" "}
+            <span className="text-gray-500 text-lg">
+              ({number_of_players} / {max_players})
+            </span>
+          </h1>
+          <div className="text-black text-lg">
+            {" "}
+            {/* Add new div for gameBalance */}
+            {formatGameCurrency(gameBalance)} $
           </div>
         </div>
-        
-
+      </div>
+      <div className="flex">
+        <PriceDisplay />
+      </div>
       <div className="flex flex-col notComputer:flex-row w-full px-10">
         <div
           className={`transition-all duration-1000 w-full sm:w-${
@@ -443,11 +563,10 @@ const CryptoChart = ({ tournament, showChart }) => {
           }`}
         >
           <div
-            className={`chart-container   w-11/12 h-96 relative transition-all duration-500 ${
+            className={`chart-container bg-black  w-11/12 h-96 relative transition-all duration-500 ${
               showChartFullWidth ? "sm:w-11/12" : "sm:w-full"
             }`}
           >
-            
             <Line data={chartData} options={options} />
           </div>
           <div className="flex justify-center mt-4">
@@ -482,7 +601,6 @@ const CryptoChart = ({ tournament, showChart }) => {
               Close Position
             </button>
           </div>
-          <div className="mt-4">{gameBalance}</div>
           <div className="mt-4">
             {pointToBuySell ? (
               <OpenPosition
@@ -533,39 +651,42 @@ const CryptoChart = ({ tournament, showChart }) => {
                     Rank
                   </th>
                   <th className="px-4 py-2 bg-gray-100 border-b">Player</th>
-                  <th className="px-4 py-2 bg-gray-100 border-b">Score</th>
+                  <th className="px-4 py-2 bg-gray-100 border-b">Balance</th>
                 </tr>
               </thead>
               <tbody>
-                {sortedPlayers.map((player, index) => (
-                  <tr key={player.uid} className="h-11">
-                    {user && (
-                      <>
-                        <td
-                          className={`px-4 py-2 border-b  ${
-                            player.uid === user.uid ? "text-black" : ""
-                          }`}
-                        >
-                          {index + 1}
-                        </td>
-                        <td
-                          className={`px-4 py-2 border-b ${
-                            player.uid === user.uid ? "text-black" : ""
-                          }`}
-                        >
-                          {player.displayName}
-                        </td>
-                        <td
-                          className={`px-4 py-2 border-b ${
-                            player.uid === user.uid ? "text-black" : ""
-                          }`}
-                        >
-                          {player.game_currency}
-                        </td>
-                      </>
-                    )}
-                  </tr>
-                ))}
+                {sortedPlayers &&
+                  sortedPlayers.map((player, index) => (
+                    <tr key={player.uid} className="h-11">
+                      {user && (
+                        <>
+                          <td
+                            className={`px-4 py-2 border-b text-center ${
+                              player.uid === user.uid ? "text-black" : ""
+                            }`}
+                          >
+                            {index + 1}
+                          </td>
+                          <td
+                            className={`px-4 py-2 border-b text-center ${
+                              player.uid === user.uid ? "text-black" : ""
+                            }`}
+                          >
+                            {player.displayName}
+                          </td>
+                          <td
+                            className={`px-4 py-2 border-b text-center ${
+                              player.uid === user.uid ? "text-black" : ""
+                            }`}
+                          >
+                            {player.uid === user.uid
+                              ? formatGameCurrency(gameBalance) + " $"
+                              : formatGameCurrency(player.game_currency) + " $"}
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>

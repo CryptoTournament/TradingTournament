@@ -51,7 +51,7 @@ const TournamentsPage = () => {
         </h1>
       )}
       {selectedTournament ? (
-        <div className="mx-4 mt-4 w-screen">
+        <div className="mx-4 mt-4 w-screen ">
           <Chart
             tournament={selectedTournament}
             showChart={setSelectedTournament}

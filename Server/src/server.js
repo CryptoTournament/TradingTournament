@@ -54,7 +54,6 @@ const getUsersFromMongoDB = async () => {
 app.get("/api/users", async (req, res) => {
   try {
     const users = await getUsersFromMongoDB();
-    console.log(users);
     if (users.length === 0) {
       res.status(404).send("No users found");
     } else {
@@ -158,13 +157,11 @@ app.get("/api/getPendingFriends", async (req, res) => {
 
     const users = await getUsersFromMongoDB();
     let display_names = [];
-    // console.log(users, "users");
     for (const user of users) {
       if (user.approve_waiting_list.includes(uid)) {
         display_names.push(user.displayName);
       }
     }
-    // console.log(display_names);
     res.json(display_names);
   } catch (error) {
     console.error("Error fetching user collection", error);
@@ -264,8 +261,7 @@ app.get("/api/get_waiting_list", async (req, res) => {
 app.post("/api/approve_friend", async (req, res) => {
   try {
     const { nickname, uid } = req.body;
-    console.log("To -> nickName:" + nickname);
-    console.log("From -> uid of me:" + uid);
+
     // Find the user with the given nickname
     const user = await db.collection("users").findOne({ uid });
     const friend_user = await db
@@ -371,7 +367,6 @@ app.post("/api/deny_friend", async (req, res) => {
       );
     // Fetch the nicknames of the updated approve_waiting_list
     const nicknames = [];
-    // console.log(updatedWaitingListForMyUser);
 
     for (const id of updatedWaitingList) {
       const userWithNickname = await db
@@ -477,10 +472,6 @@ app.put("/api/displaynames/:uid", async (req, res) => {
 
 app.put("/api/games/:gid", async (req, res) => {
   try {
-    console.log("###############");
-    //console.log(req);
-    console.log(req.body);
-    console.log("###############");
   } catch (error) {
     console.error("Error validating display name", error);
     res.status(500).send("Server error");
@@ -491,7 +482,6 @@ app.put("/api/games/:gid", async (req, res) => {
 app.get("/api/tournaments", async (req, res) => {
   try {
     const tournaments = await db.collection("tournaments").find().toArray();
-    console.log(tournaments);
     if (tournaments.length === 0) {
       res.status(404).send("No tournaments found");
     } else {
@@ -564,6 +554,131 @@ app.put("/api/tournaments/:tournament_id/join", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+app.put("/api/tournaments/:tournament_id/addPosition", async (req, res) => {
+  try {
+    const { tournament_id } = req.params;
+    const { uid, position } = req.body;
+
+    const user = await db.collection("users").findOne({ uid });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    const tournament = await db
+      .collection("tournaments")
+      .findOne({ tournament_id });
+    if (!tournament) {
+      return res.status(404).send("Tournament not found");
+    }
+
+    // Check if user is part of the tournament
+    const playerIndex = tournament.players.findIndex(
+      (player) => player.uid === uid
+    );
+    if (playerIndex === -1) {
+      return res.status(400).send("User is not part of the tournament");
+    }
+
+    // Add the position to the player's positions
+    await db.collection("tournaments").updateOne(
+      { tournament_id, "players.uid": uid },
+      {
+        $push: { "players.$.positions": position },
+      }
+    );
+
+    res.status(200).send("Position successfully added");
+  } catch (error) {
+    console.error("Error adding position", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.put("/api/tournaments/:tournament_id/closePosition", async (req, res) => {
+  try {
+    const { tournament_id } = req.params;
+    const { uid, position } = req.body;
+
+    const tournament = await db
+      .collection("tournaments")
+      .findOne({ tournament_id });
+    if (!tournament) {
+      return res.status(404).send("Tournament not found");
+    }
+
+    // Check if user is part of the tournament
+    const playerIndex = tournament.players.findIndex(
+      (player) => player.uid === uid
+    );
+    if (playerIndex === -1) {
+      return res.status(400).send("User is not part of the tournament");
+    }
+
+    // Close the position in the player's positions
+    await db.collection("tournaments").updateOne(
+      {
+        tournament_id,
+      },
+      {
+        $set: {
+          "players.$[player].positions.$[position].status": "closed",
+          "players.$[player].positions.$[position].close_price":
+            position.close_price,
+        },
+      },
+      {
+        arrayFilters: [
+          { "player.uid": uid },
+          { "position.start_time": position.start_time },
+        ],
+      }
+    );
+
+    res.status(200).send("Position successfully closed");
+  } catch (error) {
+    console.error("Error closing position", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.put(
+  "/api/tournaments/:tournament_id/players/:uid/updateBalance",
+  async (req, res) => {
+    try {
+      const { tournament_id, uid } = req.params;
+      const { newBalance } = req.body;
+
+      const tournament = await db
+        .collection("tournaments")
+        .findOne({ tournament_id });
+      if (!tournament) {
+        return res.status(404).send("Tournament not found");
+      }
+
+      const playerIndex = tournament.players.findIndex(
+        (player) => player.uid === uid
+      );
+      if (playerIndex === -1) {
+        return res.status(404).send("Player not found");
+      }
+
+      tournament.players[playerIndex].game_currency = newBalance;
+
+      await db
+        .collection("tournaments")
+        .updateOne(
+          { tournament_id },
+          { $set: { players: tournament.players } }
+        );
+
+      res.status(200).send("Player balance updated successfully");
+    } catch (error) {
+      console.error("Error updating player balance", error);
+      res.status(500).send("Server error");
+    }
+  }
+);
 
 const runServerApp = () => {
   //fetchKlineData('BTCUSDT');

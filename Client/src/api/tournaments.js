@@ -11,12 +11,18 @@ export const getTournamentById = async (id) => {
 };
 
 export const joinTournament = async (tournament_id, uid) => {
+  try{
   console.log("got here tournaments.js");
   const response = await axios.put(`/api/tournaments/${tournament_id}/join`, {
     uid,
   });
   console.log(response);
   return response.data;
+} catch(error){
+  throw error;
+}
+
+
 };
 export const addPosition = async (tournament_id, position) => {
   // transform the position array into an object

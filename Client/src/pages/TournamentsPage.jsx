@@ -6,19 +6,26 @@ import useUser from "../hooks/useUser";
 import { FaPlay, FaUserPlus } from "react-icons/fa";
 import moment from "moment";
 import Context from "../utils/context";
- 
-
+import Swal from "sweetalert2";
+import trophy from "../../public/images/trophy.png";
+import { GiTrophy } from "react-icons/gi";
+import NewTournamentForm from "../components/NewTournamentForm";
 
 const TournamentsPage = () => {
   const { user } = useUser();
   const [tournaments, setTournaments] = useState([]);
   const [selectedTournament, setSelectedTournament] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showForm, setShowForm] = useState(false); // State to control showing the form
 
+  const openForm = () => {
+    setShowForm(true);
+  };
 
-//  const {state, dispatch} = useContext(Context)
-
-
+  const closeForm = () => {
+    setShowForm(false);
+  };
 
   useEffect(() => {
     const fetchTournaments = async () => {
@@ -42,6 +49,20 @@ const TournamentsPage = () => {
       setSelectedTournament(newTournament);
     } catch (error) {
       console.error("Error joining tournament", error);
+      if (error.response && error.response.status === 400 && error.response.data) {
+        const errorMessage = error.response.data;
+        Swal.fire({
+          title: "Notification",
+          text: errorMessage,
+          icon: "info",
+          timer: 15000,
+          timerProgressBar: true,
+          toast: true,
+          position: "center",
+          showConfirmButton: true,
+          confirmButtonColor: "#1E88E5", // Set the custom color for the OK button
+        });
+      }
     }
   };
 
@@ -49,43 +70,68 @@ const TournamentsPage = () => {
     setSelectedTournament(tournament);
   };
 
+  const handleNewTournament = () => {
+    setShowForm(true);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
+  // Filter tournaments based on the search term
+  const filteredTournaments = tournaments.filter((tournament) =>
+    tournament.game_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-20 py-8 min-h-screen min-w-screen flex flex-col items-center text-gray-400 font-sans">
       {!selectedTournament && (
-        <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">
-          Tournaments Page
-        </h1>
+        <>
+          <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">
+            Tournaments Page
+          </h1>
+
+
+          <button onClick={openForm}>New Tournament</button>
+            {showForm && <NewTournamentForm onClose={closeForm} />}
+
+          {/* <button
+            className="px-4 py-2 text-white bg-blue-500 rounded"
+            onClick={handleNewTournament} // Handle click event of the "New Tournament" button
+          >
+            New Tournament
+          </button> */}
+        </>
       )}
+      {/* {showForm && <NewTournamentForm />} Render the PopupWindow component when showForm is true */}
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="Search by Tournament name"
+        className="px-4 w-1/5 py-2 rounded-md border border-gray-300 mb-4 text-center"
+      />
       {selectedTournament ? (
-        <div className="mx-4 mt-4 w-screen ">
-          <Chart
-            tournament={selectedTournament}
-            showChart={setSelectedTournament}
-          />
+        <div className="mx-4 mt-4 w-screen">
+          <Chart tournament={selectedTournament} showChart={setSelectedTournament} />
         </div>
       ) : (
         <div className="w-full max-w-4xl grid gap-8 sm:grid-cols-1 md:grid-cols-2">
-          {tournaments.map((tournament) => {
-            const timeLeft = moment(tournament.end_date).diff(
-              moment(),
-              "hours"
-            );
+          {filteredTournaments.map((tournament) => {
+            const timeLeft = moment(tournament.end_date).diff(moment(), "hours");
             const isUrgent = timeLeft < 24;
             const timeLeftDisplay = isUrgent
               ? `${timeLeft} hours`
               : moment.duration(timeLeft, "hours").humanize();
             const textColor = isUrgent ? "text-red-500" : "text-gray-500";
+            const isJoinDisabled = tournament.number_of_players === tournament.max_players;
 
             return (
               <div
                 key={tournament.tournament_id}
                 className="p-6 bg-gradient-to-r from-black to-gray-800 rounded-xl shadow-md flex items-start hover:to-gray-900 hover:text-gray-100"
               >
-                <div>
+                <div className="mr-4">
                   <h2 className="text-xl sm:text-2xl font-semibold mb-2 text-indigo-500">
                     {tournament.game_name}
                   </h2>
@@ -93,13 +139,13 @@ const TournamentsPage = () => {
                     {tournament.number_of_players} / {tournament.max_players}
                   </p>
                   <p className={`mb-2 text-gray-500`}>
-                    Start Time:{" "}
-                    {moment(tournament.start_date).format("YYYY-MM-DD HH:mm")}
+                    Start Time: {moment(tournament.start_date).format("YYYY-MM-DD HH:mm")}
+                  </p>
+                  <p className="text-gray-500 mb-2">
+                    Join Price: {`${tournament.buy_in_cost}$`}
                   </p>
                   {isUrgent ? (
-                    <p className={`mb-2 ${textColor}`}>
-                      {timeLeftDisplay} remaining
-                    </p>
+                    <p className={`mb-2 ${textColor}`}>{timeLeftDisplay} remaining</p>
                   ) : (
                     <p className={textColor}>{timeLeftDisplay} remaining</p>
                   )}
@@ -107,6 +153,7 @@ const TournamentsPage = () => {
                     <button
                       onClick={() => handlePlay(tournament)}
                       className="px-4 py-2 text-white bg-green-600 rounded"
+                      disabled={isJoinDisabled}
                     >
                       <FaPlay className="inline mr-2" />
                       Play
@@ -114,12 +161,23 @@ const TournamentsPage = () => {
                   ) : (
                     <button
                       onClick={() => handleJoin(tournament, user.uid)}
-                      className="px-4 py-2 text-white bg-blue-600 rounded"
+                      className={`px-4 py-2 text-white rounded ${
+                        isJoinDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600"
+                      }`}
+                      disabled={isJoinDisabled}
                     >
                       <FaUserPlus className="inline mr-2" />
-                      Join
+                      {isJoinDisabled ? "FULL" : "Join"}
                     </button>
                   )}
+                </div>
+                <div className="flex flex-col items-end mt-10 ml-9">
+                  <GiTrophy size={50} className="mr-7 mb-3 hover:text-amber-400" />
+                  <ul className="text-gray-500">
+                    <li className="text-amber-400">{`1st place: ${tournament.first_place_prize}$`}</li>
+                    <li className="text-white">{`2nd place:  ${tournament.second_place_prize}$`}</li>
+                    <li className="text-orange-300">{`3rd place:  ${tournament.third_place_prize}$`}</li>
+                  </ul>
                 </div>
               </div>
             );

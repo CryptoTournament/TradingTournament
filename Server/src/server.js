@@ -543,7 +543,7 @@ app.put("/api/tournaments/:tournament_id/join", async (req, res) => {
       return res.status(400).send("Tournament is already full");
     }
     if (tournament.buy_in_cost > user_money){
-      return res.status(400).send("`You are missing ${x} $ money to join this tournament.`");
+      return res.status(400).send(`You are missing ${tournament.buy_in_cost - user_money}$ money to join this tournament.`);
     }
 
     // Convert the user data to the format used in the tournament

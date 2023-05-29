@@ -198,9 +198,11 @@ const CryptoChart = ({ tournament, showChart }) => {
         setTimeout(() => {
           setShouldUpdate(true);
           if (user) {
-            const hasOpenPosition = positionsArray.some(
-              (position) => position[3] === 0 && position[5] === user.uid
-            );
+            if (positionsArray) {
+              const hasOpenPosition = positionsArray.some(
+                (position) => position[3] === 0 && position[5] === user.uid
+              );
+            }
 
             setCanTrade(!hasOpenPosition);
           }
@@ -574,41 +576,31 @@ const CryptoChart = ({ tournament, showChart }) => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex">
+      <div className="flex justify-start w-full">
         <div className="flex flex-col items-start pl-8">
-          {" "}
-          {/* Change items-end to items-start */}
-          <button
-            className="absolute top-28 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-700 text-2xl"
-            onClick={() => showChart(false)}
-          >
-            X
-          </button>
-          <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">
-            {game_name}{" "}
+          <h1 className="text-4xl sm:text-5xl font-semibold mb-4 text-left text-black">
+            {game_name}
             <span className="text-gray-500 text-lg">
               ({number_of_players} / {max_players})
             </span>
           </h1>
-          <div className="text-black text-lg">
-            {" "}
-            {/* Add new div for gameBalance */}
-            {formatGameCurrency(gameBalance)} $
+          <div className="text-2xl sm:text-3xl font-semibold mb-4 text-left text-black">
+            Your Balance: {formatGameCurrency(gameBalance)} $
+          </div>
+          <div className="text-black font-semibold">
+            {moment(tournament.end_date).diff(moment(), "hours") +
+              " Hours Left"}
           </div>
         </div>
       </div>
-      <div className="flex">
+      <div className="flex w-full ml-96">
         <PriceDisplay />
       </div>
-      <div className="flex flex-col notComputer:flex-row w-full px-10">
-        <div
-          className={`transition-all duration-1000 w-full sm:w-${
-            showChartFullWidth ? "" : "full"
-          }`}
-        >
+      <div className="flex flex-col 2xl:flex-row w-full px-10">
+        <div className={`transition-all duration-1000 w-full`}>
           <div
-            className={`chart-container bg-black  w-11/12 h-96 relative transition-all duration-500 ${
-              showChartFullWidth ? "sm:w-11/12" : "sm:w-full"
+            className={`chart-container mr-0 rounded-lg p-4 bg-black w-full  h-96 relative transition-all duration-500 ${
+              showChartFullWidth ? "md:w-11/12" : "md:w-11/12"
             }`}
           >
             <Line data={chartData} options={options} />
@@ -619,9 +611,10 @@ const CryptoChart = ({ tournament, showChart }) => {
               value={amount}
               onChange={(e) => setAmount(parseFloat(e.target.value))}
               placeholder="Amount"
+              className="mr-2"
             />
             <button
-              className={`px-4 py-2 mr-2 bg-green-500 text-white rounded ${
+              className={`px-4 py-2 bg-green-500 text-white rounded ${
                 canTrade ? "" : "opacity-50 cursor-not-allowed"
               }`}
               onClick={handleBuyButtonClick}
@@ -630,7 +623,7 @@ const CryptoChart = ({ tournament, showChart }) => {
               Buy
             </button>
             <button
-              className={`px-4 py-2 mr-2 bg-red-500 text-white rounded ${
+              className={`px-4 py-2 bg-red-500 text-white rounded ${
                 canTrade ? "" : "opacity-50 cursor-not-allowed"
               }`}
               onClick={handleSellButtonClick}
@@ -639,7 +632,7 @@ const CryptoChart = ({ tournament, showChart }) => {
               Sell
             </button>
             <button
-              className="px-4 py-2 mr-2 bg-red-500 text-white rounded"
+              className="px-4 py-2 bg-red-500 text-white rounded"
               onClick={closePosition}
             >
               Close Position
@@ -652,9 +645,7 @@ const CryptoChart = ({ tournament, showChart }) => {
                 positions={positions}
                 currentPrice={pointToBuySell[1]}
               />
-            ) : (
-              ""
-            )}
+            ) : null}
           </div>
           <div className="mt-4">
             {pointToBuySell ? (
@@ -662,18 +653,16 @@ const CryptoChart = ({ tournament, showChart }) => {
                 positions={positions}
                 currentPrice={pointToBuySell[1]}
               />
-            ) : (
-              ""
-            )}
+            ) : null}
           </div>
         </div>
         <div
-          className={`w-full ml-4  mt-4 sm:mt-0 transition-all duration-1000 ${
-            showLeaderboard ? "sm:w-1/4" : "sm:w-1/12 "
+          className={`w-full  mt-4 md:mt-0 transition-all duration-1000 ${
+            showLeaderboard ? "md:w-1/4" : "md:w-28 "
           }`}
         >
           <button
-            className="mt-4  bg-gray-500 text-white px-4 py-2 rounded hidden 2xl:block"
+            className="mt-4 bg-gray-500 text-white px-4 py-2 rounded 2xl:block"
             onClick={() => {
               setShowLeaderboard(!showLeaderboard);
               setShowChartFullWidth(!showLeaderboard);
@@ -737,6 +726,12 @@ const CryptoChart = ({ tournament, showChart }) => {
           </div>
         </div>
       </div>
+      <button
+        className="mt-2 absolute right-16 top-28 mr-2 text-gray-400 hover:text-gray-700 text-2xl"
+        onClick={() => showChart(false)}
+      >
+        X
+      </button>
     </div>
   );
 };

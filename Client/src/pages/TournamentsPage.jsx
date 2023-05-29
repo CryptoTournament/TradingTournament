@@ -33,8 +33,10 @@ const TournamentsPage = () => {
 
   const handleJoin = async (tournament, uid) => {
     try {
-      const response = await joinTournament(tournament.tournament_id, uid);
-      setSelectedTournament(tournament);
+      const newTournament = await joinTournament(tournament.tournament_id, uid);
+      const fetchedTournaments = await getTournaments();
+      setTournaments(fetchedTournaments);
+      setSelectedTournament(newTournament);
     } catch (error) {
       console.error("Error joining tournament", error);
     }

@@ -110,6 +110,8 @@ app.put("/api/users/:uid", async (req, res) => {
 connectToDb(() => {
   app.listen(process.env.PORT || 3000, () => {
     runWebSocket();
+    console.log("Server is listening on Port 3000");
+    console.log("MongoDB is Online");
   });
 });
 
@@ -522,15 +524,15 @@ app.get("/api/tournaments/:id", async (req, res) => {
 app.put("/api/tournaments/:tournament_id/join", async (req, res) => {
   try {
     const { tournament_id } = req.params;
-    const { uid } = req.body; // You should provide user id in the request body
+    const { uid } = req.body;
 
     const user = await db.collection("users").findOne({ uid });
     if (!user) {
       return res.status(404).send("User not found");
     }
-
+    console.log(tournament_id);
     const tournament = await db
-      .collection("Tournaments")
+      .collection("tournaments")
       .findOne({ tournament_id });
     if (!tournament) {
       return res.status(404).send("Tournament not found");
@@ -544,12 +546,12 @@ app.put("/api/tournaments/:tournament_id/join", async (req, res) => {
     const player = {
       uid: user.uid,
       displayName: user.displayName,
-      game_currency: user.balance,
+      game_currency: 1000000,
       positions: [],
     };
 
     // Add the player to the tournament and increment the number of players
-    await db.collection("Tournaments").updateOne(
+    await db.collection("tournaments").updateOne(
       { tournament_id },
       {
         $push: { players: player },
@@ -557,7 +559,10 @@ app.put("/api/tournaments/:tournament_id/join", async (req, res) => {
       }
     );
 
-    res.status(200).send("Successfully joined the tournament");
+    const newTournament = await db
+      .collection("tournaments")
+      .findOne({ tournament_id });
+    res.json(newTournament); // Return the updated tournament object
   } catch (error) {
     console.error("Error joining the tournament", error);
     res.status(500).send("Server error");

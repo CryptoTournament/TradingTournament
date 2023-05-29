@@ -11,9 +11,11 @@ export const getTournamentById = async (id) => {
 };
 
 export const joinTournament = async (tournament_id, uid) => {
+  console.log("got here tournaments.js");
   const response = await axios.put(`/api/tournaments/${tournament_id}/join`, {
     uid,
   });
+  console.log(response);
   return response.data;
 };
 export const addPosition = async (tournament_id, position) => {

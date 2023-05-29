@@ -8,6 +8,10 @@ import "chartjs-adapter-moment";
 import PositionTable from "../components/PositionTable";
 import OpenPosition from "../components/OpenPosition";
 import axios from "axios";
+import { w3cwebsocket as WebSocketClient } from "websocket";
+import http from 'http';
+
+
 import {
   addPosition,
   closePositionOnServer,
@@ -50,6 +54,47 @@ const CryptoChart = ({ tournament, showChart }) => {
   const [chartPulses, setChartPulses] = useState(initChartPulses);
   const [mainGameColor, setMainGameColor] = useState("rgba(0, 255, 255, 1)");
   const [sortedPlayers, setSortedPlayers] = useState([]);
+  const [client, setClient] = useState(null);
+  const [webSocketReady, setWebSocketReady] = useState(false);
+  
+  useEffect(() => {
+    if (webSocketReady && client) { // Send the message only when the WebSocket is ready
+      client.send("TID" + tournament.tournament_id+"/NewPositionsChanges");
+    }
+  }, [positions, webSocketReady, client]);
+  
+  useEffect(() => {
+    const newClient = new WebSocketClient("ws://localhost:8080"); // Replace the URL with your WebSocket server URL
+  
+    newClient.onopen = () => {
+      console.log("WebSocket Client Connected");
+      if (tournament != null) {
+        newClient.send("TID" + tournament.tournament_id+"/NewConnection"); // Send "hey" message to the server
+        setWebSocketReady(true); // Set WebSocket readiness to true
+      }
+    };
+  
+    newClient.onclose = () => {
+      setWebSocketReady(false); // Set WebSocket readiness to false
+      console.log("WebSocket Connection Closed");
+    };
+  
+    newClient.onmessage = (message) => {
+      console.log("Received: '" + message.data + "'");
+      if(message.data.includes("/NewPositionsChanges"))
+      {
+        console.log(("NEED TO BE UPDATED NOW!"));
+      }
+    };
+    setClient(newClient); // Update the client variable
+  
+    // Cleanup the WebSocket connection
+    return () => {
+      newClient.close();
+    };
+  }, [tournament]);
+  
+  
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
@@ -83,7 +128,6 @@ const CryptoChart = ({ tournament, showChart }) => {
       const [timestamp, price, amount, closePrice, type, uid] = position;
 
       if (user && uid === user.uid) {
-        console.log("thats my position!");
         balance -= amount;
         if (closePrice !== 0) {
           if (type === "long") {
@@ -600,6 +644,7 @@ const CryptoChart = ({ tournament, showChart }) => {
             >
               Close Position
             </button>
+            
           </div>
           <div className="mt-4">
             {pointToBuySell ? (

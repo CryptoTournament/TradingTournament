@@ -12,6 +12,11 @@ const TournamentsPage = () => {
   const [selectedTournament, setSelectedTournament] = useState(null);
   const [loading, setLoading] = useState(true);
 
+
+
+
+
+
   useEffect(() => {
     const fetchTournaments = async () => {
       try {

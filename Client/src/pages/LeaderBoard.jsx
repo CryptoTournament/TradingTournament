@@ -43,7 +43,9 @@ const LeaderBoard = () => {
                         className="w-10 h-10 object-cover"
                       />
                     </div>
-                    <div>{user.displayName}</div>
+                    <div className={user ? `text-${user.displayColor}` : ""}>
+                      {user.displayName}
+                    </div>
                   </div>
                 </td>
                 <td className="p-2">{user.wins}</td>

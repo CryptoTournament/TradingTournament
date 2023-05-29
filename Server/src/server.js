@@ -3,19 +3,12 @@ import dotenv from "dotenv";
 import { db, connectToDb } from "./db.js";
 import { fetchSymbolData, fetchKlineData } from "./market_data_handler.js";
 import { ObjectId } from "mongodb";
-import { server as WebSocketServer } from 'websocket';
-import http from 'http';
-
+import { server as WebSocketServer } from "websocket";
+import http from "http";
 
 dotenv.config();
 
 const app = express();
-
-
-
-
-
-
 
 app.use(express.json()); // Enable JSON parsing for request bodies
 
@@ -34,18 +27,19 @@ app.use((req, res, next) => {
 
 app.post("/api/users/signUp", async (req, res) => {
   const { uid } = req.body;
-
+  let random = Math.floor(Math.random() * 1000000);
   const status = await db.collection("users").insertOne({
     uid: uid,
     approve_waiting_list: [],
     friends: [],
-    displayName: "",
+    displayName: `Player ${random}`,
     rank: "BronzeOne",
     balance: 0,
     wins: 0,
     gamesPlayed: 0,
     gameTokens: 200,
     accountType: "Regular",
+    displayColor: "gray-50",
   });
 });
 
@@ -707,19 +701,19 @@ const runWebSocket = () => {
   let wsServer = null;
   const connectionsByTournamentId = {}; // Store connections by tournament ID
 
-  var server = http.createServer(function(request, response) {
-    console.log((new Date()) + ' Received request for ' + request.url);
+  var server = http.createServer(function (request, response) {
+    console.log(new Date() + " Received request for " + request.url);
     response.writeHead(404);
     response.end();
   });
 
-  server.listen(8080, function() {
-    console.log((new Date()) + ' Server is listening on port 8080');
+  server.listen(8080, function () {
+    console.log(new Date() + " Server is listening on port 8080");
   });
 
   wsServer = new WebSocketServer({
     httpServer: server,
-    autoAcceptConnections: false
+    autoAcceptConnections: false,
   });
 
   function originIsAllowed(origin) {
@@ -727,45 +721,56 @@ const runWebSocket = () => {
     return true;
   }
 
-  wsServer.on('request', function(request) {
+  wsServer.on("request", function (request) {
     if (!originIsAllowed(request.origin)) {
       request.reject();
-      console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
+      console.log(
+        new Date() + " Connection from origin " + request.origin + " rejected."
+      );
       return;
     }
-  
+
     var connection = request.accept(null, request.origin);
-    console.log((new Date()) + ' Connection accepted.');
-  
-    connection.on('message', function(message) {
-      if (message.type === 'utf8') {
-      //  console.log('Received Message: ' + message.utf8Data);
+    console.log(new Date() + " Connection accepted.");
+
+    connection.on("message", function (message) {
+      if (message.type === "utf8") {
+        //  console.log('Received Message: ' + message.utf8Data);
         const tournamentId = extractTournamentId(message.utf8Data);
-        if (message.utf8Data.includes("TID" ) && message.utf8Data.includes("/NewConnection")) {
-          connectionsByTournamentId[tournamentId] = connectionsByTournamentId[tournamentId] || [];
+        if (
+          message.utf8Data.includes("TID") &&
+          message.utf8Data.includes("/NewConnection")
+        ) {
+          connectionsByTournamentId[tournamentId] =
+            connectionsByTournamentId[tournamentId] || [];
           connectionsByTournamentId[tournamentId].push(connection);
-
-
-        } else if (message.utf8Data.includes("TID") && message.utf8Data.includes("/NewPositionsChanges")) {
+        } else if (
+          message.utf8Data.includes("TID") &&
+          message.utf8Data.includes("/NewPositionsChanges")
+        ) {
           const connections = connectionsByTournamentId[tournamentId];
-         // console.log(connections);
+          // console.log(connections);
           if (connections) {
-            connections.forEach(function(receiverConnection) {
+            connections.forEach(function (receiverConnection) {
               if (receiverConnection !== connection) {
                 receiverConnection.sendUTF(message.utf8Data);
               }
             });
           }
         }
-      } else if (message.type === 'binary') {
-        console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
+      } else if (message.type === "binary") {
+        console.log(
+          "Received Binary Message of " + message.binaryData.length + " bytes"
+        );
         connection.sendBytes(message.binaryData);
       }
     });
-  
-    connection.on('close', function(reasonCode, description) {
-      console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-  
+
+    connection.on("close", function (reasonCode, description) {
+      console.log(
+        new Date() + " Peer " + connection.remoteAddress + " disconnected."
+      );
+
       // Remove connection from the associated tournament ID
       for (const tournamentId in connectionsByTournamentId) {
         if (connectionsByTournamentId.hasOwnProperty(tournamentId)) {

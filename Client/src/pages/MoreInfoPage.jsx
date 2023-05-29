@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import UserContext from "../contexts/UserContext";
 const MoreInfoPage = ({ userProp }) => {
+  const { setNavBarDisplayName } = useContext(UserContext);
+
   const user = userProp;
   const [displayName, setDisplayName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -22,6 +24,7 @@ const MoreInfoPage = ({ userProp }) => {
       const response = await axios.get(`/api/displaynames/${displayName}`);
       if (response.data.valid) {
         await axios.put(`/api/displaynames/${user.uid}`, { displayName });
+        setNavBarDisplayName(displayName);
         navigate("/");
       } else {
         setErrorMessage("Display name is already in use.");

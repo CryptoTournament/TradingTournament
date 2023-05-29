@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
-
+import UserContext from "../contexts/UserContext";
 const EditDisplayNameModal = ({
   show,
   onClose,
@@ -8,6 +8,8 @@ const EditDisplayNameModal = ({
   setUserDetails,
   user,
 }) => {
+  const { setNavBarDisplayName } = useContext(UserContext);
+
   const [displayName, setDisplayName] = useState(userDetails.displayName);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -38,6 +40,7 @@ const EditDisplayNameModal = ({
       if (response.data.valid) {
         await axios.put(`/api/displaynames/${user.uid}`, { displayName });
         setUserDetails({ ...userDetails, displayName });
+        setNavBarDisplayName(displayName);
         onClose();
       } else {
         setErrorMessage("Display name is already in use.");

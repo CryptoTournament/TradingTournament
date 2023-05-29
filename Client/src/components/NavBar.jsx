@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { Link } from "react-router-dom";
 import useUser from "../hooks/useUser";
 import { MdOutlineDeliveryDining } from "react-icons/md";
 import DropDown from "./DropDown";
 import NavHeaders from "./NavHeaders";
 import NotificationBell from "./NotificationBell";
 import axios from "axios";
+import UserContext from "../contexts/UserContext";
 const NavBar = () => {
+  const { navBarDisplayName, color } = useContext(UserContext);
   const { user } = useUser();
   const registeredUserNavLinks = [
     { name: "Shop", path: "/shop" },
@@ -30,6 +32,7 @@ const NavBar = () => {
     rank: "",
     winLoseRatio: "",
     balance: 0,
+    displayColor: "",
   });
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +57,9 @@ const NavBar = () => {
           >
             <MdOutlineDeliveryDining size={48} />
           </Link>
+          <h1 className="text-gray-200 hover:animate-pulse hover:bg-gray-700 hover:text-white px-3 rounded-md text-2xl font-medium">
+            {"Balance: " + userDetails.balance}
+          </h1>
         </div>
         <div className="flex">
           {user ? (
@@ -69,6 +75,8 @@ const NavBar = () => {
                 navBarLinks={registeredUserNavLinks}
                 user={user}
                 userDetails={userDetails}
+                userDisplayName={navBarDisplayName}
+                color={color}
               />
             </>
           ) : (

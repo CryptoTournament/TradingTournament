@@ -7,7 +7,14 @@ import {
 } from "react-icons/go";
 import { useNavigate, Link } from "react-router-dom";
 
-const DropDown = ({ dropDownLinks, navBarLinks, user, userDetails }) => {
+const DropDown = ({
+  dropDownLinks,
+  navBarLinks,
+  user,
+  userDetails,
+  userDisplayName,
+  color,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const menuRef = useRef();
@@ -27,9 +34,11 @@ const DropDown = ({ dropDownLinks, navBarLinks, user, userDetails }) => {
       document.removeEventListener("click", handleClickOutsideMenu);
     }
   };
-
+  let userColor = color ? color : userDetails ? userDetails.displayColor : "";
   // let userDisplay = user ? user.displayName || user.email : "Menu";
-  let userDisplay = userDetails
+  let userDisplay = userDisplayName
+    ? userDisplayName
+    : userDetails
     ? userDetails.displayName
     : user
     ? user.displayName || user.email
@@ -52,7 +61,15 @@ const DropDown = ({ dropDownLinks, navBarLinks, user, userDetails }) => {
           className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-bg-navbar-custom text-sm font-medium text-gray-50 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2"
           onClick={handleToggleMenu}
         >
-          <span className="hidden sm:block">{userDisplay}</span>
+          <span
+            className={
+              userColor
+                ? `text-${userColor} hidden sm:block`
+                : "hidden sm:block"
+            }
+          >
+            {userDisplay}
+          </span>
           <GoTriangleDown className="hidden sm:block sm:ml-4 mt-1" />
           <GoTriangleLeft className={!isOpen ? "sm:hidden mt-1" : "hidden"} />
           <GoTriangleRight className={isOpen ? "sm:hidden mt-1" : "hidden"} />

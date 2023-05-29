@@ -1,9 +1,35 @@
 import moment from "moment";
-
+import { useState, useEffect } from "react";
+import useUser from "../hooks/useUser";
 const OpenPosition = ({ positions, currentPrice }) => {
   const openPositions = positions.filter(
     ([, , , closePrice]) => closePrice === 0
   );
+
+  const { user } = useUser();
+  const [userDetails, setUserDetails] = useState({
+    displayName: "",
+    level: "",
+    rank: "",
+    winLoseRatio: "",
+    balance: 0,
+    wins: 0,
+    gamesPlayed: 0,
+    gameTokens: 0,
+    accountType: "Regular",
+  });
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) return;
+      try {
+        const response = await axios.get(`/api/users/${user.uid}`);
+        setUserDetails(response.data);
+      } catch (error) {
+        console.error("Error fetching user data", error);
+      }
+    };
+    fetchData();
+  }, [user]);
 
   const renderPosition = (position, index) => {
     const [timestamp, openPrice, amount, closePrice, type] = position;

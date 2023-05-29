@@ -29,7 +29,6 @@ const Friends = () => {
     if (user && user.uid) {
       getNonFriendsList(user.uid);
       getPendingFriendsList(user.uid);
-
     }
     const fetchData = async () => {
       if (!user) return;
@@ -78,7 +77,7 @@ const Friends = () => {
         `${userDetails.displayName} sent you a friend request!`,
         "friends"
       );
-      getPendingFriendsList(user.uid)
+      getPendingFriendsList(user.uid);
     } catch (error) {
       console.error("Error adding friend", error);
     }
@@ -193,7 +192,6 @@ const Friends = () => {
     }
   };
 
-
   useEffect(() => {
     if (user && user.uid) {
       getNonFriendsList(user.uid);
@@ -214,7 +212,7 @@ const Friends = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 w-full max-w-7xl">
         <div className="lg:col-span-2">
           <h2 className="text-3xl font-bold mb-4">Friends</h2>
-  
+
           <div className="bg-gradient-to-r from-black to-gray-800 shadow-lg rounded-lg p-6">
             <table className="table-fixed w-full">
               <thead className="text-white">
@@ -241,7 +239,15 @@ const Friends = () => {
                           />
                         }
                       </td>
-                      <td className="text-center">{user.displayName}</td>
+                      <td
+                        className={
+                          user
+                            ? `text-${user.displayColor} text-center`
+                            : "text-center"
+                        }
+                      >
+                        {user.displayName}
+                      </td>
                       <td className="text-center">
                         {user.gamesPlayed === 0
                           ? 0
@@ -270,7 +276,9 @@ const Friends = () => {
                   key={index}
                   className="flex justify-between items-center border-b border-gray-500 py-4 text-white"
                 >
-                  <p>{user.displayName}</p>
+                  <p className={user ? `text-${user.displayColor}` : ""}>
+                    {user.displayName}
+                  </p>
                   <button
                     onClick={() => addFriendClicked(user.displayName)}
                     className="bg-indigo-600 hover:bg-indigo-800 text-white font-bold py-2 px-4 rounded"

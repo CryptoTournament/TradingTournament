@@ -739,7 +739,7 @@ const runWebSocket = () => {
   
     connection.on('message', function(message) {
       if (message.type === 'utf8') {
-        console.log('Received Message: ' + message.utf8Data);
+      //  console.log('Received Message: ' + message.utf8Data);
         const tournamentId = extractTournamentId(message.utf8Data);
         if (message.utf8Data.includes("TID" ) && message.utf8Data.includes("/NewConnection")) {
           connectionsByTournamentId[tournamentId] = connectionsByTournamentId[tournamentId] || [];

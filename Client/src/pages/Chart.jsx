@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Line } from "react-chartjs-2";
 import moment from "moment";
 import { w3cwebsocket as WebSocket } from "websocket";
@@ -9,7 +9,8 @@ import PositionTable from "../components/PositionTable";
 import OpenPosition from "../components/OpenPosition";
 import axios from "axios";
 import { w3cwebsocket as WebSocketClient } from "websocket";
-import http from 'http';
+import http from 'http'; 
+import Context from "../utils/context";
 
 
 import {
@@ -21,6 +22,8 @@ import {
 const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m";
 const HISTORY_API_URL =
   "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=60";
+
+
 
 const CryptoChart = ({ tournament, showChart }) => {
   const { game_name, number_of_players, max_players, players, tournament_id } =
@@ -56,12 +59,37 @@ const CryptoChart = ({ tournament, showChart }) => {
   const [sortedPlayers, setSortedPlayers] = useState([]);
   const [client, setClient] = useState(null);
   const [webSocketReady, setWebSocketReady] = useState(false);
+  const [refreshChart, setRefreshChart] = useState(0);
+  
+  
+  function parseDataString(dataString) {
+    const cleanedString = dataString.replace(/^TID1\/NewPositionsChanges\//, '');
+    const dataPoints = cleanedString.split(',');
+    const numFields = 6; // Number of fields per data point
+    const result = [];
+  
+    for (let i = 0; i < dataPoints.length; i += numFields) {
+      const dataArr = [
+        parseInt(dataPoints[i]),
+        parseFloat(dataPoints[i + 1]),
+        parseFloat(dataPoints[i + 2]),
+        parseFloat(dataPoints[i + 3]),
+        dataPoints[i + 4],
+        dataPoints[i + 5]
+      ];
+      result.push(dataArr);
+    }
+  
+    return result;
+  }
   
   useEffect(() => {
     if (webSocketReady && client) { // Send the message only when the WebSocket is ready
-      client.send("TID" + tournament.tournament_id+"/NewPositionsChanges");
+
+      client.send("TID" + tournament.tournament_id+"/NewPositionsChanges/"+positions);
+  
     }
-  }, [positions, webSocketReady, client]);
+  }, [refreshChart]);
   
   useEffect(() => {
     const newClient = new WebSocketClient("ws://localhost:8080"); // Replace the URL with your WebSocket server URL
@@ -80,10 +108,12 @@ const CryptoChart = ({ tournament, showChart }) => {
     };
   
     newClient.onmessage = (message) => {
-      console.log("Received: '" + message.data + "'");
+     // console.log("Received: '" + message.data + "'");
       if(message.data.includes("/NewPositionsChanges"))
       {
         console.log(("NEED TO BE UPDATED NOW!"));
+        console.log(parseDataString(message.data))
+        setPositions(parseDataString(message.data))
       }
     };
     setClient(newClient); // Update the client variable
@@ -288,6 +318,8 @@ const CryptoChart = ({ tournament, showChart }) => {
     setPositions(updatedPositions);
     updateBalance(updatedPositions);
     setCanTrade(true);
+    setRefreshChart(refreshChart+1)
+
   };
 
   const handleBuyButtonClick = async () => {
@@ -312,6 +344,7 @@ const CryptoChart = ({ tournament, showChart }) => {
           setPositions((prevPositions) => [...prevPositions, position]);
           setGameBalance(gameBalance - amount);
           setCanTrade(false);
+          setRefreshChart(refreshChart+1)
         } catch (error) {
           console.error("Error adding position", error);
           // here you can handle the error, for example show a message to the user
@@ -345,6 +378,8 @@ const CryptoChart = ({ tournament, showChart }) => {
           setPositions((prevPositions) => [...prevPositions, position]);
           setGameBalance(gameBalance - amount);
           setCanTrade(false);
+          setRefreshChart(refreshChart+1)
+
         } catch (error) {
           console.error("Error adding position", error);
           // here you can handle the error, for example show a message to the user

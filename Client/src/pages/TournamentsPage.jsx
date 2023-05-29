@@ -5,6 +5,9 @@ import { getTournaments, joinTournament } from "../api/tournaments";
 import useUser from "../hooks/useUser";
 import { FaPlay, FaUserPlus } from "react-icons/fa";
 import moment from "moment";
+import Context from "../utils/context";
+ 
+
 
 const TournamentsPage = () => {
   const { user } = useUser();
@@ -13,7 +16,7 @@ const TournamentsPage = () => {
   const [loading, setLoading] = useState(true);
 
 
-
+//  const {state, dispatch} = useContext(Context)
 
 
 

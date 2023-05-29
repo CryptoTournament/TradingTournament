@@ -1,6 +1,7 @@
 import moment from "moment";
 import { useState, useEffect } from "react";
 import useUser from "../hooks/useUser";
+import axios from "axios";
 const OpenPosition = ({ positions, currentPrice }) => {
   const openPositions = positions.filter(
     ([, , , closePrice]) => closePrice === 0

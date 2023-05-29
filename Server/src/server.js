@@ -521,6 +521,7 @@ app.put("/api/tournaments/:tournament_id/join", async (req, res) => {
     const { uid } = req.body;
 
     const user = await db.collection("users").findOne({ uid });
+    const user_money = user.balance;
     if (!user) {
       return res.status(404).send("User not found");
     }
@@ -531,9 +532,12 @@ app.put("/api/tournaments/:tournament_id/join", async (req, res) => {
     if (!tournament) {
       return res.status(404).send("Tournament not found");
     }
-
+    const tournament_cost = tournament.buy_in_cost;
     if (tournament.number_of_players >= tournament.max_players) {
       return res.status(400).send("Tournament is already full");
+    }
+    if (tournament.buy_in_cost > user_money){
+      return res.status(400).send(`You are missing ${tournament.buy_in_cost - user_money}$ money to join this tournament.`);
     }
 
     // Convert the user data to the format used in the tournament
@@ -543,13 +547,23 @@ app.put("/api/tournaments/:tournament_id/join", async (req, res) => {
       game_currency: 1000000,
       positions: [],
     };
-
+    const new_balance = user_money - tournament.buy_in_cost;
     // Add the player to the tournament and increment the number of players
     await db.collection("tournaments").updateOne(
       { tournament_id },
       {
         $push: { players: player },
         $inc: { number_of_players: 1 },
+      }
+    );
+
+    // Add the player to the tournament and increment the number of players
+    await db.collection("users").updateOne(
+      { uid },
+      {
+        $set: {
+          balance: new_balance,
+        },
       }
     );
 

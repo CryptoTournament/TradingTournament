@@ -7,7 +7,6 @@ import { server as WebSocketServer } from "websocket";
 import http from "http";
 //import cron from 'node-cron';
 
-
 dotenv.config();
 
 const app = express();
@@ -518,15 +517,10 @@ app.put("/api/games/:gid", async (req, res) => {
   }
 });
 
-//tournaments calls
 app.get("/api/tournaments", async (req, res) => {
   try {
     const tournaments = await db.collection("tournaments").find().toArray();
-    if (tournaments.length === 0) {
-      res.status(404).send("No tournaments found");
-    } else {
-      res.json(tournaments);
-    }
+    res.json(tournaments);
   } catch (error) {
     console.error("Error fetching tournaments data", error);
     res.status(500).send("Server error");
@@ -549,9 +543,6 @@ app.get("/api/tournaments/:id", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
-
-
 
 app.post("/api/newTournament", async (req, res) => {
   try {
@@ -725,23 +716,6 @@ app.put("/api/tournaments/:tournament_id/closePosition", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 app.put(
   "/api/tournaments/:tournament_id/players/:uid/updateBalance",

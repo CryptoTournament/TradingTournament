@@ -114,6 +114,7 @@ const TournamentsPage = () => {
         </>
       )}
 
+      {/* Rest of the code */}
       <input
         type="text"
         value={searchTerm}

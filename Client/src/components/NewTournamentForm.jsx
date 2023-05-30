@@ -6,20 +6,17 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
   const [gameName, setGameName] = useState("");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState("");
-  const [maxPlayers, setMaxPlayers] = useState(0);
-  const [joinPrice, setJoinPrice] = useState(0);
-  const [firstPlacePrize, setFirstPlacePrize] = useState(0);
-  const [secondPlacePrize, setSecondPlacePrize] = useState(0);
-  const [thirdPlacePrize, setThirdPlacePrize] = useState(0);
+  const [maxPlayers, setMaxPlayers] = useState("");
+  const [joinPrice, setJoinPrice] = useState("");
+  const [firstPlacePrize, setFirstPlacePrize] = useState("");
+  const [secondPlacePrize, setSecondPlacePrize] = useState("");
+  const [thirdPlacePrize, setThirdPlacePrize] = useState("");
 
   const [gameNameError, setGameNameError] = useState("");
   const [endDateError, setEndDateError] = useState("");
   const [maxPlayersError, setMaxPlayersError] = useState("");
   const [joinPriceError, setJoinPriceError] = useState("");
   const [prizeErrors, setPrizeErrors] = useState([]);
-
-
-
 
   const handleConfirm = async () => {
     setGameNameError("");
@@ -115,9 +112,16 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
         first_place_prize: firstPlacePrize,
         second_place_prize: secondPlacePrize,
         third_place_prize: thirdPlacePrize,
-        players: [{ uid, displayName: response.data.displayName, positions: [] }],
+        players: [
+          {
+            uid,
+            game_currency: 1000000,
+            displayName: response.data.displayName,
+            positions: [],
+          },
+        ],
       };
-      
+
       // Send a POST request to the server with the data
       const post = await axios
         .post("/api/newTournament", data)
@@ -132,16 +136,16 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
           // Handle any errors that occurred during the request
           console.error(error);
         });
-        const fetchTournaments = async () => {
-          try {
-            const fetchedTournaments = await getTournaments();
-            console.log(fetchedTournaments);
-            setTournamentsProp(fetchedTournaments);
-          } catch (error) {
-            console.error("Error fetching tournaments", error);
-          }
-        };  
-        fetchTournaments();
+      const fetchTournaments = async () => {
+        try {
+          const fetchedTournaments = await getTournaments();
+          console.log(fetchedTournaments);
+          setTournamentsProp(fetchedTournaments);
+        } catch (error) {
+          console.error("Error fetching tournaments", error);
+        }
+      };
+      fetchTournaments();
     }
   };
 
@@ -157,94 +161,146 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
           </button>
         </div>
         <div className="mt-6">
-          <h2 className="text-xl md:text-2xl font-semibold mb-4">New Tournament Form</h2>
+          <h2 className="text-xl md:text-2xl font-semibold mb-4">
+            New Tournament Form
+          </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-gray-700 font-medium">Game Name</label>
+              <label className="block text-gray-700 font-medium">
+                Game Name
+              </label>
               <input
                 type="text"
                 value={gameName}
                 onChange={(e) => setGameName(e.target.value)}
                 className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
-              {gameNameError && <p className="text-red-500 truncate">{gameNameError}</p>}
+              {gameNameError && (
+                <p className="text-red-500 truncate">{gameNameError}</p>
+              )}
             </div>
             <div>
-              <label className="block text-gray-700 font-medium">End Date</label>
+              <label className="block text-gray-700 font-medium">
+                End Date
+              </label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
-              {endDateError && <p className="text-red-500 truncate">{endDateError}</p>}
+              {endDateError && (
+                <p className="text-red-500 truncate">{endDateError}</p>
+              )}
             </div>
             <div>
-              <label className="block text-gray-700 font-medium">Max Players</label>
+              <label className="block text-gray-700 font-medium">
+                Max Players
+              </label>
               <input
                 type="number"
                 value={maxPlayers}
                 onChange={(e) => setMaxPlayers(parseInt(e.target.value) || 0)}
                 className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
-              {maxPlayersError && <p className="text-red-500 truncate">{maxPlayersError}</p>}
+              {maxPlayersError && (
+                <p className="text-red-500 truncate">{maxPlayersError}</p>
+              )}
             </div>
             <div>
-              <label className="block text-gray-700 font-medium">Join Price</label>
+              <label className="block text-gray-700 font-medium">
+                Join Price
+              </label>
               <input
                 type="number"
                 value={joinPrice}
                 onChange={(e) => setJoinPrice(parseInt(e.target.value) || 0)}
                 className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
-              {joinPriceError && <p className="text-red-500 truncate">{joinPriceError}</p>}
+              {joinPriceError && (
+                <p className="text-red-500 truncate">{joinPriceError}</p>
+              )}
             </div>
             <div>
-              <label className="block text-gray-700 font-medium">First Place Prize</label>
+              <label className="block text-gray-700 font-medium">
+                First Place Prize
+              </label>
               <input
                 type="number"
                 value={firstPlacePrize}
-                onChange={(e) => setFirstPlacePrize(parseInt(e.target.value) || 0)}
+                onChange={(e) =>
+                  setFirstPlacePrize(parseInt(e.target.value) || 0)
+                }
                 className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
               {prizeErrors.includes("First prize must be greater than 0") && (
-                <p className="text-red-500 truncate">First prize must be greater than 0</p>
+                <p className="text-red-500 truncate">
+                  First prize must be greater than 0
+                </p>
               )}
-              {prizeErrors.includes("First prize must be greater than second prize") && (
-                <p className="text-red-500 truncate">First prize must be greater than second prize</p>
+              {prizeErrors.includes(
+                "First prize must be greater than second prize"
+              ) && (
+                <p className="text-red-500 truncate">
+                  First prize must be greater than second prize
+                </p>
               )}
             </div>
             <div>
-              <label className="block text-gray-700 font-medium">Second Place Prize</label>
+              <label className="block text-gray-700 font-medium">
+                Second Place Prize
+              </label>
               <input
                 type="number"
                 value={secondPlacePrize}
-                onChange={(e) => setSecondPlacePrize(parseInt(e.target.value) || 0)}
+                onChange={(e) =>
+                  setSecondPlacePrize(parseInt(e.target.value) || 0)
+                }
                 className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
               {prizeErrors.includes("Second prize must be greater than 0") && (
-                <p className="text-red-500 truncate">Second prize must be greater than 0</p>
+                <p className="text-red-500 truncate">
+                  Second prize must be greater than 0
+                </p>
               )}
-              {prizeErrors.includes("First prize must be greater than second prize") && (
-                <p className="text-red-500 truncate">First prize must be greater than second prize</p>
+              {prizeErrors.includes(
+                "First prize must be greater than second prize"
+              ) && (
+                <p className="text-red-500 truncate">
+                  First prize must be greater than second prize
+                </p>
               )}
-              {prizeErrors.includes("Second prize must be greater than third prize") && (
-                <p className="text-red-500 truncate">Second prize must be greater than third prize</p>
+              {prizeErrors.includes(
+                "Second prize must be greater than third prize"
+              ) && (
+                <p className="text-red-500 truncate">
+                  Second prize must be greater than third prize
+                </p>
               )}
             </div>
             <div>
-              <label className="block text-gray-700 font-medium">Third Place Prize</label>
+              <label className="block text-gray-700 font-medium">
+                Third Place Prize
+              </label>
               <input
                 type="number"
                 value={thirdPlacePrize}
-                onChange={(e) => setThirdPlacePrize(parseInt(e.target.value) || 0)}
+                onChange={(e) =>
+                  setThirdPlacePrize(parseInt(e.target.value) || 0)
+                }
                 className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
               {prizeErrors.includes("Third prize must be greater than 0") && (
-                <p className="text-red-500 truncate">Third prize must be greater than 0</p>
+                <p className="text-red-500 truncate">
+                  Third prize must be greater than 0
+                </p>
               )}
-              {prizeErrors.includes("Second prize must be greater than third prize") && (
-                <p className="text-red-500 truncate">Second prize must be greater than third prize</p>
+              {prizeErrors.includes(
+                "Second prize must be greater than third prize"
+              ) && (
+                <p className="text-red-500 truncate">
+                  Second prize must be greater than third prize
+                </p>
               )}
             </div>
           </div>

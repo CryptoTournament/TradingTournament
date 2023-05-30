@@ -5,6 +5,8 @@ import { fetchSymbolData, fetchKlineData } from "./market_data_handler.js";
 import { ObjectId } from "mongodb";
 import { server as WebSocketServer } from "websocket";
 import http from "http";
+//import cron from 'node-cron';
+
 
 dotenv.config();
 
@@ -548,6 +550,27 @@ app.get("/api/tournaments/:id", async (req, res) => {
   }
 });
 
+
+
+
+app.post("/api/newTournament", async (req, res) => {
+  try {
+    // Assuming you have a MongoDB connection
+
+    // Get the tournament data from the request body
+    const tournamentData = req.body;
+
+    // Add the tournament to the database
+    const result = await db.collection("tournaments").insertOne(tournamentData);
+
+    // Return the inserted tournament data
+    res.json(result);
+  } catch (error) {
+    console.error("Error creating new tournament", error);
+    res.status(500).send("Server error");
+  }
+});
+
 app.put("/api/tournaments/:tournament_id/join", async (req, res) => {
   try {
     const { tournament_id } = req.params;
@@ -702,6 +725,23 @@ app.put("/api/tournaments/:tournament_id/closePosition", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 app.put(
   "/api/tournaments/:tournament_id/players/:uid/updateBalance",

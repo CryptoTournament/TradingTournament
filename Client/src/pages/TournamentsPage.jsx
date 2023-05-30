@@ -30,6 +30,7 @@ const TournamentsPage = () => {
   useEffect(() => {
     const fetchTournaments = async () => {
       try {
+        setLoading(false);
         const fetchedTournaments = await getTournaments();
         console.log(fetchedTournaments);
         setTournaments(fetchedTournaments);
@@ -94,27 +95,32 @@ const TournamentsPage = () => {
           <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">
             Tournaments Page
           </h1>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by Tournament name"
-            className="px-4 w-1/5 py-2 rounded-md border border-gray-300 mb-4 text-center"
-          />
 
-          <button onClick={openForm}>New Tournament</button>
-          {showForm && <NewTournamentForm onClose={closeForm} />}
-
-          {/* <button
-            className="px-4 py-2 text-white bg-blue-500 rounded"
-            onClick={handleNewTournament} // Handle click event of the "New Tournament" button
-          >
-            New Tournament
-          </button> */}
+          <div className="flex justify-start items-center mb-4">
+            <button
+              className="px-4 py-2 text-white bg-blue-600 rounded mr-2"
+              onClick={handleNewTournament} // Handle click event of the "New Tournament" button
+            >
+              New Tournament
+            </button>
+            {showForm && user && (
+              <NewTournamentForm
+                onClose={closeForm}
+                uid={user.uid}
+                setTournamentsProp={setTournaments}
+              />
+            )}
+          </div>
         </>
       )}
-      {/* {showForm && <NewTournamentForm />} Render the PopupWindow component when showForm is true */}
 
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="Search by Tournament name"
+        className="px-4 w-1/5 py-2 rounded-md border border-gray-300 mb-4 text-center"
+      />
       {selectedTournament ? (
         <div className="mx-4 mt-4 w-screen">
           <Chart

@@ -34,7 +34,7 @@ app.post("/api/users/signUp", async (req, res) => {
     friends: [],
     displayName: `Player ${random}`,
     rank: "BronzeOne",
-    balance: 0,
+    balance: 1000,
     wins: 0,
     gamesPlayed: 0,
     gameTokens: 200,
@@ -460,17 +460,50 @@ app.put("/api/displaynames/:uid", async (req, res) => {
     const { uid } = req.params;
     const { displayName } = req.body;
 
-    const result = await db
-      .collection("users")
-      .updateOne({ uid }, { $set: { displayName } });
+    // Update the displayName in the users collection
+    await db.collection("users").updateOne({ uid }, { $set: { displayName } });
 
-    if (result.modifiedCount > 0) {
-      res.status(200).json({ success: true });
+    // Update the displayName in all tournaments where the user is a player
+    const tournaments = await db
+      .collection("tournaments")
+      .find({ "players.uid": uid })
+      .toArray();
+
+    for (const tournament of tournaments) {
+      const playerIndex = tournament.players.findIndex(
+        (player) => player.uid === uid
+      );
+
+      tournament.players[playerIndex].displayName = displayName;
+
+      await db
+        .collection("tournaments")
+        .updateOne(
+          { _id: tournament._id },
+          { $set: { players: tournament.players } }
+        );
+    }
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Error updating user data", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.get("/api/displaynames/:uid", async (req, res) => {
+  try {
+    const { uid } = req.params;
+
+    const user = await db.collection("users").findOne({ uid: uid });
+
+    if (user) {
+      res.status(200).send(user.displayName);
     } else {
       res.status(404).send("User not found");
     }
   } catch (error) {
-    console.error("Error updating user data", error);
+    console.error("Error fetching user data", error);
     res.status(500).send("Server error");
   }
 });
@@ -536,8 +569,14 @@ app.put("/api/tournaments/:tournament_id/join", async (req, res) => {
     if (tournament.number_of_players >= tournament.max_players) {
       return res.status(400).send("Tournament is already full");
     }
-    if (tournament.buy_in_cost > user_money){
-      return res.status(400).send(`You are missing ${tournament.buy_in_cost - user_money}$ money to join this tournament.`);
+    if (tournament.buy_in_cost > user_money) {
+      return res
+        .status(400)
+        .send(
+          `You are missing ${
+            tournament.buy_in_cost - user_money
+          }$ money to join this tournament.`
+        );
     }
 
     // Convert the user data to the format used in the tournament

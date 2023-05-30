@@ -49,7 +49,11 @@ const TournamentsPage = () => {
       setSelectedTournament(newTournament);
     } catch (error) {
       console.error("Error joining tournament", error);
-      if (error.response && error.response.status === 400 && error.response.data) {
+      if (
+        error.response &&
+        error.response.status === 400 &&
+        error.response.data
+      ) {
         const errorMessage = error.response.data;
         Swal.fire({
           title: "Notification",
@@ -90,10 +94,16 @@ const TournamentsPage = () => {
           <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">
             Tournaments Page
           </h1>
-
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by Tournament name"
+            className="px-4 w-1/5 py-2 rounded-md border border-gray-300 mb-4 text-center"
+          />
 
           <button onClick={openForm}>New Tournament</button>
-            {showForm && <NewTournamentForm onClose={closeForm} />}
+          {showForm && <NewTournamentForm onClose={closeForm} />}
 
           {/* <button
             className="px-4 py-2 text-white bg-blue-500 rounded"
@@ -104,27 +114,28 @@ const TournamentsPage = () => {
         </>
       )}
       {/* {showForm && <NewTournamentForm />} Render the PopupWindow component when showForm is true */}
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Search by Tournament name"
-        className="px-4 w-1/5 py-2 rounded-md border border-gray-300 mb-4 text-center"
-      />
+
       {selectedTournament ? (
         <div className="mx-4 mt-4 w-screen">
-          <Chart tournament={selectedTournament} showChart={setSelectedTournament} />
+          <Chart
+            tournament={selectedTournament}
+            showChart={setSelectedTournament}
+          />
         </div>
       ) : (
         <div className="w-full max-w-4xl grid gap-8 sm:grid-cols-1 md:grid-cols-2">
           {filteredTournaments.map((tournament) => {
-            const timeLeft = moment(tournament.end_date).diff(moment(), "hours");
+            const timeLeft = moment(tournament.end_date).diff(
+              moment(),
+              "hours"
+            );
             const isUrgent = timeLeft < 24;
             const timeLeftDisplay = isUrgent
               ? `${timeLeft} hours`
               : moment.duration(timeLeft, "hours").humanize();
             const textColor = isUrgent ? "text-red-500" : "text-gray-500";
-            const isJoinDisabled = tournament.number_of_players === tournament.max_players;
+            const isJoinDisabled =
+              tournament.number_of_players === tournament.max_players;
 
             return (
               <div
@@ -139,13 +150,16 @@ const TournamentsPage = () => {
                     {tournament.number_of_players} / {tournament.max_players}
                   </p>
                   <p className={`mb-2 text-gray-500`}>
-                    Start Time: {moment(tournament.start_date).format("YYYY-MM-DD HH:mm")}
+                    Start Time:{" "}
+                    {moment(tournament.start_date).format("YYYY-MM-DD HH:mm")}
                   </p>
                   <p className="text-gray-500 mb-2">
                     Join Price: {`${tournament.buy_in_cost}$`}
                   </p>
                   {isUrgent ? (
-                    <p className={`mb-2 ${textColor}`}>{timeLeftDisplay} remaining</p>
+                    <p className={`mb-2 ${textColor}`}>
+                      {timeLeftDisplay} remaining
+                    </p>
                   ) : (
                     <p className={textColor}>{timeLeftDisplay} remaining</p>
                   )}
@@ -162,7 +176,9 @@ const TournamentsPage = () => {
                     <button
                       onClick={() => handleJoin(tournament, user.uid)}
                       className={`px-4 py-2 text-white rounded ${
-                        isJoinDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600"
+                        isJoinDisabled
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-blue-600"
                       }`}
                       disabled={isJoinDisabled}
                     >
@@ -172,7 +188,10 @@ const TournamentsPage = () => {
                   )}
                 </div>
                 <div className="flex flex-col items-end mt-10 ml-9">
-                  <GiTrophy size={50} className="mr-7 mb-3 hover:text-amber-400" />
+                  <GiTrophy
+                    size={50}
+                    className="mr-7 mb-3 hover:text-amber-400"
+                  />
                   <ul className="text-gray-500">
                     <li className="text-amber-400">{`1st place: ${tournament.first_place_prize}$`}</li>
                     <li className="text-white">{`2nd place:  ${tournament.second_place_prize}$`}</li>

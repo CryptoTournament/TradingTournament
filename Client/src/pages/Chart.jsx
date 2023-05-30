@@ -203,15 +203,15 @@ const CryptoChart = ({ tournament, showChart }) => {
         setChartPulses(initChartPulses);
         setTimeout(() => {
           setShouldUpdate(true);
-          if (user) {
-            if (positionsArray) {
-              const hasOpenPosition = positionsArray.some(
-                (position) => position[3] === 0 && position[5] === user.uid
-              );
-            }
+          // if (user) {
+          //   if (positionsArray) {
+          //     const hasOpenPosition = positionsArray.some(
+          //       (position) => position[3] === 0 && position[5] === user.uid
+          //     );
+          //   }
 
-            setCanTrade(!hasOpenPosition);
-          }
+          //   setCanTrade(!hasOpenPosition);
+          // }
         }, 60000); // 60 seconds
       }
     };
@@ -574,13 +574,14 @@ const CryptoChart = ({ tournament, showChart }) => {
   console.log(sortedPlayers);
 
   const formatGameCurrency = (value) => {
-    if (value >= 1000000) {
-      return (value / 1000000).toFixed(1) + "M";
-    } else if (value >= 100000) {
-      return (value / 1000).toLocaleString() + "k";
-    } else {
-      return value.toLocaleString();
-    }
+    return Math.floor(value).toLocaleString();
+    // if (value >= 1000000) {
+    //   return (value / 1000000).toFixed(1) + "M";
+    // } else if (value >= 100000) {
+    //   return (value / 1000).toLocaleString() + "k";
+    // } else {
+    //   return value.toLocaleString();
+    // }
   };
 
   return (
@@ -589,12 +590,12 @@ const CryptoChart = ({ tournament, showChart }) => {
         <div className="flex flex-col items-start pl-8">
           <h1 className="text-4xl sm:text-5xl font-semibold mb-4 text-left text-black">
             {game_name}
-            <span className="text-gray-500 text-lg">
+            <span className="text-gray-800 text-lg ml-4">
               ({number_of_players} / {max_players})
             </span>
           </h1>
           <div className="text-2xl sm:text-3xl font-semibold mb-4 text-left text-black">
-            Your Balance: {formatGameCurrency(gameBalance)} $
+            Your Balance: {Math.floor(gameBalance).toLocaleString()}$
           </div>
           <div className="text-black font-semibold">
             {moment(tournament.end_date).diff(moment(), "hours") +
@@ -623,7 +624,7 @@ const CryptoChart = ({ tournament, showChart }) => {
               className="mr-2"
             />
             <button
-              className={`px-4 py-2 bg-green-500 text-white rounded ${
+              className={`px-4 mx-1 py-2 bg-green-500 text-white rounded ${
                 canTrade ? "" : "opacity-50 cursor-not-allowed"
               }`}
               onClick={handleBuyButtonClick}
@@ -632,7 +633,7 @@ const CryptoChart = ({ tournament, showChart }) => {
               Buy
             </button>
             <button
-              className={`px-4 py-2 bg-red-500 text-white rounded ${
+              className={`px-4  py-2 bg-red-500 text-white rounded ${
                 canTrade ? "" : "opacity-50 cursor-not-allowed"
               }`}
               onClick={handleSellButtonClick}
@@ -640,18 +641,21 @@ const CryptoChart = ({ tournament, showChart }) => {
             >
               Sell
             </button>
-            <button
-              className="px-4 py-2 bg-red-500 text-white rounded"
-              onClick={closePosition}
-            >
-              Close Position
-            </button>
+            {!canTrade && (
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded"
+                onClick={closePosition}
+              >
+                Close Position
+              </button>
+            )}
           </div>
           <div className="mt-4">
             {pointToBuySell ? (
               <OpenPosition
                 positions={positions}
                 currentPrice={pointToBuySell[1]}
+                players={players}
               />
             ) : null}
           </div>
@@ -660,6 +664,7 @@ const CryptoChart = ({ tournament, showChart }) => {
               <PositionTable
                 positions={positions}
                 currentPrice={pointToBuySell[1]}
+                players={players}
               />
             ) : null}
           </div>

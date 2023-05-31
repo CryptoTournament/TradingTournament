@@ -708,15 +708,18 @@ async function updatePlayerBalances(tournamentData, topPlayers) {
     );
 
     console.log("Player balances updated successfully");
+    updateUserWinnings(firstPlace.uid) && updateRank(firstPlace.uid)
+    secondPlace && updateUserWinnings(secondPlace.uid) && updateRank(secondPlace.uid)
+    thirdPlace && updateUserWinnings(thirdPlace.uid) && updateRank(thirdPlace.uid)
+    for(const curr_user of tournamentData.players){
+      updateUserGames(curr_user.uid);
+    }
     deleteTournament(tournamentData.tournament_id);
   } catch (error) {
     console.error("Error updating player balances", error);
     throw error;
   }
 }
-
-
-
 
 async function deleteTournament(tournament_id) {
   try {
@@ -729,6 +732,96 @@ async function deleteTournament(tournament_id) {
     }
   } catch (error) {
     console.error("Error deleting tournament", error);
+    throw error;
+  }
+}
+
+async function updateRank(uid) {
+  const ranks = {
+    0: "BronzeOne",
+    10: "BronzeTwo",
+    20: "BronzeThree",
+    30: "BronzeFour",
+    40: "BronzeFive",
+    50: "SilverOne",
+    60: "SilverTwo",
+    70: "SilverThree",
+    80: "SilverFour",
+    90: "SilverFive",
+    100: "GoldOne",
+    110: "GoldTwo",
+    120: "GoldThree",
+    130: "GoldFour",
+    140: "GoldFive",
+  };
+  ranks.hasOwnProperty(10)
+  try {
+    const user = await db.collection("users").findOne({ uid });
+    if (!user) {
+      return
+    }
+    ranks.hasOwnProperty(user.wins) && await db.collection("users").updateOne(
+      { uid },
+      {
+        $set: {
+          rank: ranks[user.wins],
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Error update user rank", error);
+    throw error;
+  }
+}
+
+
+
+
+
+async function updateUserWinnings(uid) {
+  try {    
+    // const user = await db.collection("users").findOne({ uid });
+    // if (!user) {
+    //   return res.status(404).send("User not found");
+    // }
+    // const user_winnings = user.wins;
+
+
+    // Add the player to the tournament and increment the number of players
+    await db.collection("users").updateOne(
+      { uid },
+      {
+        $inc: {
+          wins: 1,
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Error updating user winnings", error);
+    throw error;
+  }
+}
+
+async function updateUserGames(uid) {
+  try {    
+    // const user = await db.collection("users").findOne({ uid });
+    // if (!user) {
+    //   return res.status(404).send("User not found");
+    // }
+    // const user_winnings = user.wins;
+
+
+    // Add the player to the tournament and increment the number of players
+    await db.collection("users").updateOne(
+      { uid },
+      {
+        $inc: {
+          gamesPlayed: 1,
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Error updating user winnings", error);
     throw error;
   }
 }

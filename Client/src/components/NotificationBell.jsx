@@ -55,6 +55,10 @@ const NotificationBell = ({ uid }) => {
         navigate("/friends");
         setDropdownVisible(false);
         break;
+      case "tournaments":
+        navigate("/chart");
+        setDropdownVisible(false);
+        break;
       default:
         // Do nothing
         break;

@@ -206,20 +206,20 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
                 <p className="text-red-500 truncate">{gameNameError}</p>
               )}
             </div>
-            <div>
-              <label className="block text-gray-700 font-medium">
-                End Date
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-              {endDateError && (
-                <p className="text-red-500 truncate">{endDateError}</p>
-              )}
-            </div>
+
+      <div>
+        <label className="block text-gray-700 font-medium">End Date and Time</label>
+        <input
+          type="datetime-local" // Change input type to datetime-local
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+        />
+        {endDateError && (
+          <p className="text-red-500 truncate">{endDateError}</p>
+        )}
+      </div>
+
             <div>
               <label className="block text-gray-700 font-medium">
                 Max Players

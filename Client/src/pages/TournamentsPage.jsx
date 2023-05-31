@@ -147,14 +147,23 @@ const TournamentsPage = () => {
       ) : (
         <div className="w-full max-w-4xl grid gap-8 sm:grid-cols-1 md:grid-cols-2">
           {filteredTournaments.map((tournament) => {
-            const timeLeft = moment(tournament.end_date).diff(
-              moment(),
-              "hours"
-            );
-            const isUrgent = timeLeft < 24;
-            const timeLeftDisplay = isUrgent
-              ? `${timeLeft} hours`
-              : moment.duration(timeLeft, "hours").humanize();
+           const endDate = moment(tournament.end_date);
+           const currentTime = moment();
+           const timeDiff = endDate.diff(currentTime);
+           const duration = moment.duration(timeDiff);
+           
+           const hoursLeft = duration.hours();
+           const minutesLeft = duration.minutes();
+           
+           const isUrgent = hoursLeft < 24;
+           
+           let timeLeftDisplay;
+           if (isUrgent) {
+             timeLeftDisplay = `${hoursLeft} hours ${minutesLeft} minutes`;
+           } else {
+             const durationWithMinutes = duration.add(minutesLeft, "minutes");
+             timeLeftDisplay = durationWithMinutes.humanize();
+           }
             const textColor = isUrgent ? "text-red-500" : "text-gray-500";
             const isJoinDisabled =
               tournament.number_of_players === tournament.max_players;

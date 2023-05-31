@@ -6,9 +6,9 @@ import { FcSearch } from "react-icons/fc";
 
 const OpenPosition = ({ positions, currentPrice, players }) => {
   console.log(positions);
-  const openPositions = positions.filter(
-    ([, , , closePrice]) => closePrice === 0
-  );
+  const openPositions = positions
+    .filter(([, , , closePrice]) => closePrice === 0)
+    .reverse();
 
   const { user } = useUser();
   const [userDetails, setUserDetails] = useState({

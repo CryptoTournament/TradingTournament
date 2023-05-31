@@ -17,6 +17,8 @@ import UserContext from "./contexts/UserContext";
 import PrivateRoute from "./pages/PrivateRoute";
 import useUser from "./hooks/useUser";
 import { useState } from "react";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+
 function App() {
   const [navBarDisplayName, setNavBarDisplayName] = useState("");
   const [color, setColor] = useState("");
@@ -25,7 +27,11 @@ function App() {
   const { user, isLoading } = useUser();
 
   if (isLoading) {
-    return <div>Loading...</div>; // or your loading component here
+    return (
+      <div className="flex items-center justify-center h-screen bg-bg-main-custom">
+        <AiOutlineLoading3Quarters className="animate-spin text-6xl text-black" />
+      </div>
+    );
   }
 
   return (

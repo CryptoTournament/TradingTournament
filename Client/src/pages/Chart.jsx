@@ -3,16 +3,9 @@ import { Line } from "react-chartjs-2";
 import moment from "moment";
 import { w3cwebsocket as WebSocket } from "websocket";
 import useUser from "../hooks/useUser";
-import Chart from "chart.js/auto";
-import "chartjs-adapter-moment";
 import PositionTable from "../components/PositionTable";
 import OpenPosition from "../components/OpenPosition";
-import axios from "axios";
 import { w3cwebsocket as WebSocketClient } from "websocket";
-import http from "http";
-import Context from "../utils/context";
-import { getUser } from "../api/users";
-
 
 import {
   addPosition,
@@ -37,7 +30,7 @@ const CryptoChart = ({ tournament, showChart }) => {
   const [zoomLevel, setZoomLevel] = useState(50);
   const [shouldUpdate, setShouldUpdate] = useState(true);
   const [pointToBuySell, setPointToBuySell] = useState(null);
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState("");
   const [canTrade, setCanTrade] = useState(true);
   const [gameBalance, setGameBalance] = useState(initBalance);
   const [showLeaderboard, setShowLeaderboard] = useState(true);
@@ -49,10 +42,7 @@ const CryptoChart = ({ tournament, showChart }) => {
   const [client, setClient] = useState(null);
   const [webSocketReady, setWebSocketReady] = useState(false);
   const [refreshChart, setRefreshChart] = useState(0);
-  const [coinSymbol, setCoinSymbol] = useState("BTC")
-  
-
-
+  const [coinSymbol, setCoinSymbol] = useState("BTC");
 
   function parseDataString(dataString) {
     const cleanedString = dataString.replace(
@@ -435,8 +425,6 @@ const CryptoChart = ({ tournament, showChart }) => {
     );
   }
 
-
-
   const options = {
     maintainAspectRatio: false,
     responsive: true,
@@ -455,71 +443,69 @@ const CryptoChart = ({ tournament, showChart }) => {
         display: true,
       },
 
-    
       tooltip: {
-        mode: 'nearest',
+        mode: "nearest",
         cornerRadius: 20,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
         borderColor: "rgba(75, 192, 192, 0.4)",
         borderWidth: 3,
         padding: 12,
         bodySpacing: 4,
         titleColor: "rgba(75, 192, 192, 0.8)",
-        bodyFont:{
+        bodyFont: {
           family: "Arial",
-          size: 18
+          size: 18,
         },
         displayColors: false,
         callbacks: {
           title(tooltipItems) {
-            if(tooltipItems.length > 0) {
-                const item = tooltipItems[0];
-                const labels = item.chart.data.labels;
-                const labelCount = labels ? labels.length : 0;
-                const price = item.formattedValue.toString();
-                if (this && this.options && this.options.mode === 'dataset') {
-                    return [item.dataset.label || '', coinSymbol + " Price " + price];
-                } else if (item.label) {
-                    return [item.label, coinSymbol + " Price " + price];
-                } else if (labelCount > 0 && item.dataIndex < labelCount) {
-                    return [labels[item.dataIndex],coinSymbol + " Price " + price];
-                }
+            if (tooltipItems.length > 0) {
+              const item = tooltipItems[0];
+              const labels = item.chart.data.labels;
+              const labelCount = labels ? labels.length : 0;
+              const price = item.formattedValue.toString();
+              if (this && this.options && this.options.mode === "dataset") {
+                return [
+                  item.dataset.label || "",
+                  coinSymbol + " Price " + price,
+                ];
+              } else if (item.label) {
+                return [item.label, coinSymbol + " Price " + price];
+              } else if (labelCount > 0 && item.dataIndex < labelCount) {
+                return [labels[item.dataIndex], coinSymbol + " Price " + price];
+              }
             }
-            return '';
-            },
-                 label: function (context) {
-                const index = context.dataIndex;
-                const value = context.dataset.data[index];
-                const price = value.y.toString()
-                let label = [];
-                let lineToAdd = ""
-    
-                if (value) {
-                    const matchingPositions = positions.filter(
-                        ([timestamp]) => timestamp === value.x
-                    );
+            return "";
+          },
+          label: function (context) {
+            const index = context.dataIndex;
+            const value = context.dataset.data[index];
+            const price = value.y.toString();
+            let label = [];
+            let lineToAdd = "";
 
-                    matchingPositions.forEach(([, , amount,,,uid]) => {
-                      
-                        sortedPlayers.forEach((player) => {
-                            if(player.uid === uid) {
-                              lineToAdd += player.displayName ;
-                            }
-                        });
-                        lineToAdd += " ("+amount.toString() + ")";
-                        label.push(lineToAdd)
-                        lineToAdd = ""
-                    });
-                }
-    
-                return label;
+            if (value) {
+              const matchingPositions = positions.filter(
+                ([timestamp]) => timestamp === value.x
+              );
+
+              matchingPositions.forEach(([, , amount, , , uid]) => {
+                sortedPlayers.forEach((player) => {
+                  if (player.uid === uid) {
+                    lineToAdd += player.displayName;
+                  }
+                });
+                lineToAdd += " (" + amount.toString() + ")";
+                label.push(lineToAdd);
+                lineToAdd = "";
+              });
             }
-        }
-    }
-  },
 
-    
-
+            return label;
+          },
+        },
+      },
+    },
 
     interaction: {
       mode: "index",
@@ -562,7 +548,7 @@ const CryptoChart = ({ tournament, showChart }) => {
       },
       y: {
         display: true,
-        
+
         ticks: {
           color: "rgba(255,255,255,0.7)",
           enabled: false,
@@ -571,7 +557,6 @@ const CryptoChart = ({ tournament, showChart }) => {
     },
   };
 
-  
   const chartData = {
     datasets: [
       {
@@ -593,18 +578,14 @@ const CryptoChart = ({ tournament, showChart }) => {
 
           //   if (matchingPositions.length > 0) {
           //     const borderColor = matchingPositions[0]
-     
+
           //     return ;
-              
+
           //   }
           // }
 
           return "rgba(75, 192, 192, 0.4)"; // Default color
         },
-
-
-
-
 
         backgroundColor: function (context) {
           const gradient = context.chart.ctx.createLinearGradient(
@@ -702,7 +683,7 @@ const CryptoChart = ({ tournament, showChart }) => {
   const PriceDisplay = () => {
     if (pointToBuySell !== null) {
       return (
-        <p className="text-2xl sm:text-4xl font-bold text-white">
+        <p className="text-base sm:text-4xl font-bold text-white">
           Bitcoin Price: {pointToBuySell[1]}
         </p>
       );
@@ -734,7 +715,7 @@ const CryptoChart = ({ tournament, showChart }) => {
             </span>
           </h1>
           <div className="text-2xl sm:text-3xl font-semibold mb-4 text-left text-black">
-            Your Balance: {Math.floor(gameBalance).toLocaleString()}$
+            Your Tournament Balance: {Math.floor(gameBalance).toLocaleString()}$
           </div>
           <div className="text-black font-semibold">
             {moment(tournament.end_date).diff(moment(), "hours") +
@@ -742,32 +723,32 @@ const CryptoChart = ({ tournament, showChart }) => {
           </div>
         </div>
       </div>
-      <div className="flex w-full ml-72 translate-y-14 z-50">
+      <div className="flex w-full ml-60 sm:ml-72 translate-y-14 z-50">
         <PriceDisplay />
       </div>
       <div className="flex flex-col 2xl:flex-row w-full px-10">
         <div className={`transition-all duration-1000 w-full`}>
-          
           <div
             className={`chart-container mr-0 rounded-lg p-4 bg-black w-full  h-96 relative transition-all duration-500 ${
               showChartFullWidth ? "md:w-11/12" : "md:w-11/12"
             }`}
           >
             <Line data={chartData} options={options} />
-
-
-
-
-
-
           </div>
-          <div className="flex justify-center mt-4">
+          <div className="flex justify-center mt-4 ">
             <input
               type="number"
               value={amount}
-              onChange={(e) => setAmount(parseFloat(e.target.value))}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value);
+                if (!isNaN(value)) {
+                  setAmount(value);
+                } else {
+                  setAmount("");
+                }
+              }}
               placeholder="Amount"
-              className="mr-2"
+              className="mr-2 text-center"
             />
             <button
               className={`px-4 mx-1 py-2 bg-green-500 text-white rounded ${
@@ -789,7 +770,7 @@ const CryptoChart = ({ tournament, showChart }) => {
             </button>
             {!canTrade && (
               <button
-                className="px-4 py-2 bg-red-500 text-white rounded"
+                className="px-4 mx-1 py-2 bg-red-500 text-white rounded"
                 onClick={closePosition}
               >
                 Close Position

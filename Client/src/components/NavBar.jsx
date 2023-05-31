@@ -70,6 +70,7 @@ const NavBar = () => {
             to="/"
             className="text-gray-200 hover:animate-pulse hover:bg-gray-700 hover:text-white px-3 rounded-md text-sm font-medium "
           >
+            {/* <img src="Client/public/logo.ico" alt="ICO Image" /> */}
             <MdOutlineDeliveryDining size={48} />
           </Link>
           {user && (

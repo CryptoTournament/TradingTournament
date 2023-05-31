@@ -701,34 +701,14 @@ const CryptoChart = ({ tournament, showChart }) => {
               </button>
             )}
           </div>
-          <div className="flex flex-col xl:flex-row space-x-16">
-            <div className="mt-4">
-              {pointToBuySell ? (
-                <OpenPosition
-                  positions={positions}
-                  currentPrice={pointToBuySell[1]}
-                  players={players}
-                />
-              ) : null}
-            </div>
-            <div className="mt-4">
-              {pointToBuySell ? (
-                <PositionTable
-                  positions={positions}
-                  currentPrice={pointToBuySell[1]}
-                  players={players}
-                />
-              ) : null}
-            </div>
-          </div>
         </div>
         <div
-          className={`w-full  mt-4 md:mt-0 transition-all duration-1000 ${
+          className={`w-full xl:-translate-y-20 mx-auto  mt-4 md:mt-0 transition-all duration-1000 ${
             showLeaderboard ? "md:w-1/4" : "md:w-28 "
           }`}
         >
           <button
-            className="mt-4 bg-gray-500 text-white px-4 py-2 rounded 2xl:block"
+            className="hidden mt-4 bg-gray-500 text-white px-4 py-2 rounded 2xl:block"
             onClick={() => {
               setShowLeaderboard(!showLeaderboard);
               setShowChartFullWidth(!showLeaderboard);
@@ -737,11 +717,11 @@ const CryptoChart = ({ tournament, showChart }) => {
             {!showLeaderboard ? "< Show" : "> Hide"}
           </button>
           <div
-            className={`transition-all ease-in-out duration-500 transform ${
+            className={`transition-all mt-14 xl:mt-3 ease-in-out duration-500 transform  xl:mx-0 xl:w-auto ${
               showLeaderboard ? "opacity-100 scale-100" : "opacity-0 scale-90"
             }`}
           >
-            <h2 className="text-xl font-semibold mb-4 text-gray-900">
+            <h2 className="text-xl font-bold mb-4 text-gray-800">
               Leaderboard
             </h2>
             <table className="min-w-full bg-white border border-gray-300">
@@ -790,6 +770,26 @@ const CryptoChart = ({ tournament, showChart }) => {
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+      <div className="flex flex-col xl:flex-row xl:space-x-16 mt-8">
+        <div className="xl:mx-auto">
+          {pointToBuySell ? (
+            <OpenPosition
+              positions={positions}
+              currentPrice={pointToBuySell[1]}
+              players={players}
+            />
+          ) : null}
+        </div>
+        <div className="xl:mx-auto">
+          {pointToBuySell ? (
+            <PositionTable
+              positions={positions}
+              currentPrice={pointToBuySell[1]}
+              players={players}
+            />
+          ) : null}
         </div>
       </div>
       <button

@@ -158,6 +158,12 @@ const Profile = () => {
             <ul className="list-disc ml-4 text-lg mt-4">
               <li className="mb-2">
                 <h2>
+                  <span className="text-indigo-500">Account Type:</span>{" "}
+                  {userDetails.accountType}
+                </h2>
+              </li>
+              <li className="mb-2">
+                <h2>
                   <span className="text-indigo-500">Rank:</span>{" "}
                   {userDetails.rank}
                 </h2>

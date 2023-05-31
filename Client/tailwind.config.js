@@ -10,11 +10,14 @@ export default {
         "bg-login-custom": "#E0E7FF",
         "bg-navbar-gradient-from": "#333",
         "bg-navbar-gradient-to": "#000",
-        "bg-home-gradient-from": "#1c92d2  ",
-        "bg-home-gradient-to": "#f2fcfe",
+        "bg-home-gradient-from": "#D3CCE3  ",
+        "bg-home-gradient-to": "#E9E4F0",
       },
       screens: {
         notComputer: "1500px",
+      },
+      width: {
+        "1/7": "14.2857143%",
       },
     },
   },

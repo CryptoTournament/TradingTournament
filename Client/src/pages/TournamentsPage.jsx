@@ -132,7 +132,7 @@ const TournamentsPage = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search by Tournament name"
-            className="px-4 w-1/5 py-2 rounded-md border border-gray-300 mb-4 text-center"
+            className="px-4 w-4/5 sm:w-1/2  py-2 rounded-md border border-gray-300 mb-4 text-center"
           />
         </>
       )}
@@ -209,12 +209,12 @@ const TournamentsPage = () => {
                     </button>
                   )}
                 </div>
-                <div className="flex flex-col items-end mt-10 ml-9">
+                <div className="flex flex-col items-end mt-10 sm:ml-9 w-48">
                   <GiTrophy
                     size={50}
                     className="mr-7 mb-3 hover:text-amber-400"
                   />
-                  <ul className="text-gray-500">
+                  <ul className="text-gray-500 ">
                     <li className="text-amber-400">{`1st place: ${formatGameCurrency(
                       tournament.first_place_prize
                     )} $`}</li>

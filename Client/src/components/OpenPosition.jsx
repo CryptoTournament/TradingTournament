@@ -2,6 +2,7 @@ import moment from "moment";
 import { useState, useEffect } from "react";
 import useUser from "../hooks/useUser";
 import axios from "axios";
+import { FcSearch } from "react-icons/fc";
 
 const OpenPosition = ({ positions, currentPrice, players }) => {
   console.log(positions);
@@ -76,19 +77,39 @@ const OpenPosition = ({ positions, currentPrice, players }) => {
     const formattedPNL = `$${(profit - amount).toFixed(2)}`;
     const formattedROE = `${((profit / amount) * 100 - 100).toFixed(2)}%`;
 
-    const profitColor = profit - amount >= 0 ? "bg-green-100" : "bg-red-100";
+    const profitColor = profit - amount >= 0 ? "bg-green-200" : "bg-red-200";
 
     return (
       <tr
-        className={`${profitColor} hover:bg-gray-200 transition-colors`}
+        className={` hover:bg-gray-200 transition-colors text-xs sm:text-base`}
         key={index}
       >
-        <td className="py-2 px-4 w-1/6 text-center">{userDisplayName}</td>
-        <td className="py-2 px-4 w-1/6 text-center">{formattedTimestamp}</td>
-        <td className="py-2 px-4 w-1/6 text-center">{formattedOpenPrice}</td>
-        <td className="py-2 px-4 w-1/6 text-center">{tradeSize}</td>
-        <td className="py-2 px-4 w-1/6 text-center">{formattedPNL}</td>
-        <td className="py-2 px-4 w-1/6 text-center">{formattedROE}</td>
+        <td
+          className={
+            type == "long"
+              ? ` bg-green-300 py-2 px-2 sm:px-4 text-center w-1/6`
+              : "bg-red-300 py-2 px-2 sm:px-4 text-center w-1/6"
+          }
+        >
+          {`${userDisplayName} (${type})`}
+        </td>
+        <td
+          className={`${profitColor} hidden sm:table-cell py-2 px-4 w-1/6 text-center`}
+        >
+          {formattedTimestamp}
+        </td>
+        <td className={`${profitColor} py-2 px-4 w-1/6 text-center`}>
+          {formattedOpenPrice}
+        </td>
+        <td className={`${profitColor} py-2 px-4 w-1/6 text-center`}>
+          {tradeSize}
+        </td>
+        <td className={`${profitColor} py-2 px-4 w-1/6 text-center`}>
+          {formattedPNL}
+        </td>
+        <td className={`${profitColor} py-2 px-4 w-1/6 text-center`}>
+          {formattedROE}
+        </td>
       </tr>
     );
   };
@@ -103,26 +124,32 @@ const OpenPosition = ({ positions, currentPrice, players }) => {
   const renderedPositions = filteredPositions.map(renderPosition);
 
   return (
-    <div className="flex flex-col items-center my-8 w-full">
-      <h2 className="text-xl font-bold mb-5">Open Positions</h2>
-      <div className="flex items-center mb-4">
-        <label htmlFor="search" className="mr-2">
-          Search by Display Name:
-        </label>
-        <input
-          type="text"
-          id="search"
-          value={searchValue}
-          onChange={handleSearchChange}
-          className="px-2 py-1 border border-gray-300 rounded"
-        />
+    <div className="flex flex-col items-center  w-full px-4">
+      <div className="flex xl:flex-col">
+        <h2 className="text-xl font-bold mb-5 mr-8 xl:mr-0 xl:ml-6 text-gray-800">
+          Open Positions
+        </h2>
+        <div className="flex items-center mb-4">
+          <label htmlFor="search" className="mr-2">
+            <FcSearch />
+          </label>
+          <input
+            type="text"
+            id="search"
+            value={searchValue}
+            onChange={handleSearchChange}
+            className="px-2 py-1 border border-gray-300 rounded"
+          />
+        </div>
       </div>
-      <div className="overflow-hidden rounded-lg shadow-lg">
+      <div className="overflow-hidden  shadow-lg">
         <table className="min-w-full bg-white">
           <thead className="bg-gray-100 text-gray-800 uppercase">
-            <tr>
+            <tr className="text-xs sm:text-base">
               <th className="py-2 px-4 w-1/6 text-center">Player</th>
-              <th className="py-2 px-4 w-1/6 text-center">Timestamp</th>
+              <th className="hidden sm:table-cell py-2 px-4 w-1/6 text-center">
+                Timestamp
+              </th>
               <th className="py-2 px-4 w-1/6 text-center">Open Price</th>
               <th className="py-2 px-4 w-1/6 text-center">Trade Size</th>
               <th className="py-2 px-4 w-1/6 text-center">PnL</th>

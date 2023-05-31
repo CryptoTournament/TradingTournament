@@ -754,6 +754,106 @@ app.put(
     }
   }
 );
+app.put("/api/users/:uid/color", async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const { color } = req.body;
+
+    // Fetch the product with the name "Player Name Color Change"
+    const product = await db
+      .collection("products")
+      .findOne({ name: "Player Name Color Change" });
+
+    if (!product) {
+      res.status(404).send("Product not found");
+      return;
+    }
+
+    const price = product.price;
+
+    // Deduct the price from the user's balance
+    await db
+      .collection("users")
+      .updateOne(
+        { uid: uid },
+        { $inc: { balance: -price }, $set: { displayColor: color } }
+      );
+
+    res.json({ message: "Color updated successfully" });
+  } catch (error) {
+    console.error("Error updating color", error);
+    res.status(500).send("Server error");
+  }
+});
+
+// Assuming you are using Express
+app.get("/api/products/:name", async (req, res) => {
+  try {
+    const { name } = req.params;
+
+    // Query the database to find the product by name
+    const product = await db.collection("products").findOne({ name });
+
+    if (!product) {
+      res.status(404).send("Product not found");
+    } else {
+      res.json(product);
+    }
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.get("/api/products", async (req, res) => {
+  try {
+    // Find all products
+    const products = await db.collection("products").find().toArray();
+
+    res.json(products);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).send("Server error");
+  }
+});
+app.put("/api/users/:uid/upgradeToVip", async (req, res) => {
+  try {
+    const { uid } = req.params;
+
+    // Check if the user is already VIP
+    const user = await db.collection("users").findOne({ uid });
+    if (user && user.accountType === "VIP") {
+      return res.status(400).send("User is already a VIP");
+    }
+    console.log("got here");
+    // Get the cost of the VIP upgrade from the products collection
+    const product = await db
+      .collection("products")
+      .findOne({ name: "VIP Upgrade" });
+    if (!product || !product.price) {
+      return res.status(404).send("VIP Upgrade product not found");
+    }
+    const vipUpgradeCost = product.price;
+    console.log(vipUpgradeCost);
+
+    // Deduct the cost from the user's balance
+    const result = await db
+      .collection("users")
+      .updateOne(
+        { uid },
+        { $set: { accountType: "VIP" }, $inc: { balance: -vipUpgradeCost } }
+      );
+
+    if (result.modifiedCount === 0) {
+      res.status(404).send("User not found");
+    } else {
+      res.json({ message: "Account upgraded to VIP" });
+    }
+  } catch (error) {
+    console.error("Error upgrading to VIP:", error);
+    res.status(500).send("Server error");
+  }
+});
 
 function extractTournamentId(inputString) {
   const regex = /TID(\d+)/;

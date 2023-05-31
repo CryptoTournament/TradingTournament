@@ -1,6 +1,6 @@
 import moment from "moment";
 import { useState } from "react";
-
+import { FcSearch } from "react-icons/fc";
 const PositionTable = ({ positions, currentPrice, players }) => {
   const closedPositions = positions
     .filter(([, , , closePrice]) => closePrice !== 0)
@@ -36,26 +36,33 @@ const PositionTable = ({ positions, currentPrice, players }) => {
   });
 
   return (
-    <div className="flex flex-col items-center">
-      <h2 className="text-lg sm:text-xl font-bold mb-5">Closed Positions</h2>
-      <div className="flex items-center mb-4">
-        <label htmlFor="search" className="mr-2 text-black">
-          Search by Display Name:
-        </label>
-        <input
-          type="text"
-          id="search"
-          value={searchValue}
-          onChange={handleSearchChange}
-          className="px-2 py-1 border border-gray-300 rounded"
-        />
+    <div className="flex flex-col items-center w-full mt-8 xl:mt-0 px-4">
+      <div className="flex xl:flex-col">
+        <h2 className="text-xl font-bold mb-5 mr-8 xl:mr-0 xl:ml-6 text-gray-800">
+          Closed Positions
+        </h2>
+        <div className="flex items-center mb-4">
+          <label htmlFor="search" className="mr-2 text-black">
+            <FcSearch />
+          </label>
+          <input
+            type="text"
+            id="search"
+            value={searchValue}
+            onChange={handleSearchChange}
+            className="px-2 py-1 border border-gray-300 rounded"
+          />
+        </div>
       </div>
-      <div className="overflow-hidden rounded-lg shadow-lg">
+
+      <div className=" rounded-lg shadow-lg  ">
         <table className="min-w-full bg-white">
-          <thead className="bg-gray-100 text-gray-800 uppercase text-xs sm:text-base">
+          <thead className="bg-gray-100 text-gray-800 uppercase  text-xs sm:text-base">
             <tr>
               <th className="py-2 px-2 sm:px-4 w-1/6 text-center">Player</th>
-              <th className="py-2 px-2 sm:px-4 w-1/6 text-center">Timestamp</th>
+              <th className="hidden sm:table-cell py-2 px-2 sm:px-4 w-1/6 text-center">
+                Timestamp
+              </th>
               <th className="py-2 px-2 sm:px-4 w-1/6 text-center">
                 Open Price
               </th>
@@ -67,7 +74,7 @@ const PositionTable = ({ positions, currentPrice, players }) => {
             </tr>
           </thead>
         </table>
-        <div className="overflow-y-auto max-h-80">
+        <div className="overflow-x-auto overflow-y-auto max-h-80 ">
           <table className="min-w-full bg-white">
             <tbody className="text-gray-700">
               {filteredPositions.slice(0, 10).map((position, index) => {
@@ -99,24 +106,40 @@ const PositionTable = ({ positions, currentPrice, players }) => {
                 return (
                   <tr
                     key={index}
-                    className={`hover:bg-gray-200 transition-colors text-xs sm:text-base ${rowClass}`}
+                    className={`hover:bg-gray-200 transition-colors text-xs sm:text-base `}
                   >
-                    <td className="py-2 px-2 sm:px-4 text-center w-1/6">
-                      {userDisplayName}
+                    <td
+                      className={
+                        type == "long"
+                          ? ` bg-green-300 py-2 px-2 sm:px-4 text-center w-1/6`
+                          : "bg-red-300 py-2 px-2 sm:px-4 text-center w-1/6"
+                      }
+                    >
+                      {`${userDisplayName} (${type})`}
                     </td>
-                    <td className="py-2 px-2 sm:px-4 text-center w-1/6">
+                    <td
+                      className={`hidden sm:table-cell py-2 px-2 sm:px-4 text-center w-1/6 ${rowClass}`}
+                    >
                       {formattedTimestamp}
                     </td>
-                    <td className="py-2 px-2 sm:px-4 text-center w-1/6">
+                    <td
+                      className={`py-2 px-2 sm:px-4 text-center w-1/6 ${rowClass}`}
+                    >
                       {formattedOpenPrice}
                     </td>
-                    <td className="py-2 px-2 sm:px-4 text-center w-1/6">
+                    <td
+                      className={`py-2 px-2 sm:px-4 text-center w-1/6 ${rowClass}`}
+                    >
                       {formattedAmount}
                     </td>
-                    <td className="py-2 px-2 sm:px-4 text-center w-1/6">
+                    <td
+                      className={`py-2 px-2 sm:px-4 text-center w-1/6 ${rowClass}`}
+                    >
                       {formattedClosePrice}
                     </td>
-                    <td className="py-2 px-2 sm:px-4 text-center w-1/6">
+                    <td
+                      className={`py-2 px-2 sm:px-4 text-center w-1/6 ${rowClass}`}
+                    >
                       {formattedProfit}
                     </td>
                   </tr>

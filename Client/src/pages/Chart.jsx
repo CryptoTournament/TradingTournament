@@ -3,9 +3,14 @@ import { Line } from "react-chartjs-2";
 import moment from "moment";
 import { w3cwebsocket as WebSocket } from "websocket";
 import useUser from "../hooks/useUser";
+import Chart from "chart.js/auto";
+import "chartjs-adapter-moment";
 import PositionTable from "../components/PositionTable";
 import OpenPosition from "../components/OpenPosition";
+import axios from "axios";
 import { w3cwebsocket as WebSocketClient } from "websocket";
+import http from "http";
+import { getUser } from "../api/users";
 
 import {
   addPosition,
@@ -27,7 +32,6 @@ const CryptoChart = ({ tournament, showChart }) => {
   const [data, setData] = useState([]);
   const [interval, setInterval] = useState("1m");
   const [domain, setDomain] = useState([null, null]);
-  const [zoomLevel, setZoomLevel] = useState(50);
   const [shouldUpdate, setShouldUpdate] = useState(true);
   const [pointToBuySell, setPointToBuySell] = useState(null);
   const [amount, setAmount] = useState("");
@@ -215,25 +219,6 @@ const CryptoChart = ({ tournament, showChart }) => {
       socket.close();
     };
   }, [interval, shouldUpdate]);
-
-  useEffect(() => {
-    const chartHeight = 900; // Increase the chart height
-    const priceRange =
-      Math.max(...data.map((d) => d.price)) -
-      Math.min(...data.map((d) => d.price));
-    const pricePerPixel = priceRange / chartHeight;
-    const zoomFactor = zoomLevel / 50;
-    const newPriceRange = priceRange * zoomFactor;
-    const newDomainMidpoint =
-      (Math.max(...data.map((d) => d.price)) +
-        Math.min(...data.map((d) => d.price))) /
-      2;
-    const newDomain = [
-      newDomainMidpoint - newPriceRange / 2,
-      newDomainMidpoint + newPriceRange / 2,
-    ];
-    setDomain(newDomain);
-  }, [zoomLevel, data]);
 
   useEffect(() => {
     console.log(tournament);
@@ -546,6 +531,7 @@ const CryptoChart = ({ tournament, showChart }) => {
           display: false,
         },
       },
+
       y: {
         display: true,
 
@@ -568,22 +554,23 @@ const CryptoChart = ({ tournament, showChart }) => {
 
         borderColor: "rgba(75, 192, 192, 0.4)",
         pointBorderColor: function (context) {
-          // const index = context.dataIndex;
-          // const value = context.dataset.data[index];
+          const index = context.dataIndex;
+          const value = context.dataset.data[index];
 
-          // if (value) {
-          //   const matchingPositions = positions.filter(
-          //     ([timestamp]) => timestamp === value.x
-          //   );
+          if (value) {
+            const matchingPositions = positions.filter(
+              ([timestamp]) => timestamp === value.x
+            );
 
-          //   if (matchingPositions.length > 0) {
-          //     const borderColor = matchingPositions[0]
-
-          //     return ;
-
-          //   }
-          // }
-
+            matchingPositions.forEach(([, , , , , uid]) => {
+              sortedPlayers.forEach((player) => {
+                if (player.uid === uid) {
+                  console.log(player);
+                  //find the user color here
+                }
+              });
+            });
+          }
           return "rgba(75, 192, 192, 0.4)"; // Default color
         },
 
@@ -683,7 +670,7 @@ const CryptoChart = ({ tournament, showChart }) => {
   const PriceDisplay = () => {
     if (pointToBuySell !== null) {
       return (
-        <p className="text-base sm:text-4xl font-bold text-white">
+        <p className="text-lg sm:text-4xl font-bold text-white">
           Bitcoin Price: {pointToBuySell[1]}
         </p>
       );
@@ -715,7 +702,7 @@ const CryptoChart = ({ tournament, showChart }) => {
             </span>
           </h1>
           <div className="text-2xl sm:text-3xl font-semibold mb-4 text-left text-black">
-            Your Tournament Balance: {Math.floor(gameBalance).toLocaleString()}$
+            Your Balance: {Math.floor(gameBalance).toLocaleString()}$
           </div>
           <div className="text-black font-semibold">
             {moment(tournament.end_date).diff(moment(), "hours") +
@@ -723,7 +710,7 @@ const CryptoChart = ({ tournament, showChart }) => {
           </div>
         </div>
       </div>
-      <div className="flex w-full ml-60 sm:ml-72 translate-y-14 z-50">
+      <div className="flex w-full ml-52 sm:ml-72  translate-y-14 z-50">
         <PriceDisplay />
       </div>
       <div className="flex flex-col 2xl:flex-row w-full px-10">
@@ -741,11 +728,7 @@ const CryptoChart = ({ tournament, showChart }) => {
               value={amount}
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
-                if (!isNaN(value)) {
-                  setAmount(value);
-                } else {
-                  setAmount("");
-                }
+                setAmount(isNaN(value) ? "" : value);
               }}
               placeholder="Amount"
               className="mr-2 text-center"
@@ -770,7 +753,7 @@ const CryptoChart = ({ tournament, showChart }) => {
             </button>
             {!canTrade && (
               <button
-                className="px-4 mx-1 py-2 bg-red-500 text-white rounded"
+                className="px-4 py-2 bg-red-500 text-white rounded"
                 onClick={closePosition}
               >
                 Close Position

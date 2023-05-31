@@ -16,12 +16,10 @@ const OrcaWatcher = ({ mouseCoords }) => {
   }, [angleFromOrca]);
   useEffect(() => {
     const rect = Orca.current.getBoundingClientRect();
-    console.log(rect);
     setAnchor({
       x: (rect.left + 500 + rect.width + 20) / 2,
       y: (rect.top + 120 + rect.height + 200) / 2,
     });
-    console.log(rect.left + rect.width);
     const angleDeg = angle(mouseCoords.x, mouseCoords.y, anchor.x, anchor.y);
     setAngleFromOrca(angleDeg);
   }, [anchor.x, anchor.y, mouseCoords]);
@@ -41,13 +39,13 @@ const OrcaWatcher = ({ mouseCoords }) => {
         ref={Orca}
         alt="orca logo"
         src={Avatar}
-        className="hidden sm:block left-[450px] absolute h-44 w-60 px-8 mx-7 " //visibile only on big screens
+        className="hidden lg:block left-[450px] absolute h-44 w-60 px-8 mx-7 " //visibile only on big screens
       ></img>
       <img
         ref={leftEye}
         alt="left eye ball"
         src={eye7}
-        className={`hidden sm:block absolute  rounded-full left-[599px] h-3 w-3  top-[430px] transform rotate-[${
+        className={`hidden lg:block absolute  rounded-full left-[599px] h-3 w-3  top-[430px] transform rotate-[${
           90 + angleFromOrca
         }deg] `}
       ></img>
@@ -56,7 +54,7 @@ const OrcaWatcher = ({ mouseCoords }) => {
         ref={rightEye}
         alt="right eye ball"
         src={eye7}
-        className={`hidden sm:block absolute rounded-full transform rotate-[${
+        className={`hidden lg:block absolute rounded-full transform rotate-[${
           angleFromOrca + 90
         }deg]   h-3 w-3  left-[620px] top-[430px] `}
       ></img>

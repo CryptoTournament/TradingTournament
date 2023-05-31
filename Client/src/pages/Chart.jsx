@@ -447,18 +447,28 @@ const CryptoChart = ({ tournament, showChart }) => {
         display: true,
       },
       zoom: {
-        pan: {
-          enabled: true,
-          mode: "x",
+        pinch: {
+          enabled: true, // Enable pinch zooming
         },
-        zoom: {
-          pinch: {
-            enabled: true, // Enable pinch zooming
-          },
-          wheel: {
-            enabled: true, // Enable wheel zooming
-          },
-          mode: "x",
+        wheel: {
+          enabled: true, // Enable wheel zooming
+        },
+        mode: "x",
+        onZoom: function (context) {
+          setShouldUpdate(false);
+        },
+        onZoomComplete: function (context) {
+          const chart = context.chart;
+          const xAxis = chart.scales.x;
+          const { min, max } = xAxis.options.ticks;
+          const { left, right } = chart.chartArea;
+          const currentMin = xAxis.getValueForPixel(left);
+          const currentMax = xAxis.getValueForPixel(right);
+
+          if (currentMin !== min || currentMax !== max) {
+            setDomain([currentMin, currentMax]);
+          }
+          setShouldUpdate(true);
         },
       },
     },
@@ -614,7 +624,7 @@ const CryptoChart = ({ tournament, showChart }) => {
   const PriceDisplay = () => {
     if (pointToBuySell !== null) {
       return (
-        <p className="text-2xl sm:text-4xl font-bold text-black">
+        <p className="text-2xl sm:text-4xl font-bold text-white">
           Bitcoin Price: {pointToBuySell[1]}
         </p>
       );
@@ -654,7 +664,7 @@ const CryptoChart = ({ tournament, showChart }) => {
           </div>
         </div>
       </div>
-      <div className="flex w-full ml-96">
+      <div className="flex w-full ml-72 translate-y-14 z-50">
         <PriceDisplay />
       </div>
       <div className="flex flex-col 2xl:flex-row w-full px-10">

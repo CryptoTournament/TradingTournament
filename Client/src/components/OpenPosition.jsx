@@ -126,18 +126,19 @@ const OpenPosition = ({ positions, currentPrice, players }) => {
   return (
     <div className="flex flex-col items-center  w-full px-4">
       <div className="flex xl:flex-col">
-        <h2 className="text-xl font-bold mb-5 mr-8 xl:mr-0 xl:ml-6 text-gray-800">
+        <h2 className="text-xl font-bold mb-5 mr-8 xl:mr-0 xl:ml-8 text-gray-800">
           Open Positions
         </h2>
         <div className="flex items-center mb-4">
           <label htmlFor="search" className="mr-2">
-            <FcSearch />
+            <FcSearch size={24} />
           </label>
           <input
             type="text"
             id="search"
             value={searchValue}
             onChange={handleSearchChange}
+            placeholder="search by name"
             className="px-2 py-1 border border-gray-300 rounded"
           />
         </div>

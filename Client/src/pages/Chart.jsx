@@ -11,6 +11,8 @@ import axios from "axios";
 import { w3cwebsocket as WebSocketClient } from "websocket";
 import http from "http";
 import Context from "../utils/context";
+import { getUser } from "../api/users";
+
 
 import {
   addPosition,
@@ -20,7 +22,7 @@ import {
 
 const API_URL = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m";
 const HISTORY_API_URL =
-  "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=60";
+  "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1440";
 
 const CryptoChart = ({ tournament, showChart }) => {
   const { game_name, number_of_players, max_players, players, tournament_id } =
@@ -47,6 +49,10 @@ const CryptoChart = ({ tournament, showChart }) => {
   const [client, setClient] = useState(null);
   const [webSocketReady, setWebSocketReady] = useState(false);
   const [refreshChart, setRefreshChart] = useState(0);
+  const [coinSymbol, setCoinSymbol] = useState("BTC")
+  
+
+
 
   function parseDataString(dataString) {
     const cleanedString = dataString.replace(
@@ -429,6 +435,8 @@ const CryptoChart = ({ tournament, showChart }) => {
     );
   }
 
+
+
   const options = {
     maintainAspectRatio: false,
     responsive: true,
@@ -446,32 +454,73 @@ const CryptoChart = ({ tournament, showChart }) => {
       title: {
         display: true,
       },
-      zoom: {
-        pinch: {
-          enabled: true, // Enable pinch zooming
-        },
-        wheel: {
-          enabled: true, // Enable wheel zooming
-        },
-        mode: "x",
-        onZoom: function (context) {
-          setShouldUpdate(false);
-        },
-        onZoomComplete: function (context) {
-          const chart = context.chart;
-          const xAxis = chart.scales.x;
-          const { min, max } = xAxis.options.ticks;
-          const { left, right } = chart.chartArea;
-          const currentMin = xAxis.getValueForPixel(left);
-          const currentMax = xAxis.getValueForPixel(right);
 
-          if (currentMin !== min || currentMax !== max) {
-            setDomain([currentMin, currentMax]);
-          }
-          setShouldUpdate(true);
+    
+      tooltip: {
+        mode: 'nearest',
+        cornerRadius: 20,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        borderColor: "rgba(75, 192, 192, 0.4)",
+        borderWidth: 3,
+        padding: 12,
+        bodySpacing: 4,
+        titleColor: "rgba(75, 192, 192, 0.8)",
+        bodyFont:{
+          family: "Arial",
+          size: 18
         },
-      },
-    },
+        displayColors: false,
+        callbacks: {
+          title(tooltipItems) {
+            if(tooltipItems.length > 0) {
+                const item = tooltipItems[0];
+                const labels = item.chart.data.labels;
+                const labelCount = labels ? labels.length : 0;
+                const price = item.formattedValue.toString();
+                if (this && this.options && this.options.mode === 'dataset') {
+                    return [item.dataset.label || '', coinSymbol + " Price " + price];
+                } else if (item.label) {
+                    return [item.label, coinSymbol + " Price " + price];
+                } else if (labelCount > 0 && item.dataIndex < labelCount) {
+                    return [labels[item.dataIndex],coinSymbol + " Price " + price];
+                }
+            }
+            return '';
+            },
+                 label: function (context) {
+                const index = context.dataIndex;
+                const value = context.dataset.data[index];
+                const price = value.y.toString()
+                let label = [];
+                let lineToAdd = ""
+    
+                if (value) {
+                    const matchingPositions = positions.filter(
+                        ([timestamp]) => timestamp === value.x
+                    );
+
+                    matchingPositions.forEach(([, , amount,,,uid]) => {
+                      
+                        sortedPlayers.forEach((player) => {
+                            if(player.uid === uid) {
+                              lineToAdd += player.displayName ;
+                            }
+                        });
+                        lineToAdd += " ("+amount.toString() + ")";
+                        label.push(lineToAdd)
+                        lineToAdd = ""
+                    });
+                }
+    
+                return label;
+            }
+        }
+    }
+  },
+
+    
+
+
     interaction: {
       mode: "index",
       intersect: false,
@@ -492,6 +541,7 @@ const CryptoChart = ({ tournament, showChart }) => {
         },
       },
     },
+
     scales: {
       x: {
         type: "time",
@@ -512,6 +562,7 @@ const CryptoChart = ({ tournament, showChart }) => {
       },
       y: {
         display: true,
+        
         ticks: {
           color: "rgba(255,255,255,0.7)",
           enabled: false,
@@ -519,6 +570,8 @@ const CryptoChart = ({ tournament, showChart }) => {
       },
     },
   };
+
+  
   const chartData = {
     datasets: [
       {
@@ -527,7 +580,32 @@ const CryptoChart = ({ tournament, showChart }) => {
           y: d.price,
         })),
         type: "line",
-        borderColor: "rgba(75,192,192,0.7)",
+
+        borderColor: "rgba(75, 192, 192, 0.4)",
+        pointBorderColor: function (context) {
+          // const index = context.dataIndex;
+          // const value = context.dataset.data[index];
+
+          // if (value) {
+          //   const matchingPositions = positions.filter(
+          //     ([timestamp]) => timestamp === value.x
+          //   );
+
+          //   if (matchingPositions.length > 0) {
+          //     const borderColor = matchingPositions[0]
+     
+          //     return ;
+              
+          //   }
+          // }
+
+          return "rgba(75, 192, 192, 0.4)"; // Default color
+        },
+
+
+
+
+
         backgroundColor: function (context) {
           const gradient = context.chart.ctx.createLinearGradient(
             0,
@@ -669,12 +747,19 @@ const CryptoChart = ({ tournament, showChart }) => {
       </div>
       <div className="flex flex-col 2xl:flex-row w-full px-10">
         <div className={`transition-all duration-1000 w-full`}>
+          
           <div
             className={`chart-container mr-0 rounded-lg p-4 bg-black w-full  h-96 relative transition-all duration-500 ${
               showChartFullWidth ? "md:w-11/12" : "md:w-11/12"
             }`}
           >
             <Line data={chartData} options={options} />
+
+
+
+
+
+
           </div>
           <div className="flex justify-center mt-4">
             <input

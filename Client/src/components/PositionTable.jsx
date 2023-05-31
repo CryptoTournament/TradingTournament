@@ -4,7 +4,7 @@ import { useState } from "react";
 const PositionTable = ({ positions, currentPrice, players }) => {
   const closedPositions = positions
     .filter(([, , , closePrice]) => closePrice !== 0)
-    .reverse(); // Reverse the array to display newest positions at the top
+    .reverse();
 
   const getRowClass = (profit) => {
     if (profit >= 0) {
@@ -37,7 +37,7 @@ const PositionTable = ({ positions, currentPrice, players }) => {
 
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-xl font-bold mb-5">Closed Positions</h2>
+      <h2 className="text-lg sm:text-xl font-bold mb-5">Closed Positions</h2>
       <div className="flex items-center mb-4">
         <label htmlFor="search" className="mr-2 text-black">
           Search by Display Name:
@@ -52,14 +52,18 @@ const PositionTable = ({ positions, currentPrice, players }) => {
       </div>
       <div className="overflow-hidden rounded-lg shadow-lg">
         <table className="min-w-full bg-white">
-          <thead className="bg-gray-100 text-gray-800 uppercase">
+          <thead className="bg-gray-100 text-gray-800 uppercase text-xs sm:text-base">
             <tr>
-              <th className="py-2 px-4 w-1/6 text-center">Player</th>
-              <th className="py-2 px-4 w-1/6 text-center">Timestamp</th>
-              <th className="py-2 px-4 w-1/6 text-center">Open Price</th>
-              <th className="py-2 px-4 w-1/6 text-center">Amount</th>
-              <th className="py-2 px-4 w-1/6 text-center">Close Price</th>
-              <th className="py-2 px-4 w-1/6 text-center">Profit</th>
+              <th className="py-2 px-2 sm:px-4 w-1/6 text-center">Player</th>
+              <th className="py-2 px-2 sm:px-4 w-1/6 text-center">Timestamp</th>
+              <th className="py-2 px-2 sm:px-4 w-1/6 text-center">
+                Open Price
+              </th>
+              <th className="py-2 px-2 sm:px-4 w-1/6 text-center">Amount</th>
+              <th className="py-2 px-2 sm:px-4 w-1/6 text-center">
+                Close Price
+              </th>
+              <th className="py-2 px-2 sm:px-4 w-1/6 text-center">Profit</th>
             </tr>
           </thead>
         </table>
@@ -95,24 +99,24 @@ const PositionTable = ({ positions, currentPrice, players }) => {
                 return (
                   <tr
                     key={index}
-                    className={`hover:bg-gray-200 transition-colors ${rowClass}`}
+                    className={`hover:bg-gray-200 transition-colors text-xs sm:text-base ${rowClass}`}
                   >
-                    <td className="py-3 px-4 text-center w-1/6">
+                    <td className="py-2 px-2 sm:px-4 text-center w-1/6">
                       {userDisplayName}
                     </td>
-                    <td className="py-3 px-4 text-center w-1/6">
+                    <td className="py-2 px-2 sm:px-4 text-center w-1/6">
                       {formattedTimestamp}
                     </td>
-                    <td className="py-3 px-4 text-center w-1/6">
+                    <td className="py-2 px-2 sm:px-4 text-center w-1/6">
                       {formattedOpenPrice}
                     </td>
-                    <td className="py-3 px-4 text-center w-1/6">
+                    <td className="py-2 px-2 sm:px-4 text-center w-1/6">
                       {formattedAmount}
                     </td>
-                    <td className="py-3 px-4 text-center w-1/6">
+                    <td className="py-2 px-2 sm:px-4 text-center w-1/6">
                       {formattedClosePrice}
                     </td>
-                    <td className="py-3 px-4 text-center w-1/6">
+                    <td className="py-2 px-2 sm:px-4 text-center w-1/6">
                       {formattedProfit}
                     </td>
                   </tr>

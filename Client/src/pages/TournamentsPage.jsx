@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import Chart from "./Chart";
 import { getTournaments, joinTournament } from "../api/tournaments";
@@ -10,8 +10,10 @@ import Swal from "sweetalert2";
 import trophy from "../../public/images/trophy.png";
 import { GiTrophy } from "react-icons/gi";
 import NewTournamentForm from "../components/NewTournamentForm";
-
+import UserContext from "../contexts/UserContext";
 const TournamentsPage = () => {
+  const { userBalance, setUserBalance } = useContext(UserContext);
+
   const { user } = useUser();
   const [tournaments, setTournaments] = useState([]);
   const [selectedTournament, setSelectedTournament] = useState(null);
@@ -27,6 +29,16 @@ const TournamentsPage = () => {
     setShowForm(false);
   };
 
+  const formatGameCurrency = (value) => {
+    // return Math.floor(value).toLocaleString();
+    if (value >= 1000000) {
+      return (value / 1000000).toFixed(1) + "M";
+    } else if (value >= 100000) {
+      return (value / 1000).toLocaleString() + "k";
+    } else {
+      return value.toLocaleString();
+    }
+  };
   useEffect(() => {
     const fetchTournaments = async () => {
       try {
@@ -45,6 +57,9 @@ const TournamentsPage = () => {
   const handleJoin = async (tournament, uid) => {
     try {
       const newTournament = await joinTournament(tournament.tournament_id, uid);
+      console.log(userBalance);
+      console.log(tournament.buy_in_cost);
+      setUserBalance(userBalance - tournament.buy_in_cost);
       const fetchedTournaments = await getTournaments();
       setTournaments(fetchedTournaments);
       setSelectedTournament(newTournament);
@@ -111,17 +126,17 @@ const TournamentsPage = () => {
               />
             )}
           </div>
+
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by Tournament name"
+            className="px-4 w-1/5 py-2 rounded-md border border-gray-300 mb-4 text-center"
+          />
         </>
       )}
 
-      {/* Rest of the code */}
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Search by Tournament name"
-        className="px-4 w-1/5 py-2 rounded-md border border-gray-300 mb-4 text-center"
-      />
       {selectedTournament ? (
         <div className="mx-4 mt-4 w-screen">
           <Chart
@@ -200,9 +215,15 @@ const TournamentsPage = () => {
                     className="mr-7 mb-3 hover:text-amber-400"
                   />
                   <ul className="text-gray-500">
-                    <li className="text-amber-400">{`1st place: ${tournament.first_place_prize}$`}</li>
-                    <li className="text-white">{`2nd place:  ${tournament.second_place_prize}$`}</li>
-                    <li className="text-orange-300">{`3rd place:  ${tournament.third_place_prize}$`}</li>
+                    <li className="text-amber-400">{`1st place: ${formatGameCurrency(
+                      tournament.first_place_prize
+                    )} $`}</li>
+                    <li className="text-white">{`2nd place:  ${formatGameCurrency(
+                      tournament.second_place_prize
+                    )} $`}</li>
+                    <li className="text-orange-300">{`3rd place:  ${formatGameCurrency(
+                      tournament.third_place_prize
+                    )} $`}</li>
                   </ul>
                 </div>
               </div>

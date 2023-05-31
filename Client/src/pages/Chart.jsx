@@ -272,12 +272,20 @@ const CryptoChart = ({ tournament, showChart }) => {
 
   const closePosition = async () => {
     const updatedPositions = [];
+    let totalBalanceChange = 0; // to keep track of how much the balance has changed
 
     for (let position of positions) {
       if (position[3] === 0 && position[5] === user.uid) {
         const closePrice = pointToBuySell[1];
         const updatedPosition = [...position];
         updatedPosition[3] = closePrice === 0 ? pointToBuySell[1] : closePrice;
+
+        // calculate the balance change due to this position
+        if (position[4] === "long") {
+          totalBalanceChange += (closePrice - position[1]) * position[2];
+        } else if (position[4] === "short") {
+          totalBalanceChange += (position[1] - closePrice) * position[2];
+        }
 
         // Close the position on the server
         try {
@@ -291,6 +299,21 @@ const CryptoChart = ({ tournament, showChart }) => {
       }
     }
 
+    // Update game_currency for the current player
+    const playersUpdated = players.map((player) =>
+      player.uid === user.uid
+        ? {
+            ...player,
+            game_currency: player.game_currency + totalBalanceChange,
+          }
+        : player
+    );
+
+    const sortedPlayersCalculation = [...playersUpdated].sort(
+      (a, b) => b.game_currency - a.game_currency
+    );
+
+    setSortedPlayers(sortedPlayersCalculation);
     setPositions(updatedPositions);
     updateBalance(updatedPositions);
     setCanTrade(true);
@@ -318,8 +341,22 @@ const CryptoChart = ({ tournament, showChart }) => {
           await addPosition(tournament.tournament_id, position);
           setPositions((prevPositions) => [...prevPositions, position]);
           setGameBalance(gameBalance - amount);
+
+          // Update game_currency for the current player
+          const playersUpdated = players.map((player) =>
+            player.uid === user.uid
+              ? { ...player, game_currency: player.game_currency - amount }
+              : player
+          );
+
+          const sortedPlayersCalculation = [...playersUpdated].sort(
+            (a, b) => b.game_currency - a.game_currency
+          );
+
+          setSortedPlayers(sortedPlayersCalculation);
           setCanTrade(false);
           setRefreshChart(refreshChart + 1);
+          setAmount(0);
         } catch (error) {
           console.error("Error adding position", error);
           // here you can handle the error, for example show a message to the user
@@ -352,8 +389,22 @@ const CryptoChart = ({ tournament, showChart }) => {
           await addPosition(tournament.tournament_id, position);
           setPositions((prevPositions) => [...prevPositions, position]);
           setGameBalance(gameBalance - amount);
+
+          // Update game_currency for the current player
+          const playersUpdated = players.map((player) =>
+            player.uid === user.uid
+              ? { ...player, game_currency: player.game_currency - amount }
+              : player
+          );
+
+          const sortedPlayersCalculation = [...playersUpdated].sort(
+            (a, b) => b.game_currency - a.game_currency
+          );
+
+          setSortedPlayers(sortedPlayersCalculation);
           setCanTrade(false);
           setRefreshChart(refreshChart + 1);
+          setAmount(0);
         } catch (error) {
           console.error("Error adding position", error);
           // here you can handle the error, for example show a message to the user
@@ -650,23 +701,25 @@ const CryptoChart = ({ tournament, showChart }) => {
               </button>
             )}
           </div>
-          <div className="mt-4">
-            {pointToBuySell ? (
-              <OpenPosition
-                positions={positions}
-                currentPrice={pointToBuySell[1]}
-                players={players}
-              />
-            ) : null}
-          </div>
-          <div className="mt-4">
-            {pointToBuySell ? (
-              <PositionTable
-                positions={positions}
-                currentPrice={pointToBuySell[1]}
-                players={players}
-              />
-            ) : null}
+          <div className="flex flex-col xl:flex-row space-x-16">
+            <div className="mt-4">
+              {pointToBuySell ? (
+                <OpenPosition
+                  positions={positions}
+                  currentPrice={pointToBuySell[1]}
+                  players={players}
+                />
+              ) : null}
+            </div>
+            <div className="mt-4">
+              {pointToBuySell ? (
+                <PositionTable
+                  positions={positions}
+                  currentPrice={pointToBuySell[1]}
+                  players={players}
+                />
+              ) : null}
+            </div>
           </div>
         </div>
         <div

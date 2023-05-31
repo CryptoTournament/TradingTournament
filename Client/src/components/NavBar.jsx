@@ -8,7 +8,8 @@ import NotificationBell from "./NotificationBell";
 import axios from "axios";
 import UserContext from "../contexts/UserContext";
 const NavBar = () => {
-  const { navBarDisplayName, color } = useContext(UserContext);
+  const { navBarDisplayName, color, userBalance, setUserBalance } =
+    useContext(UserContext);
   const { user } = useUser();
   const registeredUserNavLinks = [
     { name: "Shop", path: "/shop" },
@@ -40,13 +41,19 @@ const NavBar = () => {
       try {
         const response = await axios.get(`/api/users/${user.uid}`);
         setUserDetails(response.data);
+        setUserBalance(response.data.balance);
       } catch (error) {
         console.error("Error fetching user data", error);
       }
     };
     fetchData();
   }, [user]);
-
+  let navBarBalance =
+    userBalance && userBalance != 0
+      ? userBalance
+      : userDetails
+      ? userDetails.balance
+      : "";
   return (
     <nav className="bg-gradient-to-r from-bg-navbar-gradient-from to-bg-navbar-gradient-to border-b-4 border-black fixed top-0 w-full">
       <div className="flex justify-between items-center px-4 py-3 md:px-10 md:py-5">
@@ -57,9 +64,11 @@ const NavBar = () => {
           >
             <MdOutlineDeliveryDining size={48} />
           </Link>
-          <h1 className="text-gray-200 hover:animate-pulse hover:bg-gray-700 hover:text-white px-3 rounded-md text-2xl font-medium">
-            {"Balance: " + userDetails.balance}
-          </h1>
+          {user && (
+            <h1 className="text-gray-200 hover:animate-pulse hover:bg-gray-700 hover:text-white px-3 rounded-md text-2xl font-medium">
+              {"Balance: " + navBarBalance}
+            </h1>
+          )}
         </div>
         <div className="flex">
           {user ? (

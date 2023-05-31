@@ -14,11 +14,20 @@ import Shop from "./pages/Shop";
 import LeaderBoard from "./pages/LeaderBoard";
 import TournamentsPage from "./pages/TournamentsPage";
 import UserContext from "./contexts/UserContext";
+import PrivateRoute from "./pages/PrivateRoute";
+import useUser from "./hooks/useUser";
 import { useState } from "react";
 function App() {
   const [navBarDisplayName, setNavBarDisplayName] = useState("");
   const [color, setColor] = useState("");
   const [userBalance, setUserBalance] = useState(0);
+
+  const { user, isLoading } = useUser();
+
+  if (isLoading) {
+    return <div>Loading...</div>; // or your loading component here
+  }
+
   return (
     <UserContext.Provider
       value={{
@@ -40,12 +49,50 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/register" element={<SignUpPage />} />
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/chart" element={<TournamentsPage />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/friends" element={<Friends />} />
+              <Route
+                path="/chart"
+                element={
+                  <PrivateRoute user={user}>
+                    <TournamentsPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute user={user}>
+                    <Profile />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/friends"
+                element={
+                  <PrivateRoute user={user}>
+                    <Friends />
+                  </PrivateRoute>
+                }
+              />
+
               <Route path="/info" element={<BasicInfoPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/shop" element={<Shop />} />
+
+              {/* <Route
+                path="/settings"
+                element={
+                  <PrivateRoute user={user}>
+                    <SettingsPage />
+                  </PrivateRoute>
+                }
+              /> */}
+              <Route
+                path="/shop"
+                element={
+                  <PrivateRoute user={user}>
+                    <Shop />
+                  </PrivateRoute>
+                }
+              />
+
               <Route path="/leaderboard" element={<LeaderBoard />} />
 
               <Route path="*" element={<NotFoundPage />} />

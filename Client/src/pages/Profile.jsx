@@ -68,7 +68,7 @@ const Profile = () => {
     }
   };
   console.log("Rank:", userDetails.rank);
-  console.log("Image src:", `/images/ranks/${userDetails.rank}.png`);
+  // console.log("Image src:", `/images/ranks/${userDetails.rank}.png`);
 
   const currentRankIndex = ranks.findIndex((rank) => rank === userDetails.rank);
   const nextRankIndex = currentRankIndex + 1;
@@ -79,11 +79,13 @@ const Profile = () => {
     <div className="container mx-auto mt-8 ">
       <div className="flex flex-col md:flex-row md:justify-between items-center md:space-x-4 mr-6">
         <div className="flex space-x-4">
-          <img
-            src={`/images/ranks/${userDetails.rank}.png`}
-            alt={`Rank ${userDetails.rank}`}
-            className="hidden ml-6 md:block w-12 h-12 rounded-xl" // Adjust size as needed
-          />
+          {userDetails && userDetails.rank && (
+            <img
+              src={`/images/ranks/${userDetails.rank}.png`}
+              alt={`Rank ${userDetails.rank}`}
+              className="hidden ml-6 md:block w-12 h-12 rounded-xl" // Adjust size as needed
+            />
+          )}
           <div className="flex items-center space-x-2 mb-8">
             <h1 className="text-xl md:text-3xl font-bold ">
               {userDetails.displayName || "Profile"}
@@ -98,11 +100,14 @@ const Profile = () => {
         </div>
 
         <div className="flex mb-4  space-x-4 items-center">
-          <img
-            src={`/images/ranks/${ranks[currentRankIndex]}.png`}
-            alt={`Rank ${ranks[currentRankIndex]}`}
-            className="w-12 h-12 rounded-xl" // Adjust size as needed
-          />
+          {ranks && ranks[currentRankIndex] && (
+            <img
+              src={`/images/ranks/${ranks[currentRankIndex]}.png`}
+              alt={`Rank ${ranks[currentRankIndex]}`}
+              className="w-12 h-12 rounded-xl" // Adjust size as needed
+            />
+          )}
+
           <div className="w-full md:w-1/3 relative pt-1 ">
             <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-indigo-200">
               <div
@@ -114,11 +119,13 @@ const Profile = () => {
               {10 - winsTowardsNextRank} wins left
             </p>
           </div>
-          <img
-            src={`/images/ranks/${ranks[nextRankIndex]}.png`}
-            alt={`Rank ${ranks[nextRankIndex]}`}
-            className="w-12 h-12 rounded-xl " // Adjust size as needed
-          />
+          {ranks && ranks[nextRankIndex] && (
+            <img
+              src={`/images/ranks/${ranks[nextRankIndex]}.png`}
+              alt={`Rank ${ranks[nextRankIndex]}`}
+              className="w-12 h-12 rounded-xl " // Adjust size as needed
+            />
+          )}
         </div>
       </div>
 
@@ -138,11 +145,13 @@ const Profile = () => {
               <h2 className="text-3xl font-bold text-white mt-2 mb-4">
                 {userDetails.displayName || "Profile"}
               </h2>
-              <img
-                src={`/images/ranks/${userDetails.rank}.png`}
-                alt="Profile"
-                className="w-36 h-36 object-cover mb-4 rounded-full border-4 border-indigo-200 shadow-lg transition-transform duration-500 eas ease-in-out hover:animate-bounce"
-              />
+              {userDetails && userDetails.rank && (
+                <img
+                  src={`/images/ranks/${userDetails.rank}.png`}
+                  alt="Profile"
+                  className="w-36 h-36 object-cover mb-4 rounded-full border-4 border-indigo-200 shadow-lg transition-transform duration-500 eas ease-in-out hover:animate-bounce"
+                />
+              )}
             </div>
           </div>
           <div className="p-6 rounded-lg shadow-2xl bg-gradient-to-r from-black to-gray-800 text-white">

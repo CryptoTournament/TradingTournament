@@ -391,6 +391,44 @@ app.post("/api/deny_friend", async (req, res) => {
   }
 });
 
+
+
+
+app.put("/api/update_user_balance", async (req, res) => {
+  try {
+    const { uid, cost } = req.body;
+
+    // Find the user with the given UID
+    const user = await db.collection("users").findOne({ uid });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    if(user.balance < cost){
+      res.status(404).json({ message: `Not enough money, you missing ${cost - user.balance}$` });
+      return;
+    }
+    await db
+    .collection("users")
+    .updateOne(
+      { uid: user.uid },
+      { $set: { balance: user.balance - cost } }
+    );
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Error update user balance", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
+
+
+
+
 // // Create a new notification
 app.post("/api/notifications", async (req, res) => {
   const { uid, message, type } = req.body;

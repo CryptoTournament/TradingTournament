@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { getTournaments } from "../api/tournaments";
 
@@ -11,12 +11,27 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
   const [firstPlacePrize, setFirstPlacePrize] = useState("");
   const [secondPlacePrize, setSecondPlacePrize] = useState("");
   const [thirdPlacePrize, setThirdPlacePrize] = useState("");
+  const [cost, setCost] = useState(0);
 
   const [gameNameError, setGameNameError] = useState("");
   const [endDateError, setEndDateError] = useState("");
   const [maxPlayersError, setMaxPlayersError] = useState("");
   const [joinPriceError, setJoinPriceError] = useState("");
   const [prizeErrors, setPrizeErrors] = useState([]);
+
+
+  useEffect(() => {
+    // Calculate the cost initially and whenever the prize values change
+    let newCost;
+    if (firstPlacePrize == "" && secondPlacePrize == "" && thirdPlacePrize == ""){
+      newCost = 0;
+    } 
+    else{
+      newCost = firstPlacePrize + secondPlacePrize + thirdPlacePrize;
+    }
+    setCost(newCost);
+  }, [firstPlacePrize, secondPlacePrize, thirdPlacePrize]);
+
 
   const handleConfirm = async () => {
     setGameNameError("");
@@ -100,6 +115,16 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
       // Valid form, proceed with submission
       let random = Math.floor(Math.random() * 1000000);
       const response = await axios.get(`/api/users/${uid}`);
+      // Calculate the cost
+      const newCost = firstPlacePrize + secondPlacePrize + thirdPlacePrize;
+      setCost(newCost);
+      const responsePut = await axios.put(
+        `/api/update_user_balance`,
+        {
+          uid: uid,
+          cost: newCost,
+        }
+      );
       // Prepare the data object with form values and uid
       const data = {
         tournament_id: `${random}`,
@@ -119,7 +144,7 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
             displayName: response.data.displayName,
             positions: [],
           },
-        ],
+        ]
       };
 
       // Send a POST request to the server with the data
@@ -136,6 +161,7 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
           // Handle any errors that occurred during the request
           console.error(error);
         });
+
       const fetchTournaments = async () => {
         try {
           const fetchedTournaments = await getTournaments();
@@ -145,6 +171,7 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
           console.error("Error fetching tournaments", error);
         }
       };
+
       fetchTournaments();
     }
   };
@@ -228,9 +255,10 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
               <input
                 type="number"
                 value={firstPlacePrize}
-                onChange={(e) =>
+                onChange={(e) =>{
                   setFirstPlacePrize(parseInt(e.target.value) || 0)
                 }
+              }
                 className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
               {prizeErrors.includes("First prize must be greater than 0") && (
@@ -303,15 +331,26 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
                 </p>
               )}
             </div>
+            <div style={{ textAlign: 'center' }}>
+            <label className="block text-gray-700 text-xl font-bold mt-5">
+              {`Cost: ${cost}$`}
+            </label>
           </div>
-        </div>
-        <div className="mt-6 flex justify-end">
-          <button
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
-            onClick={handleConfirm}
-          >
-            Create Tournament
-          </button>
+          </div>
+          <div className="mt-8">
+            <button
+              className="bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
+              onClick={handleConfirm}
+            >
+              Create Tournament
+            </button>
+            <button
+              className="bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-md hover:bg-gray-400 transition-colors ml-4"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>

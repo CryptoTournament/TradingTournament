@@ -19,19 +19,20 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
   const [joinPriceError, setJoinPriceError] = useState("");
   const [prizeErrors, setPrizeErrors] = useState([]);
 
-
   useEffect(() => {
     // Calculate the cost initially and whenever the prize values change
     let newCost;
-    if (firstPlacePrize == "" && secondPlacePrize == "" && thirdPlacePrize == ""){
+    if (
+      firstPlacePrize == "" ||
+      secondPlacePrize == "" ||
+      thirdPlacePrize == ""
+    ) {
       newCost = 0;
-    } 
-    else{
+    } else {
       newCost = firstPlacePrize + secondPlacePrize + thirdPlacePrize;
     }
     setCost(newCost);
   }, [firstPlacePrize, secondPlacePrize, thirdPlacePrize]);
-
 
   const handleConfirm = async () => {
     setGameNameError("");
@@ -118,13 +119,10 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
       // Calculate the cost
       const newCost = firstPlacePrize + secondPlacePrize + thirdPlacePrize;
       setCost(newCost);
-      const responsePut = await axios.put(
-        `/api/update_user_balance`,
-        {
-          uid: uid,
-          cost: newCost,
-        }
-      );
+      const responsePut = await axios.put(`/api/update_user_balance`, {
+        uid: uid,
+        cost: newCost,
+      });
       // Prepare the data object with form values and uid
       const data = {
         tournament_id: `${random}`,
@@ -144,7 +142,7 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
             displayName: response.data.displayName,
             positions: [],
           },
-        ]
+        ],
       };
 
       // Send a POST request to the server with the data
@@ -207,18 +205,20 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
               )}
             </div>
 
-      <div>
-        <label className="block text-gray-700 font-medium">End Date and Time</label>
-        <input
-          type="datetime-local" // Change input type to datetime-local
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-        />
-        {endDateError && (
-          <p className="text-red-500 truncate">{endDateError}</p>
-        )}
-      </div>
+            <div>
+              <label className="block text-gray-700 font-medium">
+                End Date and Time
+              </label>
+              <input
+                type="datetime-local" // Change input type to datetime-local
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+              {endDateError && (
+                <p className="text-red-500 truncate">{endDateError}</p>
+              )}
+            </div>
 
             <div>
               <label className="block text-gray-700 font-medium">
@@ -255,10 +255,9 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
               <input
                 type="number"
                 value={firstPlacePrize}
-                onChange={(e) =>{
-                  setFirstPlacePrize(parseInt(e.target.value) || 0)
-                }
-              }
+                onChange={(e) => {
+                  setFirstPlacePrize(parseInt(e.target.value) || 0);
+                }}
                 className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
               {prizeErrors.includes("First prize must be greater than 0") && (
@@ -331,11 +330,11 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
                 </p>
               )}
             </div>
-            <div style={{ textAlign: 'center' }}>
-            <label className="block text-gray-700 text-xl font-bold mt-5">
-              {`Cost: ${cost}$`}
-            </label>
-          </div>
+            <div style={{ textAlign: "center" }}>
+              <label className="block text-gray-700 text-xl font-bold mt-5">
+                {`Cost: ${cost}$`}
+              </label>
+            </div>
           </div>
           <div className="mt-8">
             <button

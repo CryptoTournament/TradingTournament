@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { getTournaments } from "../api/tournaments";
-
+import UserContext from "../contexts/UserContext";
 const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
+  const { userBalance, setUserBalance } = useContext(UserContext);
+
   const [gameName, setGameName] = useState("");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState("");
@@ -159,6 +161,7 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
           // Handle any errors that occurred during the request
           console.error(error);
         });
+      setUserBalance(userBalance - newCost);
 
       const fetchTournaments = async () => {
         try {

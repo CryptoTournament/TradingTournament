@@ -5,7 +5,7 @@ import { fetchSymbolData, fetchKlineData } from "./market_data_handler.js";
 import { ObjectId } from "mongodb";
 import { server as WebSocketServer } from "websocket";
 import http from "http";
-import cron from 'node-cron';
+import cron from "node-cron";
 import moment from "moment";
 dotenv.config();
 
@@ -109,9 +109,6 @@ connectToDb(() => {
     console.log("MongoDB is Online");
   });
 });
-
-
-
 
 // app.get("/api/getNonFriends", async (req, res) => {
 //   try {
@@ -394,9 +391,6 @@ app.post("/api/deny_friend", async (req, res) => {
   }
 });
 
-
-
-
 app.put("/api/update_user_balance", async (req, res) => {
   try {
     const { uid, cost } = req.body;
@@ -409,28 +403,21 @@ app.put("/api/update_user_balance", async (req, res) => {
       return;
     }
 
-    if(user.balance < cost){
-      res.status(404).json({ message: `Not enough money, you missing ${cost - user.balance}$` });
+    if (user.balance < cost) {
+      res.status(404).json({
+        message: `Not enough money, you missing ${cost - user.balance}$`,
+      });
       return;
     }
     await db
-    .collection("users")
-    .updateOne(
-      { uid: user.uid },
-      { $set: { balance: user.balance - cost } }
-    );
+      .collection("users")
+      .updateOne({ uid: user.uid }, { $set: { balance: user.balance - cost } });
     res.status(200).json({ success: true });
   } catch (error) {
     console.error("Error update user balance", error);
     res.status(500).json({ message: "Server error" });
   }
 });
-
-
-
-
-
-
 
 // // Create a new notification
 app.post("/api/notifications", async (req, res) => {
@@ -591,23 +578,23 @@ app.post("/api/newTournament", async (req, res) => {
 
     // Get the tournament data from the request body
     const tournamentData = req.body;
-    console.log(tournamentData)
+    console.log(tournamentData);
     // Add the tournament to the database
     const result = await db.collection("tournaments").insertOne(tournamentData);
     const endDate = moment(tournamentData.end_date);
-    const cronPattern = `${endDate.minutes()} ${endDate.hours()} ${endDate.date()} ${endDate.month()+1} *`;
+    const cronPattern = `${endDate.minutes()} ${endDate.hours()} ${endDate.date()} ${
+      endDate.month() + 1
+    } *`;
     cron.schedule(cronPattern, async () => {
       // Perform the desired action at the specified end date and time
       console.log("Scheduled time reached!");
       winners_uid = await findTopPlayers(tournamentData);
       console.log("x", winners_uid);
-      
+
       // prizes to winners.
       // close tournament
       // fetch all new tournament
       // get out of all investors
-
-      
     });
     // Return the inserted tournament data
     res.json(result);
@@ -617,16 +604,17 @@ app.post("/api/newTournament", async (req, res) => {
   }
 });
 
-
-
 async function findTopPlayers(tournamentData) {
   try {
-    const tournaments = await db.collection("tournaments").find({tournament_id: tournamentData.tournament_id}).toArray();
+    const tournaments = await db
+      .collection("tournaments")
+      .find({ tournament_id: tournamentData.tournament_id })
+      .toArray();
 
     let topPlayers = {
       firstPlace: { uid: "", gameCurrency: 0 },
       secondPlace: { uid: "", gameCurrency: 0 },
-      thirdPlace: { uid: "", gameCurrency: 0 }
+      thirdPlace: { uid: "", gameCurrency: 0 },
     };
 
     for (const tournament of tournaments) {
@@ -636,18 +624,18 @@ async function findTopPlayers(tournamentData) {
           topPlayers.secondPlace = topPlayers.firstPlace;
           topPlayers.firstPlace = {
             uid: player.uid,
-            gameCurrency: player.game_currency
+            gameCurrency: player.game_currency,
           };
         } else if (player.game_currency > topPlayers.secondPlace.gameCurrency) {
           topPlayers.thirdPlace = topPlayers.secondPlace;
           topPlayers.secondPlace = {
             uid: player.uid,
-            gameCurrency: player.game_currency
+            gameCurrency: player.game_currency,
           };
         } else if (player.game_currency > topPlayers.thirdPlace.gameCurrency) {
           topPlayers.thirdPlace = {
             uid: player.uid,
-            gameCurrency: player.game_currency
+            gameCurrency: player.game_currency,
           };
         }
       }
@@ -663,7 +651,7 @@ async function findTopPlayers(tournamentData) {
     ) {
       topPlayers.thirdPlace.uid = "";
     }
-    console.log("top", topPlayers)
+    console.log("top", topPlayers);
     updatePlayerBalances(tournamentData, topPlayers);
     return topPlayers;
   } catch (error) {
@@ -671,8 +659,6 @@ async function findTopPlayers(tournamentData) {
     throw error;
   }
 }
-
-
 
 async function updatePlayerBalances(tournamentData, topPlayers) {
   const firstPlacePrize = tournamentData.first_place_prize;
@@ -684,46 +670,66 @@ async function updatePlayerBalances(tournamentData, topPlayers) {
   const playersToUpdate = [firstPlace, secondPlace, thirdPlace].filter(Boolean);
 
   try {
-    await db.collection("users").updateMany(
-      { uid: { $in: playersToUpdate.map(player => player.uid) } },
-      [
-        {
-          $set: {
-            balance: {
-              $cond: [
-                { $eq: ["$uid", firstPlace.uid] },
-                { $add: ["$balance", firstPlacePrize] },
-                {
-                  $cond: [
-                    { $eq: ["$uid", secondPlace?.uid] },
-                    { $add: ["$balance", secondPlacePrize] },
-                    { $add: ["$balance", thirdPlacePrize] }
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      ]
-    );
+    await db
+      .collection("users")
+      .updateMany(
+        { uid: { $in: playersToUpdate.map((player) => player.uid) } },
+        [
+          {
+            $set: {
+              balance: {
+                $cond: [
+                  { $eq: ["$uid", firstPlace.uid] },
+                  { $add: ["$balance", firstPlacePrize] },
+                  {
+                    $cond: [
+                      { $eq: ["$uid", secondPlace?.uid] },
+                      { $add: ["$balance", secondPlacePrize] },
+                      { $add: ["$balance", thirdPlacePrize] },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        ]
+      );
 
     console.log("Player balances updated successfully");
     deleteTournament(tournamentData.tournament_id);
+    addNotification(
+      firstPlace.uid,
+      `Congratulaions! You've finished 1st in ${tournamentData.game_name}. you earned ${firstPlacePrize}$`,
+      "tournaments"
+    );
+    secondPlace &&
+      addNotification(
+        secondPlace.uid,
+        `Congratulaions! You've finished 2nd in ${tournamentData.game_name}. you earned ${secondPlacePrize}$`,
+        "tournaments"
+      );
+    thirdPlace &&
+      addNotification(
+        thirdPlace.uid,
+        `Congratulaions! You've finished 3rs in ${tournamentData.game_name}. you earned ${thirdPlacePrize}$`,
+        "tournaments"
+      );
   } catch (error) {
     console.error("Error updating player balances", error);
     throw error;
   }
 }
 
-
-
-
 async function deleteTournament(tournament_id) {
   try {
-    const result = await db.collection("tournaments").deleteOne({ tournament_id });
-    
+    const result = await db
+      .collection("tournaments")
+      .deleteOne({ tournament_id });
+
     if (result.deletedCount === 1) {
-      console.log(`Tournament with tournament_id ${tournament_id} deleted successfully`);
+      console.log(
+        `Tournament with tournament_id ${tournament_id} deleted successfully`
+      );
     } else {
       console.log(`No tournament found with tournament_id ${tournament_id}`);
     }
@@ -732,13 +738,22 @@ async function deleteTournament(tournament_id) {
     throw error;
   }
 }
-
-
-
-
-
-
-
+//sharon
+const addNotification = async (uid, message, type) => {
+  try {
+    const status = await db.collection("notifications").insertOne({
+      uid: uid,
+      message: message,
+      type: type,
+      seen: false,
+      date: new Date(),
+    });
+    // return res.data; // Optionally, you can return the response data
+  } catch (error) {
+    console.error("Error creating notification:", error);
+    throw error; // Rethrow the error to be handled by the caller
+  }
+};
 
 app.put("/api/tournaments/:tournament_id/join", async (req, res) => {
   try {

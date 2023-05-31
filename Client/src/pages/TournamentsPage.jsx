@@ -4,6 +4,7 @@ import Chart from "./Chart";
 import { getTournaments, joinTournament } from "../api/tournaments";
 import useUser from "../hooks/useUser";
 import { FaPlay, FaUserPlus } from "react-icons/fa";
+import { BsPlusCircleDotted } from "react-icons/bs";
 import moment from "moment";
 import Context from "../utils/context";
 import Swal from "sweetalert2";
@@ -11,6 +12,7 @@ import trophy from "../../public/images/trophy.png";
 import { GiTrophy } from "react-icons/gi";
 import NewTournamentForm from "../components/NewTournamentForm";
 import UserContext from "../contexts/UserContext";
+
 const TournamentsPage = () => {
   const { userBalance, setUserBalance } = useContext(UserContext);
 
@@ -111,12 +113,18 @@ const TournamentsPage = () => {
             Tournaments Page
           </h1>
 
-          <div className="flex justify-start items-center mb-4">
+          <div className="flex  items-center text-center w-full md:w-2/3 2xl:w-7/12 mb-4 space-x-2  ">
             <button
-              className="px-4 py-2 text-white bg-blue-600 rounded mr-2"
+              className="ml-2  py-2 text-white  mr-2 h-14  w-1/4 bg-blue-600 rounded"
               onClick={handleNewTournament} // Handle click event of the "New Tournament" button
             >
-              New Tournament
+              <div className="ml-2 flex">
+                <BsPlusCircleDotted size={24} className="" />
+                <p className="my-auto ml-2 sm:ml-4  translate-x-1">New</p>
+                <p className="hidden xl:block my-auto -translate-x-1  sm:ml-4 mr-2">
+                  Tournament
+                </p>
+              </div>
             </button>
             {showForm && user && (
               <NewTournamentForm
@@ -125,15 +133,15 @@ const TournamentsPage = () => {
                 setTournamentsProp={setTournaments}
               />
             )}
-          </div>
 
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by Tournament name"
-            className="px-4 w-4/5 sm:w-1/2  py-2 rounded-md border border-gray-300 mb-4 text-center"
-          />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by Tournament name"
+              className="px-4 h-14  py-2 rounded-md border border-gray-300  text-center w-3/4 "
+            />
+          </div>
         </>
       )}
 
@@ -147,23 +155,23 @@ const TournamentsPage = () => {
       ) : (
         <div className="w-full max-w-4xl grid gap-8 sm:grid-cols-1 md:grid-cols-2">
           {filteredTournaments.map((tournament) => {
-           const endDate = moment(tournament.end_date);
-           const currentTime = moment();
-           const timeDiff = endDate.diff(currentTime);
-           const duration = moment.duration(timeDiff);
-           
-           const hoursLeft = duration.hours();
-           const minutesLeft = duration.minutes();
-           
-           const isUrgent = hoursLeft < 24;
-           
-           let timeLeftDisplay;
-           if (isUrgent) {
-             timeLeftDisplay = `${hoursLeft} hours ${minutesLeft} minutes`;
-           } else {
-             const durationWithMinutes = duration.add(minutesLeft, "minutes");
-             timeLeftDisplay = durationWithMinutes.humanize();
-           }
+            const endDate = moment(tournament.end_date);
+            const currentTime = moment();
+            const timeDiff = endDate.diff(currentTime);
+            const duration = moment.duration(timeDiff);
+
+            const hoursLeft = duration.hours();
+            const minutesLeft = duration.minutes();
+
+            const isUrgent = hoursLeft < 24;
+
+            let timeLeftDisplay;
+            if (isUrgent) {
+              timeLeftDisplay = `${hoursLeft} hours ${minutesLeft} minutes`;
+            } else {
+              const durationWithMinutes = duration.add(minutesLeft, "minutes");
+              timeLeftDisplay = durationWithMinutes.humanize();
+            }
             const textColor = isUrgent ? "text-red-500" : "text-gray-500";
             const isJoinDisabled =
               tournament.number_of_players === tournament.max_players;
@@ -173,12 +181,12 @@ const TournamentsPage = () => {
                 key={tournament.tournament_id}
                 className="p-6 bg-gradient-to-r from-black to-gray-800 rounded-xl shadow-md flex items-start hover:to-gray-900 hover:text-gray-100"
               >
-                <div className="mr-4">
-                  <h2 className="text-xl sm:text-2xl font-semibold mb-2 text-indigo-500">
+                <div className="mr-4 w-2/3">
+                  <h2 className="text-xl sm:text-2xl font-semibold mb-2 text-indigo-500 w-full">
                     {tournament.game_name}
                   </h2>
                   <p className="text-gray-500 mb-2">
-                    {tournament.number_of_players} / {tournament.max_players}
+                    {`${tournament.number_of_players} / ${tournament.max_players} Players`}
                   </p>
                   <p className={`mb-2 text-gray-500`}>
                     Start Time:{" "}
@@ -198,7 +206,6 @@ const TournamentsPage = () => {
                     <button
                       onClick={() => handlePlay(tournament)}
                       className="px-4 py-2 text-white bg-green-600 rounded"
-                      disabled={isJoinDisabled}
                     >
                       <FaPlay className="inline mr-2" />
                       Play
@@ -218,21 +225,21 @@ const TournamentsPage = () => {
                     </button>
                   )}
                 </div>
-                <div className="flex flex-col items-end mt-10 sm:ml-9 w-48">
+                <div className="flex flex-col text-center  sm:ml-9 w-1/3 mt-8">
                   <GiTrophy
                     size={50}
-                    className="mr-7 mb-3 hover:text-amber-400"
+                    className="mr-7 mb-3 hover:text-amber-400 text-center w-full"
                   />
-                  <ul className="text-gray-500 ">
-                    <li className="text-amber-400">{`1st place: ${formatGameCurrency(
+                  <ul className="text-gray-500 text-start translate-x-7">
+                    <li className="text-amber-400">{`1st: ${formatGameCurrency(
                       tournament.first_place_prize
-                    )} $`}</li>
-                    <li className="text-white">{`2nd place:  ${formatGameCurrency(
+                    )}$`}</li>
+                    <li className="text-white my-2">{`2nd:  ${formatGameCurrency(
                       tournament.second_place_prize
-                    )} $`}</li>
-                    <li className="text-orange-300">{`3rd place:  ${formatGameCurrency(
+                    )}$`}</li>
+                    <li className="text-orange-300">{`3rd:  ${formatGameCurrency(
                       tournament.third_place_prize
-                    )} $`}</li>
+                    )}$`}</li>
                   </ul>
                 </div>
               </div>

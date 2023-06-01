@@ -4,14 +4,30 @@ import useUser from "../hooks/useUser";
 import { GiTrophyCup } from "react-icons/gi";
 import { FaChartLine } from "react-icons/fa";
 import { BsLightningCharge, BsArrowRightShort } from "react-icons/bs";
+import OrcaWatcher from "../components/OrcaWatcher";
+import _ from "lodash";
+import TradingViewWidget from "../components/TradingViewWidget";
 
 const Homepage = () => {
   const { user } = useUser();
   const [isHovered, setIsHovered] = useState(false);
+  const [mouseCoords, setMouseCoords] = useState({ x: 0, y: 0 });
+  const updateMouseLocationOnMouseMove = _.debounce((event) => {
+    setMouseCoords({
+      x: event.clientX,
+      y: event.clientY,
+    });
+  }, 1); // debounce the function to be called not more than once per second
 
   return (
-    <div className=" h-full pt-10 md:pt-32    bg-gradient-to-r from-bg-home-gradient-from  to-bg-home-gradient-to flex flex-col   overflow-hidden bg-fixed">
-      <div className="text-center mb-12 md:mb-24">
+    
+    <div
+      onMouseMove={updateMouseLocationOnMouseMove}
+      className=" h-full pt-10 md:pt-32   bg-black flex flex-col   overflow-hidden bg-fixed"
+    >
+      <div className="text-center mb-12 md:mb-24 ">
+      <div className="flex">
+  </div>
         <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-gray-800 mb-8">
           Trading Tournament
         </h1>
@@ -19,9 +35,12 @@ const Homepage = () => {
           Outsmart your rivals and showcase your trading skills in Trading
           Tournament!
         </p>
+        <OrcaWatcher mouseCoords={mouseCoords} className="" />
+        
+
         <Link
           to={user ? "/chart" : "/login"}
-          className={`bg-indigo-600 hover:bg-indigo-800 text-white font-bold py-3 px-24 rounded-full text-lg sm:text-xl md:text-2xl transition-all duration-300 inline-flex justify-center items-center ${
+          className={`bg-indigo-600 mt-2 relative z-50 hover:bg-indigo-800 w-1/2 text-white font-bold py-3 px-24 rounded-full text-lg sm:text-xl md:text-2xl transition-all duration-300 inline-flex justify-center items-center ${
             isHovered ? "space-x-2" : ""
           }`}
           onMouseEnter={() => setIsHovered(true)}
@@ -67,7 +86,16 @@ const Homepage = () => {
             market conditions.
           </p>
         </div>
+        
+        <div className="flex">
+      <TradingViewWidget symbol="ETH" width="350" height="400" />
+      <TradingViewWidget symbol="BTC" width="450" height="510" />
+      <TradingViewWidget symbol="DOGE" width="350" height="400" />
       </div>
+
+
+      </div>
+
     </div>
   );
 };

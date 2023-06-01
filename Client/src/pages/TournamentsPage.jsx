@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Link } from "react-router-dom";
 import Chart from "./Chart";
 import { getTournaments, joinTournament } from "../api/tournaments";
 import useUser from "../hooks/useUser";
 import { FaPlay, FaUserPlus } from "react-icons/fa";
 import { BsPlusCircleDotted } from "react-icons/bs";
 import moment from "moment";
-import Context from "../utils/context";
 import Swal from "sweetalert2";
-import trophy from "../../public/images/trophy.png";
 import { GiTrophy } from "react-icons/gi";
 import NewTournamentForm from "../components/NewTournamentForm";
 import UserContext from "../contexts/UserContext";
+import TradingViewWidget from "../components/TradingViewWidget";
 
 const TournamentsPage = () => {
   const { userBalance, setUserBalance } = useContext(UserContext);
@@ -106,10 +104,10 @@ const TournamentsPage = () => {
   );
 
   return (
-    <div className="px-4 sm:px-8 md:px-16 lg:px-20 py-8 min-h-screen min-w-screen flex flex-col items-center text-gray-400 font-sans">
+    <div className="px-4 sm:px-8 md:px-16 lg:px-20 py-8 min-h-screen min-w-screen flex flex-col items-center text-gray-400 font-sans bg-black">
       {!selectedTournament && (
         <>
-          <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">
+          <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">  
             Tournaments Page
           </h1>
 
@@ -146,7 +144,7 @@ const TournamentsPage = () => {
       )}
 
       {selectedTournament ? (
-        <div className="mx-4 mt-4 w-screen">
+        <div className="mx-4 mt-4 w-screen bg-black">
           <Chart
             tournament={selectedTournament}
             showChart={setSelectedTournament}
@@ -160,17 +158,19 @@ const TournamentsPage = () => {
             const timeDiff = endDate.diff(currentTime);
             const duration = moment.duration(timeDiff);
 
-            const hoursLeft = duration.hours();
-            const minutesLeft = duration.minutes();
+            const daysLeft = Math.floor(duration.asDays()); // total number of complete days
+            const hoursLeft = duration.hours(); // the hour part of the duration (0-23)
+            const minutesLeft = duration.minutes(); // the minute part of the duration (0-59)
 
-            const isUrgent = hoursLeft < 24;
+            const totalHoursLeft = daysLeft * 24 + hoursLeft; // total number of hours
+
+            const isUrgent = totalHoursLeft < 24;
 
             let timeLeftDisplay;
             if (isUrgent) {
-              timeLeftDisplay = `${hoursLeft} hours ${minutesLeft} minutes`;
+              timeLeftDisplay = `${totalHoursLeft} hours ${minutesLeft} minutes`;
             } else {
-              const durationWithMinutes = duration.add(minutesLeft, "minutes");
-              timeLeftDisplay = durationWithMinutes.humanize();
+              timeLeftDisplay = `${daysLeft} days ${hoursLeft} hours`;
             }
             const textColor = isUrgent ? "text-red-500" : "text-gray-500";
             const isJoinDisabled =
@@ -205,7 +205,7 @@ const TournamentsPage = () => {
                   {tournament.players.some((p) => p.uid === user.uid) ? (
                     <button
                       onClick={() => handlePlay(tournament)}
-                      className="px-4 py-2 text-white bg-green-600 rounded"
+                      className="px-4 mt-2 py-2 text-white bg-green-600 rounded"
                     >
                       <FaPlay className="inline mr-2" />
                       Play

@@ -18,7 +18,7 @@ const NavBar = () => {
   ];
   const unRegisteredUserNavLinks = [
     { name: "Leaderboard", path: "/leaderboard" },
-    { name: "Shop", path: "/shop" },
+    { name: "Info", path: "/info" },
   ];
   const registeredDropDownLinks = [
     { name: "My Profile", path: "/profile" },
@@ -26,7 +26,7 @@ const NavBar = () => {
     { name: "Friends", path: "/friends" },
     { name: "Leaderboard", path: "/leaderboard" },
   ];
-  const unRegisteredDropDownLinks = [{ name: "Settings", path: "/settings" }];
+  const unRegisteredDropDownLinks = [];
   const [userDetails, setUserDetails] = useState({
     displayName: "",
     level: "",
@@ -70,6 +70,7 @@ const NavBar = () => {
             to="/"
             className="text-gray-200 hover:animate-pulse hover:bg-gray-700 hover:text-white px-3 rounded-md text-sm font-medium "
           >
+            {/* <img src="Client/public/logo.ico" alt="ICO Image" /> */}
             <MdOutlineDeliveryDining size={48} />
           </Link>
           {user && (

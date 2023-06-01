@@ -6,9 +6,9 @@ import { FcSearch } from "react-icons/fc";
 
 const OpenPosition = ({ positions, currentPrice, players }) => {
   console.log(positions);
-  const openPositions = positions.filter(
-    ([, , , closePrice]) => closePrice === 0
-  );
+  const openPositions = positions
+    .filter(([, , , closePrice]) => closePrice === 0)
+    .reverse();
 
   const { user } = useUser();
   const [userDetails, setUserDetails] = useState({
@@ -77,39 +77,40 @@ const OpenPosition = ({ positions, currentPrice, players }) => {
     const formattedPNL = `$${(profit - amount).toFixed(2)}`;
     const formattedROE = `${((profit / amount) * 100 - 100).toFixed(2)}%`;
 
-    const profitColor = profit - amount >= 0 ? "bg-green-200" : "bg-red-200";
+    const profitColor = profit - amount >= 0 ? "text-green-500" : "text-red-500";
 
     return (
       <tr
-        className={` hover:bg-gray-200 transition-colors text-xs sm:text-base`}
+        className={` hover:bg-teal-900 transition-colors text-xs sm:text-base`}
         key={index}
       >
         <td
           className={
             type == "long"
-              ? ` bg-green-300 py-2 px-2 sm:px-4 text-center w-1/6`
-              : "bg-red-300 py-2 px-2 sm:px-4 text-center w-1/6"
+              ? ` bg-green-300 bg-opacity-40 text-gray-100 py-2 px-2 sm:px-4 text-center w-1/6`
+              : " bg-red-300 bg-opacity-40 text-gray-100 py-2 px-2 sm:px-4 text-center w-1/6"
           }
         >
           {`${userDisplayName} (${type})`}
         </td>
         <td
-          className={`${profitColor} hidden sm:table-cell py-2 px-4 w-1/6 text-center`}
+          className={` hidden sm:table-cell py-2 px-4 w-1/6 text-center bg-opacity-40 text-gray-100`}
         >
           {formattedTimestamp}
         </td>
-        <td className={`${profitColor} py-2 px-4 w-1/6 text-center`}>
+        <td className={` py-2 px-4 w-1/6 text-center bg-opacity-40 text-gray-100`}>
           {formattedOpenPrice}
         </td>
-        <td className={`${profitColor} py-2 px-4 w-1/6 text-center`}>
+        <td className={` py-2 px-4 w-1/6 text-center bg-opacity-40 text-gray-100`}>
           {tradeSize}
         </td>
-        <td className={`${profitColor} py-2 px-4 w-1/6 text-center`}>
-          {formattedPNL}
-        </td>
-        <td className={`${profitColor} py-2 px-4 w-1/6 text-center`}>
+        <td className={`py-2 px-4 w-1/6 text-center bg-opacity-40 text-gray-100`}>
           {formattedROE}
         </td>
+        <td className={`${profitColor}  py-2 px-4 w-1/6 text-center bg-opacity-40`}>
+          {formattedPNL}
+        </td>
+
       </tr>
     );
   };
@@ -144,8 +145,8 @@ const OpenPosition = ({ positions, currentPrice, players }) => {
         </div>
       </div>
       <div className="overflow-hidden  shadow-lg">
-        <table className="min-w-full bg-white">
-          <thead className="bg-gray-100 text-gray-800 uppercase">
+        <table className="min-w-full bg-opacity-0">
+          <thead className="bg-black text-teal-600 uppercase">
             <tr className="text-xs sm:text-base">
               <th className="py-2 px-4 w-1/6 text-center">Player</th>
               <th className="hidden sm:table-cell py-2 px-4 w-1/6 text-center">
@@ -153,13 +154,14 @@ const OpenPosition = ({ positions, currentPrice, players }) => {
               </th>
               <th className="py-2 px-4 w-1/6 text-center">Open Price</th>
               <th className="py-2 px-4 w-1/6 text-center">Trade Size</th>
-              <th className="py-2 px-4 w-1/6 text-center">PnL</th>
               <th className="py-2 px-4 w-1/6 text-center">ROE</th>
+              <th className="py-2 px-4 w-1/6 text-center">PnL</th>
+              
             </tr>
           </thead>
         </table>
         <div className="overflow-y-auto max-h-80">
-          <table className="min-w-full bg-white">
+          <table className="min-w-full bg-opacity-0">
             <tbody className="text-gray-700">{renderedPositions}</tbody>
           </table>
         </div>

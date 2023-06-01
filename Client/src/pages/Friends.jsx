@@ -211,16 +211,16 @@ const Friends = () => {
     <div className="flex flex-col items-center justify-center mt-8 mx-4 py-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 w-full max-w-7xl">
         <div className="lg:col-span-2">
-          <h2 className="text-3xl font-bold mb-4">Friends</h2>
+          <h2 className="text-3xl font-bold mb-4 text-white">Friends</h2>
 
           <div className="bg-gradient-to-r from-black to-gray-800 shadow-lg rounded-lg p-6">
             <table className="table-fixed w-full">
               <thead className="text-white">
                 <tr className="border-b-4 border-gray-500">
-                  <th className="w-1/4 py-2 text-center">Rank</th>
-                  <th className="w-1/4 text-center">Username</th>
-                  <th className="w-1/4 text-center">Win Ratio</th>
-                  <th className="w-1/4 text-center">Balance</th>
+                  <th className="w-1/4 py-2 text-center text-white">Rank</th>
+                  <th className="w-1/4 text-center text-white">Username</th>
+                  <th className="w-1/4 text-center text-white">Win Ratio</th>
+                  <th className="w-1/4 text-center text-white">Balance</th>
                 </tr>
               </thead>
               <tbody>
@@ -262,7 +262,9 @@ const Friends = () => {
         </div>
         <div>
           <div className="mb-10">
-            <h2 className="text-3xl font-bold mb-4">Add new friend</h2>
+            <h2 className="text-3xl font-bold mb-4 text-white">
+              Add new friend
+            </h2>
             <input
               type="text"
               placeholder="Search by name"
@@ -304,7 +306,9 @@ const Friends = () => {
             </div>
           </div>
           <div>
-            <h2 className="text-3xl font-bold mb-4">Friend requests</h2>
+            <h2 className="text-3xl font-bold mb-4 text-white">
+              Friend requests
+            </h2>
             <div className="bg-gradient-to-r from-black to-gray-800 shadow-lg rounded-lg p-6">
               {userWaitingList.map((displayName, index) => (
                 <div

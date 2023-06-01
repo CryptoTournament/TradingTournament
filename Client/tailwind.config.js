@@ -5,11 +5,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        "bg-main-custom": "#7e869e",
+        "bg-main-custom": "#18181b",
         "bg-navbar-custom": "#161b21",
         "bg-login-custom": "#E0E7FF",
-        "bg-navbar-gradient-from": "#333",
-        "bg-navbar-gradient-to": "#000",
+        "bg-navbar-gradient-from": "#18181b",
+        "bg-navbar-gradient-to": "#000000",
         "bg-home-gradient-from": "#D3CCE3  ",
         "bg-home-gradient-to": "#E9E4F0",
       },

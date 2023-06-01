@@ -28,7 +28,7 @@ const BasicInfoPage = () => {
   ];
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-20 py-8 min-h-screen flex flex-col items-center  text-gray-400 font-sans">
-      <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center  text-black">
+      <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center  text-white">
         <FaTrophy className="inline-block mb-2 text-yellow-400 " /> Trading
         Tournament Info
       </h1>

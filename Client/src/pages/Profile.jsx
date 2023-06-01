@@ -87,12 +87,12 @@ const Profile = () => {
             />
           )}
           <div className="flex items-center space-x-2 mb-8">
-            <h1 className="text-xl md:text-3xl font-bold ">
+            <h1 className="text-xl md:text-3xl font-bold text-white">
               {userDetails.displayName || "Profile"}
             </h1>
             <button
               onClick={() => setEditMode({ ...editMode, displayName: true })}
-              className="text-black mt-1"
+              className="text-white mt-1"
             >
               <FiEdit size={24} />
             </button>
@@ -115,7 +115,7 @@ const Profile = () => {
                 className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500"
               />
             </div>
-            <p className="text-center text-sm text-gray-700">
+            <p className="text-center text-sm text-gray-300">
               {10 - winsTowardsNextRank} wins left
             </p>
           </div>
@@ -142,7 +142,7 @@ const Profile = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mx-6">
           <div className="p-6 rounded-lg shadow-2xl bg-gradient-to-r from-black to-gray-800">
             <div className="flex flex-col items-center">
-              <h2 className="text-3xl font-bold text-white mt-2 mb-4">
+              <h2 className="text-3xl font-bold text-white mt-2 mb-4 ">
                 {userDetails.displayName || "Profile"}
               </h2>
               {userDetails && userDetails.rank && (

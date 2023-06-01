@@ -63,7 +63,7 @@ const NavBar = () => {
     ? user.displayName || user.email
     : "";
   return (
-    <nav className="bg-gradient-to-r from-bg-navbar-gradient-from to-bg-navbar-gradient-to border-b-4 border-black fixed top-0 w-full">
+    <nav className="bg-gradient-to-r from-bg-navbar-gradient-from to-bg-navbar-gradient-to  fixed top-0 w-full">
       <div className="flex justify-between items-center px-4 py-3 md:px-10 md:py-5">
         <div className="flex items-center">
           <Link
@@ -76,10 +76,12 @@ const NavBar = () => {
           {user && (
             <>
               <div className="flex flex-col">
-                <h1 className="text-gray-200 hover:animate-pulse hover:bg-gray-700 hover:text-white px-3 rounded-md text-2xl font-medium">
+                <h1 className="text-gray-200 text-xs hover:animate-pulse hover:bg-gray-700 hover:text-white px-3 rounded-md md:text-2xl font-medium">
                   {"Balance: " + navBarBalance}
                 </h1>
-                <h5 className="sm:hidden text-gray-200 px-3">{userDisplay}</h5>
+                <h5 className="sm:hidden text-xs sm:text-base text-gray-200 px-3">
+                  {userDisplay}
+                </h5>
               </div>
             </>
           )}

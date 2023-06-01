@@ -9,8 +9,6 @@ import Swal from "sweetalert2";
 import { GiTrophy } from "react-icons/gi";
 import NewTournamentForm from "../components/NewTournamentForm";
 import UserContext from "../contexts/UserContext";
-import TradingViewWidget from "../components/TradingViewWidget";
-
 const TournamentsPage = () => {
   const { userBalance, setUserBalance } = useContext(UserContext);
 
@@ -104,14 +102,14 @@ const TournamentsPage = () => {
   );
 
   return (
-    <div className="px-4 sm:px-8 md:px-16 lg:px-20 py-8 min-h-screen min-w-screen flex flex-col items-center text-gray-400 font-sans bg-black">
+    <div className="px-4 sm:px-8 md:px-16 lg:px-20 py-8 min-h-screen min-w-screen flex flex-col items-center text-gray-400 font-sans bg-black ">
       {!selectedTournament && (
         <>
-          <h1 className="text-4xl sm:text-5xl font-semibold mb-10 text-center text-black">  
+          <h1 className="pt-12 text-4xl sm:text-5xl font-semibold mb-10 text-center text-white">
             Tournaments Page
           </h1>
 
-          <div className="flex  items-center text-center w-full md:w-2/3 2xl:w-7/12 mb-4 space-x-2  ">
+          <div className="flex  items-center text-center w-full md:w-2/3 2xl:w-7/12 mb-4 space-x-2 py-12 ">
             <button
               className="ml-2  py-2 text-white  mr-2 h-14  w-1/4 bg-blue-600 rounded"
               onClick={handleNewTournament} // Handle click event of the "New Tournament" button

@@ -47,26 +47,23 @@ const CryptoChart = ({ tournament, showChart }) => {
   const [webSocketReady, setWebSocketReady] = useState(false);
   const [refreshChart, setRefreshChart] = useState(0);
   const [coinSymbol, setCoinSymbol] = useState("BTC");
-  const [intervalToPresent, setIntervalToPresent] = useState(60)
+  const [intervalToPresent, setIntervalToPresent] = useState(60);
   const [lastClickedButton, setLastClickedButton] = useState("1h");
-
-
 
   const handle1dClick = () => {
     setIntervalToPresent(1440);
     setLastClickedButton("1d");
   };
-  
+
   const handle1hClick = () => {
     setIntervalToPresent(60);
     setLastClickedButton("1h");
   };
-  
+
   const handle4hClick = () => {
     setIntervalToPresent(240);
     setLastClickedButton("4h");
   };
-
 
   function parseDataString(dataString) {
     const cleanedString = dataString.replace(
@@ -525,7 +522,6 @@ const CryptoChart = ({ tournament, showChart }) => {
     },
 
     scales: {
-
       x: {
         type: "time",
         time: {
@@ -556,7 +552,6 @@ const CryptoChart = ({ tournament, showChart }) => {
   };
 
   const chartData = {
-    
     datasets: [
       {
         data: data.slice(-intervalToPresent).map((d) => ({
@@ -564,7 +559,6 @@ const CryptoChart = ({ tournament, showChart }) => {
           y: d.price,
         })),
         type: "line",
-        
 
         borderColor: "rgba(75, 192, 192, 0.4)",
         pointBorderColor: function (context) {
@@ -575,7 +569,6 @@ const CryptoChart = ({ tournament, showChart }) => {
             const matchingPositions = positions.filter(
               ([timestamp]) => timestamp === value.x
             );
-
 
             matchingPositions.forEach(([, , , , , uid]) => {
               sortedPlayers.forEach((player) => {
@@ -590,9 +583,9 @@ const CryptoChart = ({ tournament, showChart }) => {
 
         backgroundColor: function (context) {
           const gradient = context.chart.ctx.createLinearGradient(
-            0,
-            0,
-            0,
+            24,
+            24,
+            27,
             context.chart.height
           );
 
@@ -714,7 +707,7 @@ const CryptoChart = ({ tournament, showChart }) => {
               ({number_of_players} / {max_players})
             </span>
           </h1>
-          <div className="text-2xl sm:text-3xl font-semibold mb-4 text-left text-white">
+          <div className="text-2xl  sm:text-3xl font-semibold mb-4 text-left text-white">
             Your Balance: {Math.floor(gameBalance).toLocaleString()}$
           </div>
           <div className="text-white font-semibold">
@@ -723,63 +716,60 @@ const CryptoChart = ({ tournament, showChart }) => {
           </div>
         </div>
       </div>
-      <div className="flex w-full ml-52 sm:ml-72  translate-y-14 z-50">
-
+      <div className="flex flex-col lg:flex-row justify-center w-full ml-52 sm:ml-72  translate-y-14 z-50">
         <PriceDisplay />
-{/* sharon fix here */}
-        <div className="space-x-4 ml-96"> 
+        <div className="mt-2 lg:ml-12">
+          <button
+            className={`text-end btn-outline-primary mx-2 border rounded-lg px-3${
+              lastClickedButton === "1h"
+                ? " text-teal-600 border-teal-600"
+                : " border-bg-main-custom"
+            }`}
+            onClick={handle1hClick}
+          >
+            1h
+          </button>
+          <button
+            className={`btn btn-outline-primary mx-2 border rounded-lg px-3${
+              lastClickedButton === "4h"
+                ? " text-teal-600 border-teal-600"
+                : " border-bg-main-custom"
+            }`}
+            onClick={handle4hClick}
+          >
+            4h
+          </button>
+          <button
+            className={`btn  btn-outline-primary mx-2 border rounded-lg px-3${
+              lastClickedButton === "1d"
+                ? " text-teal-600 border-teal-600"
+                : " border-bg-main-custom"
+            }`}
+            onClick={handle1dClick}
+          >
+            1d
+          </button>
         </div>
-        <div className="space-x-4 ml-96">
-        </div>
-        <div className="space-x-4 ml-96">
-        </div>
-
-
-
-            <button
-              className={`btn btn-outline-primary mx-2 border rounded-lg px-3${
-                lastClickedButton === "1h" ? " text-teal-600 border-teal-600" : " border-bg-main-custom"
-              }`}
-              onClick={handle1hClick}
-            >
-              1h
-            </button>
-            <button
-              className={`btn btn-outline-primary mx-2 border rounded-lg px-3${
-                lastClickedButton === "4h" ? " text-teal-600 border-teal-600" : " border-bg-main-custom"
-              }`}             onClick={handle4hClick}
-            >
-              4h
-            </button>
-            <button
-              className={`btn btn-outline-primary mx-2 border rounded-lg px-3${
-                lastClickedButton === "1d" ? " text-teal-600 border-teal-600" : " border-bg-main-custom"
-              }`}
-              onClick={handle1dClick}
-            >
-              1d
-            </button>
-
       </div>
-      <div className="flex flex-col 2xl:flex-row w-full px-10">
+      <div className="flex flex-col 2xl:flex-row w-full pr-10">
         <div className={`transition-all duration-1000 w-full`}>
           <div
-            className={`chart-container mr-0 rounded-lg p-4 bg-black w-full  h-96 relative transition-all duration-500 ${
+            className={`chart-container mr-0  rounded-lg p-4 bg-black   h-96 relative transition-all duration-500 ${
               showChartFullWidth ? "md:w-11/12" : "md:w-11/12"
             }`}
           >
             <Line data={chartData} options={options} />
           </div>
-          <div className="flex justify-center mt-4 ">
+          <div className="flex justify-center mt-4 mb-8 ">
             <input
               type="number"
               value={amount}
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
-                setAmount(isNaN(value) ? "" : value);
+                setAmount(isNaN(value) || value < 0 ? "" : value);
               }}
               placeholder="Amount"
-              className="mr-2 text-center"
+              className="mr-2 text-center text-black"
             />
             <button
               className={`px-4 mx-1 py-2 bg-green-500 text-white rounded ${
@@ -801,7 +791,7 @@ const CryptoChart = ({ tournament, showChart }) => {
             </button>
             {!canTrade && (
               <button
-                className="px-4 py-2 bg-red-500 text-white rounded"
+                className="px-4 ml-2 py-2 bg-red-500 text-white rounded"
                 onClick={closePosition}
               >
                 Close Position
@@ -837,8 +827,12 @@ const CryptoChart = ({ tournament, showChart }) => {
                   <th className="px-4 py-2 border-b w-1/12  border-black text-teal-200">
                     Rank
                   </th>
-                  <th className="px-4 py-2 border-b  border-black  text-teal-200">Player</th>
-                  <th className="px-4 py-2 border-b border-black  text-teal-200">Balance</th>
+                  <th className="px-4 py-2 border-b  border-black  text-teal-200">
+                    Player
+                  </th>
+                  <th className="px-4 py-2 border-b border-black  text-teal-200">
+                    Balance
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -849,21 +843,27 @@ const CryptoChart = ({ tournament, showChart }) => {
                         <>
                           <td
                             className={`px-4 py-2 border-b  border-black text-center  ${
-                              player.uid === user.uid ? "text-teal-900  bg-teal-500" : "text-teal-300"
+                              player.uid === user.uid
+                                ? "text-teal-900  bg-teal-500"
+                                : "text-teal-300"
                             }`}
                           >
                             {index + 1}
                           </td>
                           <td
                             className={`px-4 py-2 border-b border-black  text-center ${
-                              player.uid === user.uid ? "text-teal-900  bg-teal-500" : "text-gray-100"
+                              player.uid === user.uid
+                                ? "text-teal-900  bg-teal-500"
+                                : "text-gray-100"
                             }`}
                           >
                             {player.displayName}
                           </td>
                           <td
                             className={`px-4 py-2 border-b  border-black text-center ${
-                              player.uid === user.uid ? "text-teal-900 bg-teal-500" : "text-gray-100"
+                              player.uid === user.uid
+                                ? "text-teal-900 bg-teal-500"
+                                : "text-gray-100"
                             }`}
                           >
                             {player.uid === user.uid
@@ -879,8 +879,8 @@ const CryptoChart = ({ tournament, showChart }) => {
           </div>
         </div>
       </div>
-      <div className="flex flex-col xl:flex-row xl:space-x-16 mt-8">
-        <div className="xl:mx-auto">
+      <div className="flex flex-col scale-90 sm:scale-100 xl:flex-row xl:space-x-16 mt-8  ">
+        <div className="xl:mx-auto  sm:px-0">
           {pointToBuySell ? (
             <OpenPosition
               positions={positions}
@@ -889,7 +889,7 @@ const CryptoChart = ({ tournament, showChart }) => {
             />
           ) : null}
         </div>
-        <div className="xl:mx-auto">
+        <div className="xl:mx-auto ">
           {pointToBuySell ? (
             <PositionTable
               positions={positions}

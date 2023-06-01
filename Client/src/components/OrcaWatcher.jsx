@@ -33,19 +33,19 @@ const OrcaWatcher = ({ mouseCoords }) => {
   }
 
   return (
-    <div className="sm:h-32 sm:w-2/5  2xl:w-1/5  flex ">
+    <div className="sm:h-32 sm:w-2/5  2xl:w-1/5  flex mb-4 ">
       <div className="w-full opacity-50 rounded-tr-xl"></div>
       <img
         ref={Orca}
         alt="orca logo"
         src={Avatar}
-        className="hidden lg:block left-[450px] absolute h-44 w-60 px-8 mx-7 " //visibile only on big screens
+        className="hidden lg:block left-[350px] absolute h-44 w-60 px-8 mx-7 " //visibile only on big screens
       ></img>
       <img
         ref={leftEye}
         alt="left eye ball"
         src={eye7}
-        className={`hidden lg:block absolute  rounded-full left-[597px] h-3 w-3  top-[435px] transform rotate-[${
+        className={`hidden lg:block absolute  rounded-full left-[497px] h-3 w-3  top-[435px] transform rotate-[${
           90 + angleFromOrca
         }deg] `}
       ></img>
@@ -56,7 +56,7 @@ const OrcaWatcher = ({ mouseCoords }) => {
         src={eye7}
         className={`hidden lg:block absolute rounded-full transform rotate-[${
           angleFromOrca + 90
-        }deg]   h-3 w-3  left-[618px] top-[435px] `}
+        }deg]   h-3 w-3  left-[518px] top-[435px] `}
       ></img>
     </div>
   );

@@ -77,7 +77,8 @@ const OpenPosition = ({ positions, currentPrice, players }) => {
     const formattedPNL = `$${(profit - amount).toFixed(2)}`;
     const formattedROE = `${((profit / amount) * 100 - 100).toFixed(2)}%`;
 
-    const profitColor = profit - amount >= 0 ? "text-green-500" : "text-red-500";
+    const profitColor =
+      profit - amount >= 0 ? "text-green-500" : "text-red-500";
 
     return (
       <tr
@@ -98,19 +99,26 @@ const OpenPosition = ({ positions, currentPrice, players }) => {
         >
           {formattedTimestamp}
         </td>
-        <td className={` py-2 px-4 w-1/6 text-center bg-opacity-40 text-gray-100`}>
+        <td
+          className={` py-2 px-4 w-1/6 text-center bg-opacity-40 text-gray-100`}
+        >
           {formattedOpenPrice}
         </td>
-        <td className={` py-2 px-4 w-1/6 text-center bg-opacity-40 text-gray-100`}>
+        <td
+          className={` py-2 px-4 w-1/6 text-center bg-opacity-40 text-gray-100`}
+        >
           {tradeSize}
         </td>
-        <td className={`py-2 px-4 w-1/6 text-center bg-opacity-40 text-gray-100`}>
+        <td
+          className={`py-2 px-4 w-1/6 text-center bg-opacity-40 text-gray-100`}
+        >
           {formattedROE}
         </td>
-        <td className={`${profitColor}  py-2 px-4 w-1/6 text-center bg-opacity-40`}>
+        <td
+          className={`${profitColor}  py-2 px-4 w-1/6 text-center bg-opacity-40`}
+        >
           {formattedPNL}
         </td>
-
       </tr>
     );
   };
@@ -127,7 +135,7 @@ const OpenPosition = ({ positions, currentPrice, players }) => {
   return (
     <div className="flex flex-col items-center  w-full px-4">
       <div className="flex xl:flex-col">
-        <h2 className="text-xl font-bold mb-5 mr-8 xl:mr-0 xl:ml-8 text-gray-800">
+        <h2 className="text-xl font-bold mb-5 mr-8 xl:mr-0 xl:ml-8 text-teal-200 text-opacity-60">
           Open Positions
         </h2>
         <div className="flex items-center mb-4">
@@ -144,7 +152,7 @@ const OpenPosition = ({ positions, currentPrice, players }) => {
           />
         </div>
       </div>
-      <div className="overflow-hidden  shadow-lg">
+      <div className="overflow-hidden  shadow-lg border-2 border-teal-600 p-2 rounded-lg">
         <table className="min-w-full bg-opacity-0">
           <thead className="bg-black text-teal-600 uppercase">
             <tr className="text-xs sm:text-base">
@@ -156,7 +164,6 @@ const OpenPosition = ({ positions, currentPrice, players }) => {
               <th className="py-2 px-4 w-1/6 text-center">Trade Size</th>
               <th className="py-2 px-4 w-1/6 text-center">ROE</th>
               <th className="py-2 px-4 w-1/6 text-center">PnL</th>
-              
             </tr>
           </thead>
         </table>

@@ -16,7 +16,6 @@ const Profile = () => {
     balance: 0,
     wins: 0,
     gamesPlayed: 0,
-    gameTokens: 0,
     accountType: "Regular",
   });
   const [editMode, setEditMode] = useState({
@@ -187,12 +186,6 @@ const Profile = () => {
                 <h2>
                   <span className="text-indigo-500">Games Played:</span>{" "}
                   {userDetails.gamesPlayed}
-                </h2>
-              </li>
-              <li className="mb-2">
-                <h2>
-                  <span className="text-indigo-500">Game Tokens:</span>{" "}
-                  {userDetails.gameTokens}
                 </h2>
               </li>
             </ul>

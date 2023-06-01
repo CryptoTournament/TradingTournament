@@ -312,6 +312,11 @@ const CryptoChart = ({ tournament, showChart }) => {
   };
 
   const handleBuyButtonClick = async () => {
+    if (amount > gameBalance) {
+      setAmount("");
+
+      return;
+    }
     if (pointToBuySell && amount > 0) {
       // Check if the user already has an open position
       const hasOpenPosition = positions.some(
@@ -359,6 +364,10 @@ const CryptoChart = ({ tournament, showChart }) => {
   };
 
   const handleSellButtonClick = async () => {
+    if (amount > gameBalance) {
+      setAmount("");
+      return;
+    }
     if (pointToBuySell && amount > 0) {
       // Check if the user already has an open position
       const hasOpenPosition = positions.some(
@@ -698,7 +707,7 @@ const CryptoChart = ({ tournament, showChart }) => {
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center ml-2">
       <div className="flex justify-start w-full">
         <div className="flex flex-col items-start pl-8">
           <h1 className="text-4xl sm:text-5xl font-semibold mb-4 text-left text-white">
@@ -814,11 +823,11 @@ const CryptoChart = ({ tournament, showChart }) => {
             {!showLeaderboard ? "< Show" : "> Hide"}
           </button>
           <div
-            className={`transition-all mt-14 xl:mt-3 ease-in-out duration-500 transform  xl:mx-0 xl:w-auto ${
+            className={`transition-all ml-8 mt-14 2xl:mt-5 ease-in-out duration-500 transform  xl:mx-0 xl:w-auto ${
               showLeaderboard ? "opacity-100 scale-100" : "opacity-0 scale-90"
             }`}
           >
-            <h2 className="text-xl font-bold mb-4 text-teal-200 text-opacity-60 text-center text">
+            <h2 className="text-xl  font-bold mb-4 text-teal-200 text-opacity-60 text-center text">
               Leaderboard
             </h2>
             <table className="min-w-full bg-teal-300 bg-opacity-40 border-collapse">

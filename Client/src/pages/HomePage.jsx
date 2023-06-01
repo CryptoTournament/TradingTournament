@@ -21,14 +21,14 @@ const Homepage = () => {
   return (
     <div
       onMouseMove={updateMouseLocationOnMouseMove}
-      className=" h-full    bg-bg-main-custom  flex flex-col   overflow-hidden bg-fixed"
+      className=" h-full    bg-bg-main-custom  flex flex-col   overflow-x-hidden  bg-fixed"
     >
       <div className="text-center">
         <div className="bg-gradient-to-r from-bg-navbar-gradient-from to-bg-navbar-gradient-to  pt-10 md:pt-32 pb-8 ">
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-8">
             Trading Tournament
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-white mb-8">
+          <p className="text-lg sm:text-xl md:text-2xl text-white mb-8 mx-4">
             Outsmart your rivals and showcase your trading skills in Trading
             Tournament!
           </p>
@@ -64,7 +64,7 @@ const Homepage = () => {
           <h2 className="text-2xl font-semibold mb-4 text-white">
             Become a Champion
           </h2>
-          <p className="text-white">
+          <p className="text-white mx-4">
             Conquer the leaderboard and claim your title as the ultimate trading
             champion.
           </p>
@@ -74,7 +74,7 @@ const Homepage = () => {
           <h2 className="text-2xl font-semibold mb-4 text-white">
             Master the Market
           </h2>
-          <p className="text-white">
+          <p className="text-white mx-4">
             Learn, practice, and refine your trading strategies in a fun and
             competitive environment.
           </p>
@@ -84,7 +84,7 @@ const Homepage = () => {
           <h2 className="text-2xl font-semibold mb-4 text-white">
             Trade With Speed
           </h2>
-          <p className="text-white">
+          <p className="text-white mx-4">
             Hone your trading instincts and react quickly to the ever-changing
             market conditions.
           </p>

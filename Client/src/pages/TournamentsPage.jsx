@@ -109,9 +109,9 @@ const TournamentsPage = () => {
             Tournaments Page
           </h1>
 
-          <div className="flex  items-center text-center w-full md:w-2/3 2xl:w-7/12 mb-4 space-x-2 py-12 ">
+          <div className="flex  items-center text-center w-full md:w-2/3 2xl:w-1/3 mb-4 space-x-2 py-12 ">
             <button
-              className="ml-2  py-2 text-white  mr-2 h-14  w-1/4 bg-blue-600 rounded"
+              className="ml-2  py-2 text-white  mr-2 h-14  w-1/4 bg-blue-600 rounded 2xl:w-1/3"
               onClick={handleNewTournament} // Handle click event of the "New Tournament" button
             >
               <div className="ml-2 flex">

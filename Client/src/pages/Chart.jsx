@@ -13,7 +13,6 @@ import http from "http";
 import Context from "../utils/context";
 import { getUser } from "../api/users";
 
-
 import {
   addPosition,
   closePositionOnServer,
@@ -34,7 +33,6 @@ const CryptoChart = ({ tournament, showChart }) => {
   const [data, setData] = useState([]);
   const [interval, setInterval] = useState("1m");
   const [domain, setDomain] = useState([null, null]);
-  const [zoomLevel, setZoomLevel] = useState(50);
   const [shouldUpdate, setShouldUpdate] = useState(true);
   const [pointToBuySell, setPointToBuySell] = useState(null);
   const [amount, setAmount] = useState(0);
@@ -226,24 +224,7 @@ const CryptoChart = ({ tournament, showChart }) => {
     };
   }, [interval, shouldUpdate]);
 
-  useEffect(() => {
-    const chartHeight = 900; // Increase the chart height
-    const priceRange =
-      Math.max(...data.map((d) => d.price)) -
-      Math.min(...data.map((d) => d.price));
-    const pricePerPixel = priceRange / chartHeight;
-    const zoomFactor = zoomLevel / 50;
-    const newPriceRange = priceRange * zoomFactor;
-    const newDomainMidpoint =
-      (Math.max(...data.map((d) => d.price)) +
-        Math.min(...data.map((d) => d.price))) /
-      2;
-    const newDomain = [
-      newDomainMidpoint - newPriceRange / 2,
-      newDomainMidpoint + newPriceRange / 2,
-    ];
-    setDomain(newDomain);
-  }, [zoomLevel, data]);
+
 
   useEffect(() => {
     console.log(tournament);
@@ -543,6 +524,7 @@ const CryptoChart = ({ tournament, showChart }) => {
     },
 
     scales: {
+
       x: {
         type: "time",
         time: {
@@ -560,6 +542,8 @@ const CryptoChart = ({ tournament, showChart }) => {
           display: false,
         },
       },
+
+      
       y: {
         display: true,
         
@@ -573,6 +557,7 @@ const CryptoChart = ({ tournament, showChart }) => {
 
   
   const chartData = {
+    
     datasets: [
       {
         data: data.map((d) => ({
@@ -580,25 +565,28 @@ const CryptoChart = ({ tournament, showChart }) => {
           y: d.price,
         })),
         type: "line",
+        
 
         borderColor: "rgba(75, 192, 192, 0.4)",
         pointBorderColor: function (context) {
-          // const index = context.dataIndex;
-          // const value = context.dataset.data[index];
+          const index = context.dataIndex;
+          const value = context.dataset.data[index];
 
-          // if (value) {
-          //   const matchingPositions = positions.filter(
-          //     ([timestamp]) => timestamp === value.x
-          //   );
+          if (value) {
+            const matchingPositions = positions.filter(
+              ([timestamp]) => timestamp === value.x
+            );
 
-          //   if (matchingPositions.length > 0) {
-          //     const borderColor = matchingPositions[0]
-     
-          //     return ;
-              
-          //   }
-          // }
+            matchingPositions.forEach(([,,,,,uid]) => {
+                      
+              sortedPlayers.forEach((player) => {
+                  if(player.uid === uid) {
+                    console.log(player);
+                    //HERE
+                  }
+                });
 
+              })}
           return "rgba(75, 192, 192, 0.4)"; // Default color
         },
 
@@ -753,11 +741,8 @@ const CryptoChart = ({ tournament, showChart }) => {
               showChartFullWidth ? "md:w-11/12" : "md:w-11/12"
             }`}
           >
+
             <Line data={chartData} options={options} />
-
-
-
-
 
 
           </div>

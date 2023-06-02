@@ -1185,11 +1185,19 @@ function extractTournamentId(inputString) {
   return null;
 }
 
+const privateKey = process.env.PRIVATE_KEY;
+const certificate = process.env.CERTIFICATE;
+
+const options = {
+  key: privateKey,
+  cert: certificate,
+};
+
 const runWebSocket = () => {
   let wsServer = null;
   const connectionsByTournamentId = {}; // Store connections by tournament ID
 
-  var server = https.createServer(function (request, response) {
+  const server = https.createServer(options, function (request, response) {
     console.log(new Date() + " Received request for " + request.url);
     response.writeHead(404);
     response.end();

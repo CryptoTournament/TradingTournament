@@ -104,7 +104,7 @@ const CryptoChart = ({ tournament, showChart }) => {
     const port = 443; // Port 443 for HTTPS
     const path = "/chart"; // Update the path to "/chart"
 
-    const newClient = new WebSocket(`wss://${hostname}:${port}${path}`);
+    const newClient = new WebSocket(`wss://${hostname}:${port}`);
     // const newClient = new WebSocketClient("ws://localhost:8080"); // Replace the URL with your WebSocket server URL
 
     newClient.onopen = () => {

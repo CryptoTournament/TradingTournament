@@ -1224,7 +1224,6 @@ const runWebSocket = () => {
 
     connection.on("message", function (message) {
       if (message.type === "utf8") {
-        //  console.log('Received Message: ' + message.utf8Data);
         const tournamentId = extractTournamentId(message.utf8Data);
         if (
           message.utf8Data.includes("TID") &&
@@ -1233,18 +1232,24 @@ const runWebSocket = () => {
           connectionsByTournamentId[tournamentId] =
             connectionsByTournamentId[tournamentId] || [];
           connectionsByTournamentId[tournamentId].push(connection);
+          console.log(
+            `New connection for tournament ID ${tournamentId} established.`
+          );
         } else if (
           message.utf8Data.includes("TID") &&
           message.utf8Data.includes("/NewPositionsChanges")
         ) {
           const connections = connectionsByTournamentId[tournamentId];
-          // console.log(connections);
           if (connections) {
             connections.forEach(function (receiverConnection) {
               if (receiverConnection !== connection) {
                 receiverConnection.sendUTF(message.utf8Data);
               }
             });
+          } else {
+            console.log(
+              `No connections found for tournament ID ${tournamentId}.`
+            );
           }
         }
       } else if (message.type === "binary") {
@@ -1267,10 +1272,17 @@ const runWebSocket = () => {
           const index = connections.indexOf(connection);
           if (index !== -1) {
             connections.splice(index, 1);
+            console.log(
+              `Connection for tournament ID ${tournamentId} removed.`
+            );
             break; // Exit the loop after removing the connection
           }
         }
       }
+    });
+
+    connection.on("error", function (error) {
+      console.log("WebSocket connection error:", error);
     });
   });
 };

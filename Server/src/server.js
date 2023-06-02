@@ -618,6 +618,11 @@ app.post("/api/newTournament", async (req, res) => {
       endDate.month() + 1
     } *`;
     console.log(cronPattern);
+
+    cron.schedule("* * * * *", async () => {
+      console.log("woe=rk");
+    });
+
     cron.schedule(cronPattern, async () => {
       // Perform the desired action at the specified end date and time
       console.log("Scheduled time reached!");

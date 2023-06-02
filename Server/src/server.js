@@ -4,7 +4,7 @@ import { db, connectToDb } from "./db.js";
 import { fetchSymbolData, fetchKlineData } from "./market_data_handler.js";
 import { ObjectId } from "mongodb";
 import { server as WebSocketServer } from "websocket";
-import http from "http";
+import https from "https";
 import cron from "node-cron";
 import moment from "moment";
 import path from "path";
@@ -1189,13 +1189,13 @@ const runWebSocket = () => {
   let wsServer = null;
   const connectionsByTournamentId = {}; // Store connections by tournament ID
 
-  var server = http.createServer(function (request, response) {
+  var server = https.createServer(function (request, response) {
     console.log(new Date() + " Received request for " + request.url);
     response.writeHead(404);
     response.end();
   });
 
-  const PORT = 8080;
+  const PORT = 443;
   server.listen(PORT, function () {
     console.log(new Date() + ` Server is listening on port ${PORT}`);
   });

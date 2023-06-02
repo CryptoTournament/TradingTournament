@@ -59,6 +59,19 @@ app.get("/index-*.js", function (req, res) {
   );
 });
 
+app.get("*", (req, res) => {
+  const filePath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "Client",
+    "dist",
+    "index.html"
+  );
+  console.log("File path:", filePath);
+  res.sendFile(filePath);
+});
+
 app.post("/api/users/signUp", async (req, res) => {
   const { uid } = req.body;
   let random = Math.floor(Math.random() * 1000000);

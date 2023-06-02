@@ -7,6 +7,12 @@ import { server as WebSocketServer } from "websocket";
 import http from "http";
 import cron from "node-cron";
 import moment from "moment";
+import path from "path";
+
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
@@ -24,6 +30,32 @@ app.use((req, res, next) => {
     "GET, POST, PATCH, PUT, DELETE, OPTIONS"
   );
   next();
+});
+
+app.use((req, res, next) => {
+  if (!req.url.endsWith(".js") && !req.url.endsWith(".css")) {
+    res.type("text/html");
+  }
+  next();
+});
+app.use((req, res, next) => {
+  if (req.url.endsWith(".js")) {
+    res.type("text/javascript");
+  }
+  next();
+});
+
+app.use(
+  "/assets",
+  express.static(path.join(__dirname, "..", "..", "Client", "dist", "assets"))
+);
+app.use(express.static(path.join(__dirname, "..", "..", "Client", "dist")));
+
+app.get("/index-*.js", function (req, res) {
+  res.type("application/javascript");
+  res.sendFile(
+    path.join(__dirname, "..", "..", "Client", "dist", "assets", req.path)
+  );
 });
 
 app.post("/api/users/signUp", async (req, res) => {
@@ -696,10 +728,14 @@ async function updatePlayerBalances(tournamentData, topPlayers) {
       );
 
     console.log("Player balances updated successfully");
-    updateUserWinnings(firstPlace.uid) && updateRank(firstPlace.uid)
-    secondPlace && updateUserWinnings(secondPlace.uid) && updateRank(secondPlace.uid)
-    thirdPlace && updateUserWinnings(thirdPlace.uid) && updateRank(thirdPlace.uid)
-    for(const curr_user of tournamentData.players){
+    updateUserWinnings(firstPlace.uid) && updateRank(firstPlace.uid);
+    secondPlace &&
+      updateUserWinnings(secondPlace.uid) &&
+      updateRank(secondPlace.uid);
+    thirdPlace &&
+      updateUserWinnings(thirdPlace.uid) &&
+      updateRank(thirdPlace.uid);
+    for (const curr_user of tournamentData.players) {
       updateUserGames(curr_user.uid);
     }
     deleteTournament(tournamentData.tournament_id);
@@ -763,38 +799,34 @@ async function updateRank(uid) {
     130: "GoldFour",
     140: "GoldFive",
   };
-  ranks.hasOwnProperty(10)
+  ranks.hasOwnProperty(10);
   try {
     const user = await db.collection("users").findOne({ uid });
     if (!user) {
-      return
+      return;
     }
-    ranks.hasOwnProperty(user.wins) && await db.collection("users").updateOne(
-      { uid },
-      {
-        $set: {
-          rank: ranks[user.wins],
-        },
-      }
-    );
+    ranks.hasOwnProperty(user.wins) &&
+      (await db.collection("users").updateOne(
+        { uid },
+        {
+          $set: {
+            rank: ranks[user.wins],
+          },
+        }
+      ));
   } catch (error) {
     console.error("Error update user rank", error);
     throw error;
   }
 }
 
-
-
-
-
 async function updateUserWinnings(uid) {
-  try {    
+  try {
     // const user = await db.collection("users").findOne({ uid });
     // if (!user) {
     //   return res.status(404).send("User not found");
     // }
     // const user_winnings = user.wins;
-
 
     // Add the player to the tournament and increment the number of players
     await db.collection("users").updateOne(
@@ -812,13 +844,12 @@ async function updateUserWinnings(uid) {
 }
 
 async function updateUserGames(uid) {
-  try {    
+  try {
     // const user = await db.collection("users").findOne({ uid });
     // if (!user) {
     //   return res.status(404).send("User not found");
     // }
     // const user_winnings = user.wins;
-
 
     // Add the player to the tournament and increment the number of players
     await db.collection("users").updateOne(
@@ -834,12 +865,6 @@ async function updateUserGames(uid) {
     throw error;
   }
 }
-
-
-
-
-
-
 
 //sharon
 const addNotification = async (uid, message, type) => {

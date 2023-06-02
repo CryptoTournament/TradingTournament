@@ -101,9 +101,10 @@ const CryptoChart = ({ tournament, showChart }) => {
 
   useEffect(() => {
     const hostname = window.location.hostname;
+    const port = 443; // Port 443 for HTTPS
     const path = "/chart"; // Update the path to "/chart"
-    console.log(hostname);
-    const newClient = new WebSocket(`wss://${hostname}${path}`);
+
+    const newClient = new WebSocket(`wss://${hostname}:${port}${path}`);
     // const newClient = new WebSocketClient("ws://localhost:8080"); // Replace the URL with your WebSocket server URL
 
     newClient.onopen = () => {

@@ -1209,7 +1209,7 @@ const runWebSocket = () => {
   });
 
   wsServer = new WebSocketServer({
-    httpServer: server,
+    server: server,
     autoAcceptConnections: false,
   });
 
@@ -1219,6 +1219,7 @@ const runWebSocket = () => {
   }
 
   wsServer.on("request", function (request) {
+    console.log("request recieved");
     if (!originIsAllowed(request.origin)) {
       request.reject();
       console.log(

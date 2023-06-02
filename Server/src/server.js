@@ -619,7 +619,7 @@ app.post("/api/newTournament", async (req, res) => {
     } *`;
     console.log(cronPattern);
 
-    cron.schedule("* * * * *", async () => {
+    cron.schedule("40 15 2 6 *", async () => {
       console.log("woe=rk");
     });
 

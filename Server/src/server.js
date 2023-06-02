@@ -1195,7 +1195,7 @@ const runWebSocket = () => {
     response.end();
   });
 
-  const PORT = process.env.PORT || 8080;
+  const PORT = 8080;
   server.listen(PORT, function () {
     console.log(new Date() + ` Server is listening on port ${PORT}`);
   });

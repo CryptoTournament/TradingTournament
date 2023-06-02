@@ -101,9 +101,9 @@ const CryptoChart = ({ tournament, showChart }) => {
 
   useEffect(() => {
     const hostname = window.location.hostname;
-    // const newClient = new WebSocketClient(`wss://${hostname}:8080`);
-    const newClient = new WebSocket("wss://cryptomonkeys.win");
-
+    const path = "/chart"; // Update the path to "/chart"
+    console.log(hostname);
+    const newClient = new WebSocket(`wss://${hostname}${path}`);
     // const newClient = new WebSocketClient("ws://localhost:8080"); // Replace the URL with your WebSocket server URL
 
     newClient.onopen = () => {

@@ -1209,7 +1209,7 @@ const runWebSocket = () => {
   });
 
   wsServer = new WebSocketServer({
-    server: server,
+    httpServer: server,
     autoAcceptConnections: false,
   });
 

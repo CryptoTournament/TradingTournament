@@ -21,7 +21,7 @@ const Homepage = () => {
   return (
     <div
       onMouseMove={updateMouseLocationOnMouseMove}
-      className=" h-full    bg-bg-main-custom  flex flex-col   overflow-x-hidden  bg-fixed"
+      className=" h-full    bg-bg-main-custom  flex flex-col  bg-fixed"
     >
       <div className="text-center">
         <div className="bg-gradient-to-r from-bg-navbar-gradient-from to-bg-navbar-gradient-to  pt-10 md:pt-32 pb-8 ">
@@ -37,7 +37,7 @@ const Homepage = () => {
 
         <Link
           to={user ? "/chart" : "/login"}
-          className={`bg-indigo-600 mt-2 relative z-50 hover:bg-indigo-800 w-1/4 text-white font-bold py-3 px-24 rounded-full text-lg sm:text-xl md:text-2xl transition-all duration-300 inline-flex justify-center items-center ${
+          className={`bg-teal-600 mt-10 relative z-50 hover:bg-teal-800 w-1/4 text-white font-bold py-3 px-24 rounded-full text-lg sm:text-xl md:text-2xl transition-all duration-300 inline-flex justify-center items-center ${
             isHovered ? "space-x-2" : ""
           }`}
           onMouseEnter={() => setIsHovered(true)}
@@ -60,7 +60,7 @@ const Homepage = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mt-24">
         <div className="text-center">
-          <GiTrophyCup className="text-6xl mx-auto mb-4 text-indigo-600" />
+          <GiTrophyCup className="text-6xl mx-auto mb-4 text-yellow-500" />
           <h2 className="text-2xl font-semibold mb-4 text-white">
             Become a Champion
           </h2>
@@ -70,7 +70,7 @@ const Homepage = () => {
           </p>
         </div>
         <div className="text-center">
-          <FaChartLine className="text-6xl mx-auto mb-4 text-indigo-600" />
+          <FaChartLine className="text-6xl mx-auto mb-4 text-teal-400" />
           <h2 className="text-2xl font-semibold mb-4 text-white">
             Master the Market
           </h2>
@@ -80,7 +80,7 @@ const Homepage = () => {
           </p>
         </div>
         <div className="flex-col justify-center text-center">
-          <BsLightningCharge className="text-6xl mx-auto mb-4 text-indigo-600" />
+          <BsLightningCharge className="text-6xl mx-auto mb-4 text-indigo-300" />
           <h2 className="text-2xl font-semibold mb-4 text-white">
             Trade With Speed
           </h2>

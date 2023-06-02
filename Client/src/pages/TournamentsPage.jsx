@@ -111,7 +111,7 @@ const TournamentsPage = () => {
 
           <div className="flex  items-center text-center w-full md:w-2/3 2xl:w-1/3 mb-4 space-x-2 py-12 ">
             <button
-              className="ml-2  py-2 text-white  mr-2 h-14  w-1/4 bg-blue-600 rounded 2xl:w-1/3"
+              className="ml-2  py-2 text-white  mr-2 h-14  w-1/4 bg-teal-600 rounded 2xl:w-1/3"
               onClick={handleNewTournament} // Handle click event of the "New Tournament" button
             >
               <div className="ml-2 flex">
@@ -180,7 +180,7 @@ const TournamentsPage = () => {
                 className="p-6 bg-gradient-to-r from-black to-gray-800 rounded-xl shadow-md flex items-start hover:to-gray-900 hover:text-gray-100"
               >
                 <div className="mr-4 w-2/3">
-                  <h2 className="text-xl sm:text-2xl font-semibold mb-2 text-indigo-500 w-full">
+                  <h2 className="text-xl sm:text-2xl font-semibold mb-2 text-teal-500 w-full">
                     {tournament.game_name}
                   </h2>
                   <p className="text-gray-500 mb-2">
@@ -198,12 +198,12 @@ const TournamentsPage = () => {
                       {timeLeftDisplay} remaining
                     </p>
                   ) : (
-                    <p className={textColor}>{timeLeftDisplay} remaining</p>
+                    <p className={'mb-2 ${textColor}'} >{timeLeftDisplay} remaining</p>
                   )}
                   {tournament.players.some((p) => p.uid === user.uid) ? (
                     <button
                       onClick={() => handlePlay(tournament)}
-                      className="px-4 mt-2 py-2 text-white bg-green-600 rounded"
+                      className="px-4 mt-2 py-2 text-white bg-green-500 rounded"
                     >
                       <FaPlay className="inline mr-2" />
                       Play
@@ -211,10 +211,10 @@ const TournamentsPage = () => {
                   ) : (
                     <button
                       onClick={() => handleJoin(tournament, user.uid)}
-                      className={`px-4 py-2 text-white rounded ${
+                      className={`px-4 mt-4 py-2 text-white rounded ${
                         isJoinDisabled
                           ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-blue-600"
+                          : " bg-indigo-600"
                       }`}
                       disabled={isJoinDisabled}
                     >

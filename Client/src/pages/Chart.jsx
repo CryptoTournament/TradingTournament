@@ -725,9 +725,9 @@ const CryptoChart = ({ tournament, showChart }) => {
           </div>
         </div>
       </div>
-      <div className="flex flex-col lg:flex-row justify-center w-full ml-52 sm:ml-72  translate-y-14 z-50">
+      <div className="flex flex-col lg:flex-row w-full ml-36 sm:ml-48  translate-y-14 z-50">
         <PriceDisplay />
-        <div className="mt-2 lg:ml-12">
+        <div className="mt-2 lg:ml-96 ">
           <button
             className={`text-end btn-outline-primary mx-2 border rounded-lg px-3${
               lastClickedButton === "1h"

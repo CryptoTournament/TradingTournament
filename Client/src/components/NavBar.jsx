@@ -77,9 +77,25 @@ const NavBar = () => {
           {user && (
             <>
               <div className="flex flex-col">
-                <h1 className="text-gray-200 text-xs hover:animate-pulse hover:bg-gray-700 hover:text-white px-3 rounded-md md:text-2xl font-medium">
-                  {"Balance: " + navBarBalance}
+              <div className="flex flex-row">
+
+                <h1 className="text-gray-200 text-xs hover:animate-pulse hover:bg-gray-700 hover:text-white px-1 rounded-md md:text-2xl font-medium">
+                  {"Wallet Balance: "}
                 </h1>
+                <h4 className="text-teal-500 px-2 text-2xl"> 
+                {navBarBalance}                
+                </h4>
+                <h4 className=" text-yellow-500 text-2xl"> 
+                ₿
+                </h4>
+                <h4 className=" text-gray-200  text-2xl"> 
+                ananas
+                </h4>
+
+                </div>
+
+
+
                 <h5 className="sm:hidden text-xs sm:text-base text-gray-200 px-3">
                   {userDisplay}
                 </h5>

@@ -50,7 +50,7 @@ const DropDown = ({
   };
 
   return (
-    <div className="relative inline-block text-left mx-auto mt-2 ml-8">
+    <div className="relative inline-block text-left mx-auto mt-2 sm:ml-8">
       <div
         ref={menuRef}
         className={` sm:w-auto transition-width duration-1000 ease-in-out ${
@@ -76,7 +76,7 @@ const DropDown = ({
         </button>
       </div>
       {isOpen && (
-        <div className="origin-top-right absolute right-0 mt-2 w-full rounded-md shadow-lg bg-bg-navbar-custom ring-1 ring-black ring-opacity-5 focus:outline-none transition-transform duration-300 ease-in-out md:translate-x-0">
+        <div className="origin-top-right absolute right-0 mt-2 h-screen sm:h-fit w-screen  sm:w-full rounded-md shadow-lg bg-bg-navbar-custom ring-1 ring-black ring-opacity-5 focus:outline-none transition-transform duration-300 ease-in-out md:translate-x-0">
           <div
             className="text-center"
             role="menu"
@@ -87,7 +87,7 @@ const DropDown = ({
               <Link
                 key={index}
                 to={link.path}
-                className="sm:hidden block px-4 pb-4 mb-4  text-lg  text-gray-50 hover:bg-gray-50 hover:text-black border-b-2 border-gray-500"
+                className="lg:hidden block px-4 py-4 sm:py-2 lg:py-0 pb-4 lg:mb-4 text-lg sm:text-sm lg:text-lg  text-gray-50 hover:bg-gray-50 hover:text-black border-b-2 border-gray-500"
                 role="menuitem"
               >
                 {link.name}

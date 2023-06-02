@@ -774,7 +774,7 @@ const CryptoChart = ({ tournament, showChart }) => {
           >
             <Line data={chartData} options={options} />
           </div>
-          <div className="flex justify-center mt-4 mb-8 ">
+          <div className="flex justify-center mt-4 mb-20 ">
             <input
               type="number"
               value={amount}
@@ -814,7 +814,7 @@ const CryptoChart = ({ tournament, showChart }) => {
           </div>
         </div>
         <div
-          className={`w-full xl:-translate-y-20 mx-auto  mt-4 md:mt-0 transition-all duration-1000 ${
+          className={`w-full -translate-y-20 mx-auto mt-4 md:mt-0 transition-all duration-1000 ${
             showLeaderboard ? "md:w-1/4" : "md:w-28 "
           }`}
         >

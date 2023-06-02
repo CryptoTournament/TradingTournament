@@ -4,7 +4,7 @@ import useUser from "../hooks/useUser";
 import { GiTrophyCup } from "react-icons/gi";
 import { FaChartLine } from "react-icons/fa";
 import { BsLightningCharge, BsArrowRightShort } from "react-icons/bs";
-import OrcaWatcher from "../components/OrcaWatcher";
+import MonkeyWatcher from "../components/MonkeyWatcher";
 import _ from "lodash";
 
 const Homepage = () => {
@@ -32,7 +32,7 @@ const Homepage = () => {
             Outsmart your rivals and showcase your trading skills in Trading
             Tournament!
           </p>
-          <OrcaWatcher mouseCoords={mouseCoords} className="" />
+          <MonkeyWatcher mouseCoords={mouseCoords} className="" />
         </div>
 
         <Link

@@ -3,7 +3,7 @@ import { useRef, useState, useEffect } from "react";
 import Avatar from "../utils/Avatar.png";
 import eye7 from "../utils/eye7.png";
 
-const OrcaWatcher = ({ mouseCoords }) => {
+const MonkeyWatcher = ({ mouseCoords }) => {
   const Orca = useRef();
   const leftEye = useRef();
   const rightEye = useRef();
@@ -45,7 +45,7 @@ const OrcaWatcher = ({ mouseCoords }) => {
         ref={leftEye}
         alt="left eye ball"
         src={eye7}
-        className={`hidden lg:block absolute  rounded-full left-[497px] h-3 w-3  top-[435px] transform rotate-[${
+        className={`hidden lg:block absolute  rounded-full left-[495px] h-3 w-3  top-[435px] transform rotate-[${
           90 + angleFromOrca
         }deg] `}
       ></img>
@@ -56,10 +56,10 @@ const OrcaWatcher = ({ mouseCoords }) => {
         src={eye7}
         className={`hidden lg:block absolute rounded-full transform rotate-[${
           angleFromOrca + 90
-        }deg]   h-3 w-3  left-[518px] top-[435px] `}
+        }deg]   h-3 w-3  left-[516px] top-[435px] `}
       ></img>
     </div>
   );
 };
 
-export default OrcaWatcher;
+export default MonkeyWatcher;

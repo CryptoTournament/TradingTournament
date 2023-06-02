@@ -8,6 +8,7 @@ import https from "https";
 import cron from "node-cron";
 import moment from "moment";
 import path from "path";
+import moment from "moment-timezone";
 
 import { fileURLToPath } from "url";
 
@@ -604,6 +605,9 @@ app.get("/api/tournaments/:id", async (req, res) => {
   }
 });
 
+const localTime = new Date().toLocaleString();
+console.log("Local Time:", localTime);
+
 app.post("/api/newTournament", async (req, res) => {
   try {
     // Assuming you have a MongoDB connection
@@ -611,17 +615,22 @@ app.post("/api/newTournament", async (req, res) => {
     // Get the tournament data from the request body
     const tournamentData = req.body;
     console.log(tournamentData);
+
     // Add the tournament to the database
     const result = await db.collection("tournaments").insertOne(tournamentData);
-    const endDate = moment(tournamentData.end_date);
+
+    // Convert the end date from Israel time to server time
+    const endDate = moment.tz(tournamentData.end_date, "Asia/Jerusalem").utc();
+
+    // Generate the cron pattern using the converted end date
     const cronPattern = `${endDate.minutes()} ${endDate.hours()} ${endDate.date()} ${
       endDate.month() + 1
     } *`;
     console.log(cronPattern);
 
-    cron.schedule("40 15 2 6 *", async () => {
-      console.log("woe=rk");
-    });
+    // cron.schedule('40 15 2 6 *', async () => {
+    //   console.log('work');
+    // });
 
     cron.schedule(cronPattern, async () => {
       // Perform the desired action at the specified end date and time
@@ -634,6 +643,7 @@ app.post("/api/newTournament", async (req, res) => {
       // fetch all new tournament
       // get out of all investors
     });
+
     // Return the inserted tournament data
     res.json(result);
   } catch (error) {

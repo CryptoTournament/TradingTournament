@@ -16,16 +16,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config();
 
-const privateKey = process.env.PRIVATE_KEY;
-const certificate = process.env.CERTIFICATE;
-
 const app = express();
-const options = {
-  key: privateKey,
-  cert: certificate,
-};
-
-const server = https.createServer(options, app);
 
 app.use(express.json()); // Enable JSON parsing for request bodies
 
@@ -145,7 +136,7 @@ app.put("/api/users/:uid", async (req, res) => {
 
 // connecting to db and then connecting to express server.
 connectToDb(() => {
-  server.listen(process.env.PORT || 3000, () => {
+  app.listen(process.env.PORT || 3000, () => {
     runWebSocket();
     console.log("Server is listening on Port 3000");
     console.log("MongoDB is Online");
@@ -1209,6 +1200,14 @@ function extractTournamentId(inputString) {
   }
   return null;
 }
+
+const privateKey = process.env.PRIVATE_KEY;
+const certificate = process.env.CERTIFICATE;
+
+const options = {
+  key: privateKey,
+  cert: certificate,
+};
 
 const runWebSocket = () => {
   let wsServer = null;

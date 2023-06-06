@@ -1208,6 +1208,8 @@ const options = {
   key: privateKey,
   cert: certificate,
 };
+console.log(options.key);
+console.log(options.certificate);
 
 const runWebSocket = () => {
   let wsServer = null;

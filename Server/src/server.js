@@ -1225,7 +1225,7 @@ const runWebSocket = () => {
     console.log(new Date() + ` Server is listening on port ${PORT}`);
   });
 
-  wsServer = new WebSocket({
+  wsServer = new WebSocketServer({
     httpServer: server,
     autoAcceptConnections: false,
   });

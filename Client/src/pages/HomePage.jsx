@@ -5,7 +5,7 @@ import { GiTrophyCup } from "react-icons/gi";
 import { FaChartLine } from "react-icons/fa";
 import { BsLightningCharge, BsArrowRightShort } from "react-icons/bs";
 import MonkeyWatcher from "../components/MonkeyWatcher";
-import _ from "lodash-es";
+import _ from "lodash";
 
 const Homepage = () => {
   const { user } = useUser();

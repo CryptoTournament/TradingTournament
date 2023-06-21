@@ -19,7 +19,7 @@ export default {
   },
   build: {
     rollupOptions: {
-      external: ["lodash"],
+      external: ["lodash-es"],
     },
   },
 };

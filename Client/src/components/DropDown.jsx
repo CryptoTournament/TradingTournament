@@ -43,7 +43,6 @@ const DropDown = ({
     : user
     ? user.displayName || user.email
     : "Menu";
-  // console.log(userDetails);
   const handleLogOut = async (navigate) => {
     await logout();
     navigate("/login");

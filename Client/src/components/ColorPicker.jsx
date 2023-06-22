@@ -9,7 +9,6 @@ const ColorPicker = ({ displayName, onClose, uid }) => {
   const [localDisplayColor, setLocalDisplayColor] = useState("gray-900");
   const [selectedColor, setSelectedColor] = useState(null);
   const [product, setProduct] = useState(null);
-  console.log(product);
 
   const colors = ["red-500", "blue-500", "gray-500", "indigo-500"];
   useEffect(() => {
@@ -33,7 +32,6 @@ const ColorPicker = ({ displayName, onClose, uid }) => {
     if (selectedColor) {
       // Perform buy action here
       // You can pass the selectedColor and price to the parent component using the setColor function and perform any necessary actions.
-      console.log("Buy:", selectedColor);
       await buyColorChangeProduct(uid, localDisplayColor);
       setColor(localDisplayColor);
       setUserBalance(userBalance - product.price);

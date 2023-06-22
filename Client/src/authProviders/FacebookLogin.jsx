@@ -10,7 +10,6 @@ const FacebookLogin = () => {
   const signIn = async () => {
     try {
       const userCredential = await signInWithPopup(auth, provider);
-      console.log(userCredential);
       // Check if the user is new and add to the database
       if (userCredential._tokenResponse.isNewUser) {
         const user = userCredential.user;

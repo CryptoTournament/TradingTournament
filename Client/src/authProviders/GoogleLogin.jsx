@@ -10,14 +10,12 @@ const GoogleLogin = ({ setShowAddMoreInfo }) => {
   const signIn = async () => {
     try {
       const userCredential = await signInWithPopup(auth, provider);
-      console.log(userCredential);
       // Check if the user is new and add to the database
       if (userCredential._tokenResponse.isNewUser) {
         setShowAddMoreInfo(true);
         const user = userCredential.user;
 
         addNewUserToDb(user);
-        console.log("new user");
         addNotification(user.uid, "Welcome To Trading Tournament!", "welcome");
       }
       console.log("successfully logged in with google account");

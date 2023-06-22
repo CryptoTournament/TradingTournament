@@ -49,10 +49,6 @@ const Friends = () => {
           `/api/getUserByDisplayName?displayName=${displayName}`
         );
         const data = response.data;
-        console.log("fetch user1");
-        console.log(data);
-        console.log(data.uid);
-        console.log("fetch user2");
 
         return data;
       }
@@ -67,11 +63,9 @@ const Friends = () => {
         nickname: username,
         uid: user.uid,
       });
-      console.log(response.data);
       fetchUserWaitingList();
       getNonFriendsList(user.uid);
       let userToNotify = await getUserByDisplayName(username);
-      console.log(userToNotify);
       addNotification(
         userToNotify.uid,
         `${userDetails.displayName} sent you a friend request!`,
@@ -135,12 +129,10 @@ const Friends = () => {
   };
 
   const fetchFriends = async () => {
-    console.log("fetching friends");
     try {
       if (user && user.uid) {
         const response = await axios.get(`/api/getFriends?uid=${user.uid}`);
         const data = response.data;
-        console.log(data);
         setUserFriendsList(data.friends);
       }
     } catch (error) {

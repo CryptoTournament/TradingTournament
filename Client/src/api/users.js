@@ -4,7 +4,6 @@ export const addNewUserToDb = async (user) => {
   // const token = user && (await user.getIdToken());
   // const headers = token ? { authtoken: token } : {};
   const uid = user.uid;
-  console.log(user.uid);
   const response = await axios.post("/api/users/signUp", {
     uid: uid,
   });
@@ -29,7 +28,6 @@ export const buyColorChangeProduct = async (uid, color) => {
 };
 
 export const upgradeToVip = async (uid) => {
-  console.log("got heresss");
   try {
     const response = await axios.put(`/api/users/${uid}/upgradeToVip`);
     return response.data;

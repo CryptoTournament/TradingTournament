@@ -7,7 +7,6 @@ import EditDisplayNameModal from "../components/EditDisplayNameModal ";
 const Profile = () => {
   const { user } = useUser();
 
-  console.log(user);
   const [userDetails, setUserDetails] = useState({
     displayName: "",
     level: "",
@@ -66,8 +65,6 @@ const Profile = () => {
       console.error("Error updating user data", error);
     }
   };
-  console.log("Rank:", userDetails.rank);
-  // console.log("Image src:", `/images/ranks/${userDetails.rank}.png`);
 
   const currentRankIndex = ranks.findIndex((rank) => rank === userDetails.rank);
   const nextRankIndex = currentRankIndex + 1;

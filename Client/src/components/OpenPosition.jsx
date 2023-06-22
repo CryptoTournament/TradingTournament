@@ -5,7 +5,6 @@ import axios from "axios";
 import { FcSearch } from "react-icons/fc";
 
 const OpenPosition = ({ positions, currentPrice, players }) => {
-  // console.log(positions);
   const openPositions = positions
     .filter(([, , , closePrice]) => closePrice === 0)
     .reverse();
@@ -50,7 +49,6 @@ const OpenPosition = ({ positions, currentPrice, players }) => {
   }, [user]);
 
   const renderPosition = (position, index) => {
-    // console.log(position);
     const [timestamp, openPrice, amount, closePrice, type, uid] = position;
 
     // Find the user with the matching UID

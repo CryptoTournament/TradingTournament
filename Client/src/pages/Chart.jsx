@@ -63,74 +63,74 @@ const CryptoChart = ({ tournament, showChart }) => {
     setLastClickedButton("4h");
   };
 
-  function parseDataString(dataString) {
-    const cleanedString = dataString.replace(
-      /^TID1\/NewPositionsChanges\//,
-      ""
-    );
-    const dataPoints = cleanedString.split(",");
-    const numFields = 6; // Number of fields per data point
-    const result = [];
+  // function parseDataString(dataString) {
+  //   const cleanedString = dataString.replace(
+  //     /^TID1\/NewPositionsChanges\//,
+  //     ""
+  //   );
+  //   const dataPoints = cleanedString.split(",");
+  //   const numFields = 6; // Number of fields per data point
+  //   const result = [];
 
-    for (let i = 0; i < dataPoints.length; i += numFields) {
-      const dataArr = [
-        parseInt(dataPoints[i]),
-        parseFloat(dataPoints[i + 1]),
-        parseFloat(dataPoints[i + 2]),
-        parseFloat(dataPoints[i + 3]),
-        dataPoints[i + 4],
-        dataPoints[i + 5],
-      ];
-      result.push(dataArr);
-    }
+  //   for (let i = 0; i < dataPoints.length; i += numFields) {
+  //     const dataArr = [
+  //       parseInt(dataPoints[i]),
+  //       parseFloat(dataPoints[i + 1]),
+  //       parseFloat(dataPoints[i + 2]),
+  //       parseFloat(dataPoints[i + 3]),
+  //       dataPoints[i + 4],
+  //       dataPoints[i + 5],
+  //     ];
+  //     result.push(dataArr);
+  //   }
 
-    return result;
-  }
+  //   return result;
+  // }
 
-  useEffect(() => {
-    if (webSocketReady && client) {
-      // Send the message only when the WebSocket is ready
+  // useEffect(() => {
+  //   if (webSocketReady && client) {
+  //     // Send the message only when the WebSocket is ready
 
-      client.send(
-        "TID" + tournament.tournament_id + "/NewPositionsChanges/" + positions
-      );
-    }
-  }, [refreshChart]);
+  //     client.send(
+  //       "TID" + tournament.tournament_id + "/NewPositionsChanges/" + positions
+  //     );
+  //   }
+  // }, [refreshChart]);
 
-  useEffect(() => {
-    const hostname = window.location.hostname;
-    const port = 443; // Port 443 for HTTPS
-    const path = "/chart"; // Update the path to "/chart"
+  // useEffect(() => {
+  //   const hostname = window.location.hostname;
+  //   const port = 443; // Port 443 for HTTPS
+  //   const path = "/chart"; // Update the path to "/chart"
 
-    const newClient = new WebSocket(`wss://${hostname}:${port}`);
-    // const newClient = new WebSocketClient("ws://localhost:8080"); // Replace the URL with your WebSocket server URL
+  //   const newClient = new WebSocket(`wss://${hostname}:${port}`);
+  //   // const newClient = new WebSocketClient("ws://localhost:8080"); // Replace the URL with your WebSocket server URL
 
-    newClient.onopen = () => {
-      // console.log("WebSocket Client Connected");
-      if (tournament != null) {
-        newClient.send("TID" + tournament.tournament_id + "/NewConnection"); // Send "hey" message to the server
-        setWebSocketReady(true); // Set WebSocket readiness to true
-      }
-    };
+  //   newClient.onopen = () => {
+  //     // console.log("WebSocket Client Connected");
+  //     if (tournament != null) {
+  //       newClient.send("TID" + tournament.tournament_id + "/NewConnection"); // Send "hey" message to the server
+  //       setWebSocketReady(true); // Set WebSocket readiness to true
+  //     }
+  //   };
 
-    newClient.onclose = () => {
-      setWebSocketReady(false); // Set WebSocket readiness to false
-      // console.log("WebSocket Connection Closed");
-    };
+  //   newClient.onclose = () => {
+  //     setWebSocketReady(false); // Set WebSocket readiness to false
+  //     // console.log("WebSocket Connection Closed");
+  //   };
 
-    newClient.onmessage = (message) => {
-      // console.log("Received: '" + message.data + "'");
-      if (message.data.includes("/NewPositionsChanges")) {
-        setPositions(parseDataString(message.data));
-      }
-    };
-    setClient(newClient); // Update the client variable
+  //   newClient.onmessage = (message) => {
+  //     // console.log("Received: '" + message.data + "'");
+  //     if (message.data.includes("/NewPositionsChanges")) {
+  //       setPositions(parseDataString(message.data));
+  //     }
+  //   };
+  //   setClient(newClient); // Update the client variable
 
-    // Cleanup the WebSocket connection
-    return () => {
-      newClient.close();
-    };
-  }, [tournament]);
+  //   // Cleanup the WebSocket connection
+  //   return () => {
+  //     newClient.close();
+  //   };
+  // }, [tournament]);
 
   const getBalance = (userId) => {
     let balance = initBalance;
@@ -149,7 +149,6 @@ const CryptoChart = ({ tournament, showChart }) => {
         } //if open position
         else {
           if (pointToBuySell) {
-            // console.log(pointToBuySell[1]);
             if (type === "long") {
               balance += (pointToBuySell[1] / price) * amount;
             } else {
@@ -242,15 +241,6 @@ const CryptoChart = ({ tournament, showChart }) => {
 
   //sort leaderboard @ the beginning
   useEffect(() => {
-    console.log(
-      "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-    );
-    // if (!players) {
-    //   return;
-    // }
-    // console.log(players);
-    // console.log(pointToBuySell[1]);
-
     const sortedPlayersCalculation = [...players].sort(
       (a, b) => getBalance(b.uid) - getBalance(a.uid)
     );
@@ -341,7 +331,6 @@ const CryptoChart = ({ tournament, showChart }) => {
         try {
           await addPosition(tournament.tournament_id, position);
           setPositions((prevPositions) => [...prevPositions, position]);
-          // console.log((prevPositions) => [...prevPositions, position]);
           setCanTrade(false);
           setRefreshChart(refreshChart + 1);
           setAmount(0);
@@ -354,9 +343,7 @@ const CryptoChart = ({ tournament, showChart }) => {
       }
     }
   };
-  useEffect(() => {
-    console.log("tournament state updated");
-  }, [tournament]);
+  useEffect(() => {}, [tournament]);
   const handleSellButtonClick = async () => {
     if (user && amount > getBalance(user.uid)) {
       setAmount("");

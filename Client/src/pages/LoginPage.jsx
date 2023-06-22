@@ -19,7 +19,6 @@ function LoginPage() {
   const logIn = async () => {
     setIsLoading(true);
     let logStatus = await login(email, password);
-    console.log(logStatus);
     if (logStatus) {
     } else {
       setError("Invalid email or password");

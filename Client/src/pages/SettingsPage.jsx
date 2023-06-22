@@ -117,7 +117,6 @@ const ChangePasswordComponent = (userProp) => {
     if (firebaseUser && user && user.email) {
       try {
         let response = await login(user.email, currentPassword);
-        console.log(response);
         if (response) {
           if (newPassword.length < 6) {
             setError(true);

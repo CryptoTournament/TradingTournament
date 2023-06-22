@@ -87,7 +87,9 @@ const NavBar = () => {
                     {navBarBalance}
                   </h4>
                   <h4 className=" text-yellow-500 text-s sm:text-2xl">₿</h4>
-                  <h4 className=" text-gray-200 text-s  sm:text-2xl">ananas</h4>
+                  <h4 className="hidden sm:block text-gray-200 text-s  sm:text-2xl">
+                    ananas
+                  </h4>
                 </div>
 
                 <h5

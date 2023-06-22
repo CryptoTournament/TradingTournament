@@ -152,7 +152,6 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
         .post("/api/newTournament", data)
         .then((response) => {
           // Handle the response from the server if needed
-          console.log(response.data);
 
           // After form submission, close the pop-up
           onClose();
@@ -166,7 +165,6 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
       const fetchTournaments = async () => {
         try {
           const fetchedTournaments = await getTournaments();
-          console.log(fetchedTournaments);
           setTournamentsProp(fetchedTournaments);
         } catch (error) {
           console.error("Error fetching tournaments", error);
@@ -178,8 +176,8 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50">
-      <div className="max-w-6xl w-1/2 mx-auto bg-white rounded-lg shadow-lg p-6">
+    <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50 overflow-y-auto  ">
+      <div className="max-w-6xl w-11/12 sm:w-1/2 mx-auto bg-white rounded-lg shadow-lg p-6  mt-20 sm:mt-0">
         <div className="flex justify-end">
           <button
             className="text-gray-400 hover:text-gray-600 text-lg"

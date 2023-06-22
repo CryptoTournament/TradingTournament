@@ -17,7 +17,7 @@ const Homepage = () => {
       y: event.clientY,
     });
   }, 1); // debounce the function to be called not more than once per second
-
+  //homepage
   return (
     <div
       onMouseMove={updateMouseLocationOnMouseMove}

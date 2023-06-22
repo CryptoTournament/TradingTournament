@@ -42,7 +42,6 @@ const TournamentsPage = () => {
       try {
         setLoading(false);
         const fetchedTournaments = await getTournaments();
-        console.log(fetchedTournaments);
         setTournaments(fetchedTournaments);
         setLoading(false);
       } catch (error) {
@@ -55,8 +54,6 @@ const TournamentsPage = () => {
   const handleJoin = async (tournament, uid) => {
     try {
       const newTournament = await joinTournament(tournament.tournament_id, uid);
-      console.log(userBalance);
-      console.log(tournament.buy_in_cost);
       setUserBalance(userBalance - tournament.buy_in_cost);
       const fetchedTournaments = await getTournaments();
       setTournaments(fetchedTournaments);

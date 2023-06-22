@@ -7,7 +7,6 @@ export const addNotification = async (uid, message, type) => {
       message,
       type,
     });
-    console.log(res.data);
     // return res.data; // Optionally, you can return the response data
   } catch (error) {
     console.error("Error creating notification:", error);
@@ -16,7 +15,6 @@ export const addNotification = async (uid, message, type) => {
 };
 
 export const markNotificationAsSeen = async (notification) => {
-  console.log(notification);
   try {
     if (!notification.seen) {
       await axios.patch(`/api/notifications/${notification._id}`, {

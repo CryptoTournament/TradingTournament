@@ -13,7 +13,6 @@ export function login(email, password) {
   try {
     return signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        console.log("logged in");
         return userCredential.user;
       })
       .catch((error) => {
@@ -27,7 +26,6 @@ export function login(email, password) {
 export async function logout() {
   try {
     await signOut(auth);
-    console.log("Logged out");
   } catch (error) {
     console.log("Error in logout caught" + error);
   }
@@ -41,7 +39,6 @@ export async function signUp(auth, email, password) {
       password
     );
     const user = userCredential.user;
-    console.log(user);
     addNewUserToDb(user);
     addNotification(user.uid, "Welcome To Trading Tournament!", "welcome");
     return { status: true };

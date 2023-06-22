@@ -149,7 +149,6 @@ const CryptoChart = ({ tournament, showChart }) => {
         } //if open position
         else {
           if (pointToBuySell) {
-            // console.log(pointToBuySell[1]);
             if (type === "long") {
               balance += (pointToBuySell[1] / price) * amount;
             } else {
@@ -242,15 +241,6 @@ const CryptoChart = ({ tournament, showChart }) => {
 
   //sort leaderboard @ the beginning
   useEffect(() => {
-    console.log(
-      "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-    );
-    // if (!players) {
-    //   return;
-    // }
-    // console.log(players);
-    // console.log(pointToBuySell[1]);
-
     const sortedPlayersCalculation = [...players].sort(
       (a, b) => getBalance(b.uid) - getBalance(a.uid)
     );
@@ -341,7 +331,6 @@ const CryptoChart = ({ tournament, showChart }) => {
         try {
           await addPosition(tournament.tournament_id, position);
           setPositions((prevPositions) => [...prevPositions, position]);
-          // console.log((prevPositions) => [...prevPositions, position]);
           setCanTrade(false);
           setRefreshChart(refreshChart + 1);
           setAmount(0);
@@ -354,9 +343,7 @@ const CryptoChart = ({ tournament, showChart }) => {
       }
     }
   };
-  useEffect(() => {
-    console.log("tournament state updated");
-  }, [tournament]);
+  useEffect(() => {}, [tournament]);
   const handleSellButtonClick = async () => {
     if (user && amount > getBalance(user.uid)) {
       setAmount("");

@@ -152,7 +152,6 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
         .post("/api/newTournament", data)
         .then((response) => {
           // Handle the response from the server if needed
-          console.log(response.data);
 
           // After form submission, close the pop-up
           onClose();
@@ -166,7 +165,6 @@ const NewTournamentForm = ({ onClose, uid, setTournamentsProp }) => {
       const fetchTournaments = async () => {
         try {
           const fetchedTournaments = await getTournaments();
-          console.log(fetchedTournaments);
           setTournamentsProp(fetchedTournaments);
         } catch (error) {
           console.error("Error fetching tournaments", error);

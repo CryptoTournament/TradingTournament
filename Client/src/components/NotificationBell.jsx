@@ -71,7 +71,7 @@ const NotificationBell = ({ uid }) => {
         onClick={() => setDropdownVisible(!dropdownVisible)}
         className="focus:outline-none"
       >
-        <AiOutlineBell size={34} className="text-white" />
+        <AiOutlineBell size={34} className="mr-2 sm:mr-0 text-white" />
         {unseenNotifications.length > 0 && (
           <div className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 text-center text-xs leading-5">
             {unseenNotifications.length}

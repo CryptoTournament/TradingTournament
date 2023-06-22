@@ -138,7 +138,7 @@ app.put("/api/users/:uid", async (req, res) => {
 // connecting to db and then connecting to express server.
 connectToDb(() => {
   app.listen(process.env.PORT || 3000, () => {
-    runWebSocket();
+    // runWebSocket();
     console.log("Server is listening on Port 3000");
     console.log("MongoDB is Online");
   });
@@ -1252,108 +1252,108 @@ const options = {
   cert: certificate,
 };
 
-const runWebSocket = () => {
-  let wsServer = null;
-  const connectionsByTournamentId = {}; // Store connections by tournament ID
+// const runWebSocket = () => {
+//   let wsServer = null;
+//   const connectionsByTournamentId = {}; // Store connections by tournament ID
 
-  const server = https.createServer(options, function (request, response) {
-    console.log(new Date() + " Received request for " + request.url);
-    response.writeHead(404);
-    response.end();
-  });
+//   const server = https.createServer(options, function (request, response) {
+//     console.log(new Date() + " Received request for " + request.url);
+//     response.writeHead(404);
+//     response.end();
+//   });
 
-  const PORT = 443;
-  server.listen(PORT, function () {
-    console.log(new Date() + ` Server is listening on port ${PORT}`);
-  });
+//   const PORT = 443;
+//   server.listen(PORT, function () {
+//     console.log(new Date() + ` Server is listening on port ${PORT}`);
+//   });
 
-  wsServer = new WebSocketServer({
-    httpServer: server,
-    autoAcceptConnections: false,
-  });
+//   wsServer = new WebSocketServer({
+//     httpServer: server,
+//     autoAcceptConnections: false,
+//   });
 
-  function originIsAllowed(origin) {
-    // put logic here to detect whether the specified origin is allowed.
-    return true;
-  }
+//   function originIsAllowed(origin) {
+//     // put logic here to detect whether the specified origin is allowed.
+//     return true;
+//   }
 
-  wsServer.on("request", function (request) {
-    console.log("request recieved");
-    if (!originIsAllowed(request.origin)) {
-      request.reject();
-      console.log(
-        new Date() + " Connection from origin " + request.origin + " rejected."
-      );
-      return;
-    }
+//   wsServer.on("request", function (request) {
+//     console.log("request recieved");
+//     if (!originIsAllowed(request.origin)) {
+//       request.reject();
+//       console.log(
+//         new Date() + " Connection from origin " + request.origin + " rejected."
+//       );
+//       return;
+//     }
 
-    var connection = request.accept(null, request.origin);
-    console.log(new Date() + " Connection accepted.");
+//     var connection = request.accept(null, request.origin);
+//     console.log(new Date() + " Connection accepted.");
 
-    connection.on("message", function (message) {
-      if (message.type === "utf8") {
-        const tournamentId = extractTournamentId(message.utf8Data);
-        if (
-          message.utf8Data.includes("TID") &&
-          message.utf8Data.includes("/NewConnection")
-        ) {
-          connectionsByTournamentId[tournamentId] =
-            connectionsByTournamentId[tournamentId] || [];
-          connectionsByTournamentId[tournamentId].push(connection);
-          console.log(
-            `New connection for tournament ID ${tournamentId} established.`
-          );
-        } else if (
-          message.utf8Data.includes("TID") &&
-          message.utf8Data.includes("/NewPositionsChanges")
-        ) {
-          const connections = connectionsByTournamentId[tournamentId];
-          if (connections) {
-            connections.forEach(function (receiverConnection) {
-              if (receiverConnection !== connection) {
-                receiverConnection.sendUTF(message.utf8Data);
-              }
-            });
-          } else {
-            console.log(
-              `No connections found for tournament ID ${tournamentId}.`
-            );
-          }
-        }
-      } else if (message.type === "binary") {
-        console.log(
-          "Received Binary Message of " + message.binaryData.length + " bytes"
-        );
-        connection.sendBytes(message.binaryData);
-      }
-    });
+//     connection.on("message", function (message) {
+//       if (message.type === "utf8") {
+//         const tournamentId = extractTournamentId(message.utf8Data);
+//         if (
+//           message.utf8Data.includes("TID") &&
+//           message.utf8Data.includes("/NewConnection")
+//         ) {
+//           connectionsByTournamentId[tournamentId] =
+//             connectionsByTournamentId[tournamentId] || [];
+//           connectionsByTournamentId[tournamentId].push(connection);
+//           console.log(
+//             `New connection for tournament ID ${tournamentId} established.`
+//           );
+//         } else if (
+//           message.utf8Data.includes("TID") &&
+//           message.utf8Data.includes("/NewPositionsChanges")
+//         ) {
+//           const connections = connectionsByTournamentId[tournamentId];
+//           if (connections) {
+//             connections.forEach(function (receiverConnection) {
+//               if (receiverConnection !== connection) {
+//                 receiverConnection.sendUTF(message.utf8Data);
+//               }
+//             });
+//           } else {
+//             console.log(
+//               `No connections found for tournament ID ${tournamentId}.`
+//             );
+//           }
+//         }
+//       } else if (message.type === "binary") {
+//         console.log(
+//           "Received Binary Message of " + message.binaryData.length + " bytes"
+//         );
+//         connection.sendBytes(message.binaryData);
+//       }
+//     });
 
-    connection.on("close", function (reasonCode, description) {
-      console.log(
-        new Date() + " Peer " + connection.remoteAddress + " disconnected."
-      );
+//     connection.on("close", function (reasonCode, description) {
+//       console.log(
+//         new Date() + " Peer " + connection.remoteAddress + " disconnected."
+//       );
 
-      // Remove connection from the associated tournament ID
-      for (const tournamentId in connectionsByTournamentId) {
-        if (connectionsByTournamentId.hasOwnProperty(tournamentId)) {
-          const connections = connectionsByTournamentId[tournamentId];
-          const index = connections.indexOf(connection);
-          if (index !== -1) {
-            connections.splice(index, 1);
-            console.log(
-              `Connection for tournament ID ${tournamentId} removed.`
-            );
-            break; // Exit the loop after removing the connection
-          }
-        }
-      }
-    });
+//       // Remove connection from the associated tournament ID
+//       for (const tournamentId in connectionsByTournamentId) {
+//         if (connectionsByTournamentId.hasOwnProperty(tournamentId)) {
+//           const connections = connectionsByTournamentId[tournamentId];
+//           const index = connections.indexOf(connection);
+//           if (index !== -1) {
+//             connections.splice(index, 1);
+//             console.log(
+//               `Connection for tournament ID ${tournamentId} removed.`
+//             );
+//             break; // Exit the loop after removing the connection
+//           }
+//         }
+//       }
+//     });
 
-    connection.on("error", function (error) {
-      console.log("WebSocket connection error:", error);
-    });
-  });
-};
+//     connection.on("error", function (error) {
+//       console.log("WebSocket connection error:", error);
+//     });
+//   });
+// };
 
 app.get("*", (req, res) => {
   const filePath = path.join(

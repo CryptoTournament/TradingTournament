@@ -31,12 +31,10 @@ const CryptoChart = ({ tournament, showChart }) => {
 
   const [data, setData] = useState([]);
   const [interval, setInterval] = useState("1m");
-  const [domain, setDomain] = useState([null, null]);
   const [shouldUpdate, setShouldUpdate] = useState(true);
   const [pointToBuySell, setPointToBuySell] = useState(null);
   const [amount, setAmount] = useState("");
   const [canTrade, setCanTrade] = useState(true);
-  const [gameBalance, setGameBalance] = useState(initBalance);
   const [showLeaderboard, setShowLeaderboard] = useState(true);
   const [showChartFullWidth, setShowChartFullWidth] = useState(false);
   const [positions, setPositions] = useState([]);
@@ -108,7 +106,7 @@ const CryptoChart = ({ tournament, showChart }) => {
     // const newClient = new WebSocketClient("ws://localhost:8080"); // Replace the URL with your WebSocket server URL
 
     newClient.onopen = () => {
-      console.log("WebSocket Client Connected");
+      // console.log("WebSocket Client Connected");
       if (tournament != null) {
         newClient.send("TID" + tournament.tournament_id + "/NewConnection"); // Send "hey" message to the server
         setWebSocketReady(true); // Set WebSocket readiness to true
@@ -117,7 +115,7 @@ const CryptoChart = ({ tournament, showChart }) => {
 
     newClient.onclose = () => {
       setWebSocketReady(false); // Set WebSocket readiness to false
-      console.log("WebSocket Connection Closed");
+      // console.log("WebSocket Connection Closed");
     };
 
     newClient.onmessage = (message) => {
@@ -134,24 +132,12 @@ const CryptoChart = ({ tournament, showChart }) => {
     };
   }, [tournament]);
 
-  // useEffect(() => {
-  //   const sendPositions = async () => {
-  //     try {
-  //       const gid = 123;
-  //       const response = await axios.put(`/api/games/${gid}`, { positions });
-  //     } catch (error) {
-  //       console.error("Error updating user data", error);
-  //     }
-  //   };
-  //   sendPositions();
-  // }, [positions]);
-
-  const updateBalance = (positionsArray) => {
+  const getBalance = (userId) => {
     let balance = initBalance;
-    for (const position of positionsArray) {
+    for (const position of positions) {
       const [timestamp, price, amount, closePrice, type, uid] = position;
 
-      if (user && uid === user.uid) {
+      if (uid === userId) {
         balance -= amount;
         if (closePrice !== 0) {
           if (type === "long") {
@@ -160,17 +146,22 @@ const CryptoChart = ({ tournament, showChart }) => {
             //Short
             balance += (price / closePrice) * amount;
           }
+        } //if open position
+        else {
+          if (pointToBuySell) {
+            // console.log(pointToBuySell[1]);
+            if (type === "long") {
+              balance += (pointToBuySell[1] / price) * amount;
+            } else {
+              //Short
+              balance += (price / pointToBuySell[1]) * amount;
+            }
+          }
         }
       }
     }
-    if (user) {
-      updatePlayerTournamentBalance(
-        tournament.tournament_id,
-        user.uid,
-        balance
-      );
-      setGameBalance(balance);
-    }
+
+    return balance;
   };
 
   useEffect(() => {
@@ -218,17 +209,29 @@ const CryptoChart = ({ tournament, showChart }) => {
         });
         setShouldUpdate(false);
         setChartPulses(initChartPulses);
+        const sortedPlayersCalculation = [...players].sort(
+          (a, b) => getBalance(b.uid) - getBalance(a.uid)
+        );
+        setSortedPlayers(sortedPlayersCalculation);
+        const positionsArray = tournament.players.flatMap((player) => {
+          return player.positions.map((position) => {
+            const {
+              type,
+              open_price,
+              status,
+              start_time,
+              amount,
+              close_price,
+            } = position;
+            let timestamp = start_time;
+            let closePrice = close_price ? close_price : 0; // If close_price is not defined set it as null
+            let userid = player.uid;
+            return [timestamp, open_price, amount, closePrice, type, userid];
+          });
+        });
+
         setTimeout(() => {
           setShouldUpdate(true);
-          // if (user) {
-          //   if (positionsArray) {
-          //     const hasOpenPosition = positionsArray.some(
-          //       (position) => position[3] === 0 && position[5] === user.uid
-          //     );
-          //   }
-
-          //   setCanTrade(!hasOpenPosition);
-          // }
         }, 60000); // 60 seconds
       }
     };
@@ -237,12 +240,25 @@ const CryptoChart = ({ tournament, showChart }) => {
     };
   }, [interval, shouldUpdate]);
 
+  //sort leaderboard @ the beginning
   useEffect(() => {
-    // Sort players by scores
+    console.log(
+      "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+    );
+    // if (!players) {
+    //   return;
+    // }
+    // console.log(players);
+    // console.log(pointToBuySell[1]);
+
     const sortedPlayersCalculation = [...players].sort(
-      (a, b) => b.game_currency - a.game_currency
+      (a, b) => getBalance(b.uid) - getBalance(a.uid)
     );
     setSortedPlayers(sortedPlayersCalculation);
+    console.log(sortedPlayersCalculation);
+  }, [players, pointToBuySell]);
+
+  useEffect(() => {
     const positionsArray = tournament.players.flatMap((player) => {
       return player.positions.map((position) => {
         const { type, open_price, status, start_time, amount, close_price } =
@@ -254,7 +270,6 @@ const CryptoChart = ({ tournament, showChart }) => {
       });
     });
     setPositions(positionsArray);
-    updateBalance(positionsArray);
 
     // Check if there is an open position for the user
     if (user) {
@@ -295,29 +310,14 @@ const CryptoChart = ({ tournament, showChart }) => {
       }
     }
 
-    // Update game_currency for the current player
-    const playersUpdated = players.map((player) =>
-      player.uid === user.uid
-        ? {
-            ...player,
-            game_currency: player.game_currency + totalBalanceChange,
-          }
-        : player
-    );
-
-    const sortedPlayersCalculation = [...playersUpdated].sort(
-      (a, b) => b.game_currency - a.game_currency
-    );
-
-    setSortedPlayers(sortedPlayersCalculation);
     setPositions(updatedPositions);
-    updateBalance(updatedPositions);
+    // updateBalance(updatedPositions);
     setCanTrade(true);
     setRefreshChart(refreshChart + 1);
   };
 
   const handleBuyButtonClick = async () => {
-    if (amount > gameBalance) {
+    if (user && amount > getBalance(user.uid)) {
       setAmount("");
 
       return;
@@ -341,20 +341,7 @@ const CryptoChart = ({ tournament, showChart }) => {
         try {
           await addPosition(tournament.tournament_id, position);
           setPositions((prevPositions) => [...prevPositions, position]);
-          setGameBalance(gameBalance - amount);
-
-          // Update game_currency for the current player
-          const playersUpdated = players.map((player) =>
-            player.uid === user.uid
-              ? { ...player, game_currency: player.game_currency - amount }
-              : player
-          );
-
-          const sortedPlayersCalculation = [...playersUpdated].sort(
-            (a, b) => b.game_currency - a.game_currency
-          );
-
-          setSortedPlayers(sortedPlayersCalculation);
+          // console.log((prevPositions) => [...prevPositions, position]);
           setCanTrade(false);
           setRefreshChart(refreshChart + 1);
           setAmount(0);
@@ -367,9 +354,11 @@ const CryptoChart = ({ tournament, showChart }) => {
       }
     }
   };
-
+  useEffect(() => {
+    console.log("tournament state updated");
+  }, [tournament]);
   const handleSellButtonClick = async () => {
-    if (amount > gameBalance) {
+    if (user && amount > getBalance(user.uid)) {
       setAmount("");
       return;
     }
@@ -392,20 +381,6 @@ const CryptoChart = ({ tournament, showChart }) => {
         try {
           await addPosition(tournament.tournament_id, position);
           setPositions((prevPositions) => [...prevPositions, position]);
-          setGameBalance(gameBalance - amount);
-
-          // Update game_currency for the current player
-          const playersUpdated = players.map((player) =>
-            player.uid === user.uid
-              ? { ...player, game_currency: player.game_currency - amount }
-              : player
-          );
-
-          const sortedPlayersCalculation = [...playersUpdated].sort(
-            (a, b) => b.game_currency - a.game_currency
-          );
-
-          setSortedPlayers(sortedPlayersCalculation);
           setCanTrade(false);
           setRefreshChart(refreshChart + 1);
           setAmount(0);
@@ -702,13 +677,6 @@ const CryptoChart = ({ tournament, showChart }) => {
 
   const formatGameCurrency = (value) => {
     return Math.floor(value).toLocaleString();
-    // if (value >= 1000000) {
-    //   return (value / 1000000).toFixed(1) + "M";
-    // } else if (value >= 100000) {
-    //   return (value / 1000).toLocaleString() + "k";
-    // } else {
-    //   return value.toLocaleString();
-    // }
   };
 
   return (
@@ -722,7 +690,9 @@ const CryptoChart = ({ tournament, showChart }) => {
             </span>
           </h1>
           <div className="text-2xl  sm:text-3xl font-semibold mb-4 text-left text-white">
-            Your Balance: {Math.floor(gameBalance).toLocaleString()}$
+            {user &&
+              "Your Balance:" +
+                `${Math.floor(getBalance(user.uid)).toLocaleString()}$`}
           </div>
           <div className="text-white font-semibold">
             {moment(tournament.end_date).diff(moment(), "hours") +
@@ -880,9 +850,12 @@ const CryptoChart = ({ tournament, showChart }) => {
                                 : "text-gray-100"
                             }`}
                           >
+                            {/* {getBalance(player.uid) + " $"} */}
                             {player.uid === user.uid
-                              ? formatGameCurrency(gameBalance) + " $"
-                              : formatGameCurrency(player.game_currency) + " $"}
+                              ? formatGameCurrency(getBalance(player.uid)) +
+                                " $"
+                              : formatGameCurrency(getBalance(player.uid)) +
+                                " $"}
                           </td>
                         </>
                       )}

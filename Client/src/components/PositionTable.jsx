@@ -108,7 +108,7 @@ const PositionTable = ({ positions, currentPrice, players }) => {
                 const formattedROE = `${((profit / amount) * 100 - 100).toFixed(
                   2
                 )}%`;
-                console.log(formattedPNL);
+                // console.log(formattedPNL);
                 const rowClass = getRowClass((profit - amount).toFixed(2));
 
                 return (

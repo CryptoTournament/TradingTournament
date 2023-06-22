@@ -198,7 +198,9 @@ const TournamentsPage = () => {
                       {timeLeftDisplay} remaining
                     </p>
                   ) : (
-                    <p className={'mb-2 ${textColor}'} >{timeLeftDisplay} remaining</p>
+                    <p className={"mb-2 ${textColor}"}>
+                      {timeLeftDisplay} remaining
+                    </p>
                   )}
                   {tournament.players.some((p) => p.uid === user.uid) ? (
                     <button

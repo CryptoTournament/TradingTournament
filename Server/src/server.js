@@ -693,6 +693,7 @@ async function findTopPlayers(tournamentData) {
               openPositionsAddition -= 1000000;
             } else {
               //Short
+              //lol
               openPositionsAddition +=
                 (position.open_price / btcPrice) * position.amount;
               openPositionsAddition -= 1000000;

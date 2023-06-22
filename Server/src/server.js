@@ -69,7 +69,7 @@ app.post("/api/users/signUp", async (req, res) => {
     friends: [],
     displayName: `Player ${random}`,
     rank: "BronzeOne",
-    balance: 1000,
+    balance: 100000,
     wins: 0,
     gamesPlayed: 0,
     gameTokens: 200,

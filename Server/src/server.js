@@ -9,6 +9,7 @@ import cron from "node-cron";
 // import moment from "moment";
 import path from "path";
 import moment from "moment-timezone";
+import fetch from "node-fetch";
 
 import { fileURLToPath } from "url";
 
@@ -620,7 +621,7 @@ app.post("/api/newTournament", async (req, res) => {
     const result = await db.collection("tournaments").insertOne(tournamentData);
 
     // Convert the end date from Israel time to server time
-    const endDate = moment.tz(tournamentData.end_date, "Asia/Jerusalem").utc();
+    const endDate = moment.tz(tournamentData.end_date, "Asia/Jerusalem");
 
     // Generate the cron pattern using the converted end date
     const cronPattern = `${endDate.minutes()} ${endDate.hours()} ${endDate.date()} ${
@@ -652,7 +653,23 @@ app.post("/api/newTournament", async (req, res) => {
   }
 });
 
+async function fetchCurrentBitcoinPrice() {
+  const CURRENT_PRICE_API_URL =
+    "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT";
+  try {
+    const response = await fetch(CURRENT_PRICE_API_URL);
+    const data = await response.json();
+    const price = parseFloat(data.price);
+    return price;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to fetch Bitcoin price");
+  }
+}
+
 async function findTopPlayers(tournamentData) {
+  const btcPrice = await fetchCurrentBitcoinPrice();
+
   try {
     const tournaments = await db
       .collection("tournaments")
@@ -667,23 +684,48 @@ async function findTopPlayers(tournamentData) {
 
     for (const tournament of tournaments) {
       for (const player of tournament.players) {
-        if (player.game_currency > topPlayers.firstPlace.gameCurrency) {
+        let openPositionsAddition = 0;
+        for (let position of player.positions) {
+          if (position.status == "open") {
+            if (position.type === "long") {
+              openPositionsAddition +=
+                (btcPrice / position.open_price) * position.amount;
+              openPositionsAddition -= 1000000;
+            } else {
+              //Short
+              openPositionsAddition +=
+                (position.open_price / btcPrice) * position.amount;
+              openPositionsAddition -= 1000000;
+            }
+          }
+        }
+
+        if (
+          player.game_currency + openPositionsAddition >
+          topPlayers.firstPlace.gameCurrency
+        ) {
           topPlayers.thirdPlace = topPlayers.secondPlace;
           topPlayers.secondPlace = topPlayers.firstPlace;
           topPlayers.firstPlace = {
             uid: player.uid,
-            gameCurrency: player.game_currency,
+            gameCurrency: player.game_currency + openPositionsAddition,
           };
-        } else if (player.game_currency > topPlayers.secondPlace.gameCurrency) {
+        } else if (
+          player.game_currency + openPositionsAddition >
+          topPlayers.secondPlace.gameCurrency
+        ) {
           topPlayers.thirdPlace = topPlayers.secondPlace;
           topPlayers.secondPlace = {
             uid: player.uid,
-            gameCurrency: player.game_currency,
+            gameCurrency: player.game_currency + openPositionsAddition,
           };
-        } else if (player.game_currency > topPlayers.thirdPlace.gameCurrency) {
+        } else if (
+          player.game_currency + openPositionsAddition >
+          topPlayers.thirdPlace.gameCurrency
+        ) {
           topPlayers.thirdPlace = {
             uid: player.uid,
-            gameCurrency: player.game_currency,
+            gameCurrency: player.game_currency + openPositionsAddition,
           };
         }
       }

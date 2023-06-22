@@ -621,7 +621,7 @@ app.post("/api/newTournament", async (req, res) => {
     const result = await db.collection("tournaments").insertOne(tournamentData);
 
     // Convert the end date from Israel time to server time
-    const endDate = moment.tz(tournamentData.end_date, "Asia/Jerusalem");
+    const endDate = moment.tz(tournamentData.end_date, "Asia/Jerusalem").utc();
 
     // Generate the cron pattern using the converted end date
     const cronPattern = `${endDate.minutes()} ${endDate.hours()} ${endDate.date()} ${
